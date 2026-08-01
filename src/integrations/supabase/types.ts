@@ -18,7 +18,9 @@ export type Database = {
         Row: {
           channel: string
           created_at: string
+          draft_lead: Json
           ended_at: string | null
+          external_id: string | null
           id: string
           language: string | null
           started_at: string
@@ -29,7 +31,9 @@ export type Database = {
         Insert: {
           channel?: string
           created_at?: string
+          draft_lead?: Json
           ended_at?: string | null
+          external_id?: string | null
           id?: string
           language?: string | null
           started_at?: string
@@ -40,7 +44,9 @@ export type Database = {
         Update: {
           channel?: string
           created_at?: string
+          draft_lead?: Json
           ended_at?: string | null
+          external_id?: string | null
           id?: string
           language?: string | null
           started_at?: string
