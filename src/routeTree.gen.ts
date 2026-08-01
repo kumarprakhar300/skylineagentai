@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as DocsRouteImport } from './routes/docs'
 import { Route as PhoneRouteImport } from './routes/phone'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
@@ -28,6 +29,11 @@ const IndexRoute = IndexRouteImport.update({
 } as any)
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DocsRoute = DocsRouteImport.update({
@@ -78,6 +84,7 @@ const ApiPublicTwilioVoiceRoute = ApiPublicTwilioVoiceRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/docs': typeof DocsRoute
   '/phone': typeof PhoneRoute
   '/admin': typeof AuthenticatedAdminRoute
@@ -90,6 +97,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
   '/docs': typeof DocsRoute
   '/phone': typeof PhoneRoute
   '/admin': typeof AuthenticatedAdminRoute
@@ -104,6 +112,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
   '/docs': typeof DocsRoute
   '/phone': typeof PhoneRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
@@ -118,6 +127,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/auth'
     | '/docs'
     | '/phone'
     | '/admin'
@@ -130,6 +140,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/auth'
     | '/docs'
     | '/phone'
     | '/admin'
@@ -143,6 +154,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/auth'
     | '/docs'
     | '/phone'
     | '/_authenticated/admin'
@@ -157,6 +169,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
   DocsRoute: typeof DocsRoute
   PhoneRoute: typeof PhoneRoute
   ApiEndCallRoute: typeof ApiEndCallRoute
@@ -180,6 +193,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/docs': {
@@ -264,6 +284,7 @@ const AuthenticatedRouteRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
   DocsRoute: DocsRoute,
   PhoneRoute: PhoneRoute,
   ApiEndCallRoute: ApiEndCallRoute,
