@@ -15,3 +15,6 @@ export const fontStack = {
   display: "Fraunces",
   body: "Manrope",
 };
+
+export const FONT_BODY = 'Manrope, "Noto Sans Devanagari", "Noto Serif Devanagari", sans-serif';
+export const FONT_DISPLAY = 'Fraunces, "Noto Serif Devanagari", serif';

@@ -1,5 +1,5 @@
 import { AbsoluteFill, Sequence, useCurrentFrame, useVideoConfig, spring, interpolate } from "remotion";
-import { C } from "../theme";
+import { C, FONT_BODY } from "../theme";
 import { Body, Display, Eyebrow } from "../components/Kit";
 
 const rows: [string, string][] = [

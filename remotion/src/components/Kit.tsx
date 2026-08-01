@@ -1,5 +1,5 @@
 import { useCurrentFrame, useVideoConfig, spring, interpolate } from "remotion";
-import { C } from "../theme";
+import { C, FONT_BODY, FONT_DISPLAY } from "../theme";
 
 /** Small uppercase eyebrow label used at the top of every scene. */
 export const Eyebrow: React.FC<{ children: React.ReactNode; delay?: number }> = ({

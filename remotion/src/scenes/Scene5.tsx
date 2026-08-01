@@ -1,5 +1,5 @@
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, spring, interpolate } from "remotion";
-import { C } from "../theme";
+import { C, FONT_BODY, FONT_DISPLAY } from "../theme";
 import { Display, Eyebrow, Panel } from "../components/Kit";
 
 /** Scene 5 — two demo channels: browser mic and a real phone call. */

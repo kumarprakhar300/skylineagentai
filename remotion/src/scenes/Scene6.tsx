@@ -1,5 +1,5 @@
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, spring, interpolate } from "remotion";
-import { C } from "../theme";
+import { C, FONT_BODY, FONT_DISPLAY } from "../theme";
 import { Display, Eyebrow, Panel } from "../components/Kit";
 
 const bars = [42, 68, 55, 88, 74, 96, 61];

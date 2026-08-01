@@ -1,5 +1,5 @@
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, spring, interpolate } from "remotion";
-import { C } from "../theme";
+import { C, FONT_BODY, FONT_DISPLAY } from "../theme";
 import { Body, Display, Eyebrow, Panel } from "../components/Kit";
 
 const langs = [
