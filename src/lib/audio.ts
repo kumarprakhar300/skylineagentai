@@ -83,6 +83,8 @@ export function encodeWav(chunks: Float32Array[], inputRate: number): Blob {
 export type RecorderHandle = {
   stop: () => Promise<Blob>;
   level: () => number;
+  /** Milliseconds of actual speech detected (not silence). */
+  spokenMs: () => number;
 };
 
 export async function startRecording(options?: {
@@ -90,18 +92,32 @@ export async function startRecording(options?: {
   silenceMs?: number;
 }): Promise<RecorderHandle> {
   const stream = await navigator.mediaDevices.getUserMedia({
-    audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+    audio: {
+      echoCancellation: true,
+      noiseSuppression: true,
+      autoGainControl: true,
+      channelCount: 1,
+    },
   });
 
   const ctx = new AudioContext();
   const source = ctx.createMediaStreamSource(stream);
   const processor = ctx.createScriptProcessor(4096, 1, 1);
   const chunks: Float32Array[] = [];
+  const frameMs = (4096 / ctx.sampleRate) * 1000;
+
   let currentLevel = 0;
   let hasSpoken = false;
+  let spokenMs = 0;
   let silenceStart = 0;
   let stopped = false;
+  // Calibrate the room's noise floor from the first ~400 ms so a noisy mic does
+  // not read as constant speech (and a quiet one still triggers reliably).
+  let noiseFloor = 0.006;
+  let calibrationFrames = 0;
+
   const silenceMs = options?.silenceMs ?? 1400;
+  const minSpeechMs = 350;
 
   processor.onaudioprocess = (event) => {
     const data = event.inputBuffer.getChannelData(0);
@@ -112,10 +128,25 @@ export async function startRecording(options?: {
     const rms = Math.sqrt(sum / data.length);
     currentLevel = rms;
 
-    if (rms > 0.02) {
+    if (calibrationFrames < Math.ceil(400 / frameMs)) {
+      calibrationFrames++;
+      noiseFloor = Math.max(noiseFloor, rms);
+      return;
+    }
+
+    const speechThreshold = Math.max(0.012, noiseFloor * 2.5);
+
+    if (rms > speechThreshold) {
       hasSpoken = true;
+      spokenMs += frameMs;
       silenceStart = 0;
-    } else if (hasSpoken && !stopped) {
+      return;
+    }
+
+    // Slowly track a drifting noise floor while nobody is talking.
+    noiseFloor = noiseFloor * 0.95 + rms * 0.05;
+
+    if (hasSpoken && spokenMs >= minSpeechMs && !stopped) {
       const now = performance.now();
       if (silenceStart === 0) silenceStart = now;
       else if (now - silenceStart > silenceMs) {
@@ -130,6 +161,7 @@ export async function startRecording(options?: {
 
   return {
     level: () => currentLevel,
+    spokenMs: () => spokenMs,
     stop: async () => {
       stream.getTracks().forEach((t) => t.stop());
       processor.disconnect();
@@ -140,3 +172,4 @@ export async function startRecording(options?: {
     },
   };
 }
+
