@@ -59,7 +59,7 @@ function PhonePage() {
           </p>
         </Card>
 
-        <Card className="mt-5 p-6">
+        <Card className="panel-3d p-6">
           <h2 className="text-lg font-semibold">2. Call the number</h2>
           <p className="mt-2 text-sm text-muted-foreground">
             Aarav answers, speaks in Hinglish and switches to Hindi or English based on how you
@@ -74,7 +74,7 @@ function PhonePage() {
           </p>
         </Card>
 
-        <Card className="mt-5 border-accent/40 bg-accent/10 p-6">
+        <Card className="panel-3d border-accent/40 bg-accent/10 p-6">
           <h2 className="text-lg font-semibold">Notes for the reviewer</h2>
           <ul className="mt-2 space-y-2 text-sm text-muted-foreground">
             <li>
@@ -92,7 +92,7 @@ function PhonePage() {
             </li>
           </ul>
         </Card>
-      </div>
-    </main>
+    </PageShell>
+
   );
 }
