@@ -145,6 +145,7 @@ function Leads() {
   const { data } = useSuspenseQuery(leadsQuery);
   const search = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });
+  const queryClient = useQueryClient();
 
   const setSearch = (patch: Partial<LeadsSearch>) =>
     navigate({ search: (prev: LeadsSearch) => ({ ...prev, ...patch }) });
@@ -153,6 +154,15 @@ function Leads() {
 
   const locations = uniqueSorted(data.leads.map((l) => l.location));
   const budgets = uniqueSorted(data.leads.map((l) => l.budget));
+
+  const refresh = () => queryClient.invalidateQueries({ queryKey: ["leads"] });
+
+  const total = data.calls.length;
+  const hot = data.leads.filter((l) => l.score_band === "hot").length;
+  const qualified = data.leads.filter((l) => !!l.budget && !!l.location).length;
+  const avgScore = data.leads.length
+    ? Math.round(data.leads.reduce((sum, l) => sum + (l.score ?? 0), 0) / data.leads.length)
+    : 0;
 
   const q = search.q.trim().toLowerCase();
   const fromTime = search.from ? new Date(`${search.from}T00:00:00`).getTime() : null;
@@ -164,6 +174,8 @@ function Leads() {
     if (search.location !== ALL && (lead?.location ?? "") !== search.location) return false;
     if (search.budget !== ALL && (lead?.budget ?? "") !== search.budget) return false;
     if (search.band !== ALL && (lead?.score_band ?? "") !== search.band) return false;
+    if (search.status !== ALL && (lead?.status ?? "new") !== search.status) return false;
+
 
     const started = new Date(call.started_at).getTime();
     if (fromTime !== null && started < fromTime) return false;
