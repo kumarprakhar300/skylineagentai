@@ -47,6 +47,9 @@ export function VoiceCall() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const activeRef = useRef(false);
   const scrollRef = useRef<HTMLDivElement | null>(null);
+  /** Audio kept per customer turn index so low-confidence parts can be re-transcribed. */
+  const audioByTurnRef = useRef<Map<number, Blob>>(new Map());
+  const [retryingTurn, setRetryingTurn] = useState<number | null>(null);
 
 
   useEffect(() => {
@@ -193,7 +196,10 @@ export function VoiceCall() {
         const body = (await res.json().catch(() => ({}))) as { error?: string };
         throw new Error(body.error ?? "Could not understand the audio");
       }
-      const { text } = (await res.json()) as { text: string };
+      const { text, segments } = (await res.json()) as {
+        text: string;
+        segments?: ConfidenceSegment[];
+      };
       if (!activeRef.current) return;
 
       if (!text.trim()) {
@@ -201,7 +207,8 @@ export function VoiceCall() {
         return;
       }
 
-      push({ role: "user", content: text });
+      audioByTurnRef.current.set(transcriptRef.current.length, blob);
+      push({ role: "user", content: text, segments });
       await runAgentTurn(text);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Something went wrong");
