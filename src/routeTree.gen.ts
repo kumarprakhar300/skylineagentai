@@ -13,7 +13,6 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as DocsRouteImport } from './routes/docs'
-import { Route as PanelPreviewRouteImport } from './routes/panel-preview'
 import { Route as PhoneRouteImport } from './routes/phone'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authenticated/analytics'
@@ -41,11 +40,6 @@ const AuthRoute = AuthRouteImport.update({
 const DocsRoute = DocsRouteImport.update({
   id: '/docs',
   path: '/docs',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PanelPreviewRoute = PanelPreviewRouteImport.update({
-  id: '/panel-preview',
-  path: '/panel-preview',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PhoneRoute = PhoneRouteImport.update({
@@ -98,7 +92,6 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/docs': typeof DocsRoute
-  '/panel-preview': typeof PanelPreviewRoute
   '/phone': typeof PhoneRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/analytics': typeof AuthenticatedAnalyticsRoute
@@ -113,7 +106,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/docs': typeof DocsRoute
-  '/panel-preview': typeof PanelPreviewRoute
   '/phone': typeof PhoneRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/analytics': typeof AuthenticatedAnalyticsRoute
@@ -130,7 +122,6 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/docs': typeof DocsRoute
-  '/panel-preview': typeof PanelPreviewRoute
   '/phone': typeof PhoneRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/analytics': typeof AuthenticatedAnalyticsRoute
@@ -147,7 +138,6 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/docs'
-    | '/panel-preview'
     | '/phone'
     | '/admin'
     | '/analytics'
@@ -162,7 +152,6 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/docs'
-    | '/panel-preview'
     | '/phone'
     | '/admin'
     | '/analytics'
@@ -178,7 +167,6 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/docs'
-    | '/panel-preview'
     | '/phone'
     | '/_authenticated/admin'
     | '/_authenticated/analytics'
@@ -195,7 +183,6 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   DocsRoute: typeof DocsRoute
-  PanelPreviewRoute: typeof PanelPreviewRoute
   PhoneRoute: typeof PhoneRoute
   ApiEndCallRoute: typeof ApiEndCallRoute
   ApiSttRoute: typeof ApiSttRoute
@@ -232,13 +219,6 @@ declare module '@tanstack/react-router' {
       path: '/docs'
       fullPath: '/docs'
       preLoaderRoute: typeof DocsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/panel-preview': {
-      id: '/panel-preview'
-      path: '/panel-preview'
-      fullPath: '/panel-preview'
-      preLoaderRoute: typeof PanelPreviewRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/phone': {
@@ -327,7 +307,6 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   DocsRoute: DocsRoute,
-  PanelPreviewRoute: PanelPreviewRoute,
   PhoneRoute: PhoneRoute,
   ApiEndCallRoute: ApiEndCallRoute,
   ApiSttRoute: ApiSttRoute,
