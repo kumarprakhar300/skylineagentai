@@ -75,13 +75,12 @@ export function LeadDetailPanel({
 
   const turns = call?.transcript ?? [];
   const term = transcriptQuery.trim();
-  const visibleTurns = useMemo(
-    () =>
-      term
-        ? turns.filter((t) => t.content.toLowerCase().includes(term.toLowerCase()))
-        : turns,
-    [turns, term],
-  );
+  const visibleTurns = useMemo(() => {
+    const numbered = turns.map((t, index) => ({ ...t, turnNumber: index + 1 }));
+    return term
+      ? numbered.filter((t) => t.content.toLowerCase().includes(term.toLowerCase()))
+      : numbered;
+  }, [turns, term]);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
