@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { leadsDefaultSearch } from "@/routes/leads";
 import { ArrowLeft, Phone } from "lucide-react";
 
 import { Card } from "@/components/ui/card";
@@ -70,7 +71,8 @@ function PhonePage() {
             reply. Twilio's speech recognition transcribes each answer, the agent decides the next
             question, and the call ends politely once the requirement and contact details are
             captured. The record appears under{" "}
-            <Link to="/leads" className="font-medium text-primary underline-offset-4 hover:underline">
+            <Link to="/leads"
+              search={leadsDefaultSearch} className="font-medium text-primary underline-offset-4 hover:underline">
               Leads &amp; calls
             </Link>{" "}
             with channel <em>phone</em>.

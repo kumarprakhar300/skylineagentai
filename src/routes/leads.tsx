@@ -74,6 +74,16 @@ type LeadsSearch = {
 
 const ALL = "all";
 
+export const leadsDefaultSearch: LeadsSearch = {
+  q: "",
+  location: ALL,
+  budget: ALL,
+  band: ALL,
+  sort: "recent",
+  from: "",
+  to: "",
+};
+
 function str(value: unknown): string {
   return typeof value === "string" ? value : "";
 }
