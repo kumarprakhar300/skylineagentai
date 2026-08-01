@@ -212,10 +212,14 @@ export function VoiceCall() {
     activeRef.current = true;
     transcriptRef.current = [];
     leadRef.current = emptyLead;
+    choiceRef.current = choice;
     setTranscript([]);
     setLead(emptyLead);
     setSummary(null);
+    setScore(null);
+    if (choice !== "auto") setLanguage(choice);
     setPhase("connecting");
+
 
     try {
       // Ask for the mic up front so the browser prompt appears before the greeting.
