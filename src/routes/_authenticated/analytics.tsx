@@ -1,10 +1,14 @@
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { BarChart3, MapPin, PhoneCall } from "lucide-react";
 
+import { EmptyState } from "@/components/EmptyState";
 import { PageShell } from "@/components/PageShell";
+import { AnalyticsPageSkeleton } from "@/components/Skeletons";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
+
 
 type Row = {
   score: number | null;
