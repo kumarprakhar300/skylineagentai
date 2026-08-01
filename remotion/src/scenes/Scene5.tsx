@@ -100,7 +100,7 @@ export const Scene5: React.FC = () => {
               ☎
             </div>
             <div style={{ fontFamily: "Manrope", fontSize: 27, color: `${C.cream}dd`, lineHeight: 1.5 }}>
-              Signed webhook \u2192 Polly voice
+              Signed webhook → Polly voice
               <br />
               Aditi / Raveena for Hindi
               <br />
