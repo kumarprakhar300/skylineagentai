@@ -115,6 +115,63 @@ export type Database = {
           },
         ]
       }
+      project_catalog: {
+        Row: {
+          amenities: Json
+          configurations: Json
+          created_at: string
+          developer: string
+          id: string
+          location: string
+          location_advantages: Json
+          name: string
+          payment_note: string
+          possession: string
+          price_range: string
+          rera_note: string
+          singleton: boolean
+          site_visit_note: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amenities?: Json
+          configurations?: Json
+          created_at?: string
+          developer: string
+          id?: string
+          location: string
+          location_advantages?: Json
+          name: string
+          payment_note?: string
+          possession?: string
+          price_range?: string
+          rera_note?: string
+          singleton?: boolean
+          site_visit_note?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amenities?: Json
+          configurations?: Json
+          created_at?: string
+          developer?: string
+          id?: string
+          location?: string
+          location_advantages?: Json
+          name?: string
+          payment_note?: string
+          possession?: string
+          price_range?: string
+          rera_note?: string
+          singleton?: boolean
+          site_visit_note?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
