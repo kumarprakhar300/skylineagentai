@@ -29,7 +29,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { SpeakerLabel, speakerShortName } from "@/components/SpeakerLabel";
+import { speakerShortName } from "@/components/SpeakerLabel";
 import { supabase } from "@/integrations/supabase/client";
 import { downloadCsv, stamp, toCsv } from "@/lib/csv";
 import {
