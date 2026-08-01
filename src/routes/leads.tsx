@@ -140,7 +140,7 @@ function Leads() {
   const navigate = useNavigate({ from: Route.fullPath });
 
   const setSearch = (patch: Partial<LeadsSearch>) =>
-    navigate({ search: (prev) => ({ ...prev, ...patch }) });
+    navigate({ search: (prev: LeadsSearch) => ({ ...prev, ...patch }) });
 
   const leadByCall = new Map(data.leads.filter((l) => l.call_id).map((l) => [l.call_id!, l]));
 
