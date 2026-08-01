@@ -1,4 +1,4 @@
-import { AbsoluteFill, Sequence, useCurrentFrame, useVideoConfig, spring, interpolate } from "remotion";
+import { AbsoluteFill, useCurrentFrame, useVideoConfig, spring, interpolate } from "remotion";
 import { C, FONT_BODY } from "../theme";
 import { Body, Display, Eyebrow } from "../components/Kit";
 
@@ -118,11 +118,9 @@ export const Scene4: React.FC = () => {
         ))}
       </div>
 
-      <Sequence from={118}>
-        <Body size={26} style={{ marginTop: 34 }}>
+      <Body size={26} delay={118} style={{ marginTop: 34 }}>
           Confidence-scored transcript · Devanagari-safe punctuation · tap to re-transcribe
-        </Body>
-      </Sequence>
+      </Body>
     </AbsoluteFill>
   );
 };

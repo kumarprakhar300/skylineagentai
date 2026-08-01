@@ -1,4 +1,4 @@
-import { AbsoluteFill, Sequence, useCurrentFrame, useVideoConfig, spring, interpolate } from "remotion";
+import { AbsoluteFill, useCurrentFrame, useVideoConfig, spring, interpolate } from "remotion";
 import { C, FONT_BODY } from "../theme";
 import { Body, Display, Eyebrow } from "../components/Kit";
 
@@ -64,11 +64,9 @@ export const Scene7: React.FC = () => {
           );
         })}
       </div>
-      <Sequence from={64}>
-        <Body size={28} style={{ marginTop: 40 }}>
+      <Body size={28} delay={64} style={{ marginTop: 40 }}>
           Hindi · Hinglish · English — qualified, scored and summarised automatically.
-        </Body>
-      </Sequence>
+      </Body>
     </AbsoluteFill>
   );
 };

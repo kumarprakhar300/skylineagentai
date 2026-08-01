@@ -1,4 +1,4 @@
-import { AbsoluteFill, Sequence, useCurrentFrame, useVideoConfig, spring, interpolate } from "remotion";
+import { AbsoluteFill, useCurrentFrame, useVideoConfig, spring, interpolate } from "remotion";
 import { C } from "../theme";
 import { Body, Display, Eyebrow } from "../components/Kit";
 
@@ -61,12 +61,10 @@ export const Scene1: React.FC = () => {
             marginTop: 34,
           }}
         />
-        <Sequence from={30}>
-          <Body size={34} style={{ marginTop: 30, maxWidth: 820 }}>
+          <Body size={34} delay={30} style={{ marginTop: 30, maxWidth: 820 }}>
             A real-estate voice agent that calls leads, talks in Hindi, Hinglish or
             English — and qualifies them end to end.
           </Body>
-        </Sequence>
       </div>
     </AbsoluteFill>
   );

@@ -28,7 +28,7 @@ export const Scene2: React.FC = () => {
         {langs.map((l, i) => {
           const delay = 22 + i * 7;
           const active = spring({
-            frame: frame - (60 + i * 14),
+            frame: frame - (34 + i * 10),
             fps,
             config: { damping: 16, stiffness: 120 },
           });
