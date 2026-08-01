@@ -46,7 +46,9 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-  const { data: project } = useSuspenseQuery(catalogQuery);
+  const { data: projects } = useSuspenseQuery(catalogQuery);
+  const cityCount = new Set(projects.map((p) => p.city || p.location)).size;
+
 
   return (
     <main className="min-h-screen bg-background">
