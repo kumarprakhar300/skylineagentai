@@ -116,8 +116,8 @@ function Index() {
       </section>
 
       <section className="mx-auto max-w-6xl px-5 pb-16">
-        <div className="grid gap-6 lg:grid-cols-[1.1fr_1fr]">
-          <Card className="p-6">
+        <div className="scene-3d grid gap-6 lg:grid-cols-[1.1fr_1fr]">
+          <Card className="tilt-card glass-panel p-6">
             <p className="text-xs font-semibold uppercase tracking-wider text-accent-foreground/70">
               Sample project (fictional)
             </p>
