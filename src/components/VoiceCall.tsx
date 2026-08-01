@@ -1,9 +1,17 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Loader2, Mic, PhoneCall, PhoneOff, Radio, Square, Volume2 } from "lucide-react";
+import { Languages, Loader2, Mic, PhoneCall, PhoneOff, Radio, Square, Volume2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { languageOptions, type SpokenLanguage } from "@/lib/agent/language";
 import { emptyLead, leadFieldLabels, type LeadFields, type Turn } from "@/lib/agent/prompt";
 import type { LeadScore } from "@/lib/agent/score";
 import { startRecording, type RecorderHandle } from "@/lib/audio";
@@ -27,15 +35,18 @@ export function VoiceCall() {
   const [lead, setLead] = useState<LeadFields>(emptyLead);
   const [summary, setSummary] = useState<string | null>(null);
   const [score, setScore] = useState<LeadScore | null>(null);
+  const [choice, setChoice] = useState<SpokenLanguage>("auto");
   const [language, setLanguage] = useState<string>("hinglish");
 
   const transcriptRef = useRef<Turn[]>([]);
   const leadRef = useRef<LeadFields>(emptyLead);
   const languageRef = useRef("hinglish");
+  const choiceRef = useRef<SpokenLanguage>("auto");
   const recorderRef = useRef<RecorderHandle | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const activeRef = useRef(false);
   const scrollRef = useRef<HTMLDivElement | null>(null);
+
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
