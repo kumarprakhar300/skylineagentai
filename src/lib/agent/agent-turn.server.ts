@@ -1,4 +1,5 @@
 import { chat } from "@/lib/ai.server";
+import { readCatalog } from "@/lib/catalog.server";
 import { emptyLead, systemPrompt, type LeadFields, type Turn } from "@/lib/agent/prompt";
 
 export type AgentTurnResult = {
@@ -32,7 +33,7 @@ function parseJson(raw: string): AgentJson {
 /** One conversational turn. Shared by the browser demo and the Twilio phone demo. */
 export async function agentTurn(history: Turn[], userText: string): Promise<AgentTurnResult> {
   const messages = [
-    { role: "system" as const, content: systemPrompt() },
+    { role: "system" as const, content: systemPrompt(await readCatalog()) },
     ...history.slice(-24).map((t) => ({
       role: t.role === "user" ? ("user" as const) : ("assistant" as const),
       content: t.content,

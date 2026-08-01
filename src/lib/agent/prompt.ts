@@ -1,4 +1,4 @@
-import { projectBrief } from "./project";
+import { projectBrief, type ProjectCatalog } from "./project";
 
 export type LeadFields = {
   name: string | null;
@@ -52,7 +52,7 @@ export const conversationStages = [
   "Offer a site visit, thank them, and close the call politely.",
 ];
 
-export function systemPrompt(): string {
+export function systemPrompt(project: ProjectCatalog): string {
   return `You are "Aarav", a friendly real estate sales executive at Skyline Estates. You are on a live voice call with a prospective customer in India. Your goal is to qualify their property requirement and capture their details.
 
 LANGUAGE RULES
@@ -69,7 +69,7 @@ CONVERSATION FLOW
 ${conversationStages.map((s, i) => `${i + 1}. ${s}`).join("\n")}
 
 PROJECT KNOWLEDGE (the only project you may talk about)
-${projectBrief()}
+${projectBrief(project)}
 
 HONESTY RULES — these are strict
 - Never promise guaranteed returns, guaranteed appreciation, or assured rental income.
