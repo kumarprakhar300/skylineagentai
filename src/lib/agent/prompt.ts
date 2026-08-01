@@ -1,3 +1,5 @@
+import type { ConfidenceSegment } from "@/lib/agent/confidence";
+
 import { projectBrief, type ProjectCatalog } from "./project";
 
 export type LeadFields = {
@@ -36,7 +38,14 @@ export const leadFieldLabels: Record<keyof LeadFields, string> = {
   phone: "Contact number",
 };
 
-export type Turn = { role: "assistant" | "user"; content: string };
+export type Turn = {
+  role: "assistant" | "user";
+  content: string;
+  /** Segment-level STT confidence (customer turns only, when available). */
+  segments?: ConfidenceSegment[] | undefined;
+  /** True once the turn has been re-transcribed with the high-accuracy model. */
+  refined?: boolean | undefined;
+};
 
 /**
  * CONVERSATION FLOW

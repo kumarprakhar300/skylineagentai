@@ -19,6 +19,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { ConfidenceChip, ConfidenceText } from "@/components/ConfidenceText";
 import { SpeakerLabel } from "@/components/SpeakerLabel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
@@ -249,13 +250,34 @@ export function LeadDetailPanel({
                               : "border border-border bg-secondary/40",
                           )}
                         >
-                          <SpeakerLabel
-                            role={turn.role}
-                            turnNumber={turn.turnNumber}
-                            tone={turn.role === "user" ? "onPrimary" : "muted"}
-                          />
+                          <span className="flex items-center gap-2">
+                            <SpeakerLabel
+                              role={turn.role}
+                              turnNumber={turn.turnNumber}
+                              tone={turn.role === "user" ? "onPrimary" : "muted"}
+                            />
+                            {turn.role === "user" && (
+                              <ConfidenceChip
+                                segments={turn.segments}
+                                refined={turn.refined}
+                                className={
+                                  turn.role === "user"
+                                    ? "bg-primary-foreground/20 text-primary-foreground"
+                                    : undefined
+                                }
+                              />
+                            )}
+                          </span>
                           <p className="mt-1 whitespace-pre-wrap">
-                            <Highlighted text={turn.content} term={term} />
+                            {term || turn.role !== "user" || !turn.segments?.length ? (
+                              <Highlighted text={turn.content} term={term} />
+                            ) : (
+                              <ConfidenceText
+                                text={turn.content}
+                                segments={turn.segments}
+                                tone="onPrimary"
+                              />
+                            )}
                           </p>
                         </div>
                       ))

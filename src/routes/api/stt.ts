@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
+import { segmentsFromTokens } from "@/lib/agent/confidence";
 import { normalizeLanguage, sttLanguageCode, sttPrompt } from "@/lib/agent/language";
 import { cleanSpokenText } from "@/lib/agent/transcript-text";
 import { gatewayErrorResponse, transcribe } from "@/lib/ai.server";
@@ -20,11 +21,25 @@ export const Route = createFileRoute("/api/stt")({
           }
 
           const language = normalizeLanguage(form.get("language"));
-          const raw = await transcribe(file, {
+          // "high" is used when the caller re-transcribes a low-confidence turn.
+          const highQuality = form.get("quality") === "high";
+          const hint = form.get("hint");
+
+          const { text, tokens } = await transcribe(file, {
             language: sttLanguageCode(language),
-            prompt: sttPrompt(language),
+            prompt: [sttPrompt(language), typeof hint === "string" ? hint : ""]
+              .filter(Boolean)
+              .join(" ")
+              .slice(0, 900),
+            highQuality,
           });
-          return Response.json({ text: cleanSpokenText(raw) });
+
+          const segments = segmentsFromTokens(tokens).map((segment) => ({
+            text: cleanSpokenText(segment.text),
+            confidence: segment.confidence,
+          }));
+
+          return Response.json({ text: cleanSpokenText(text), segments, highQuality });
         } catch (error) {
           return gatewayErrorResponse(error);
         }

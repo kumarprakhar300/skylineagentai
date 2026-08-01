@@ -11,8 +11,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ConfidenceText } from "@/components/ConfidenceText";
 import { SpeakerLabel } from "@/components/SpeakerLabel";
 import { languageOptions, type SpokenLanguage } from "@/lib/agent/language";
+import type { ConfidenceSegment } from "@/lib/agent/confidence";
 import { emptyLead, leadFieldLabels, type LeadFields, type Turn } from "@/lib/agent/prompt";
 import type { LeadScore } from "@/lib/agent/score";
 import { startRecording, type RecorderHandle } from "@/lib/audio";
@@ -47,6 +49,9 @@ export function VoiceCall() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const activeRef = useRef(false);
   const scrollRef = useRef<HTMLDivElement | null>(null);
+  /** Audio kept per customer turn index so low-confidence parts can be re-transcribed. */
+  const audioByTurnRef = useRef<Map<number, Blob>>(new Map());
+  const [retryingTurn, setRetryingTurn] = useState<number | null>(null);
 
 
   useEffect(() => {
@@ -193,7 +198,10 @@ export function VoiceCall() {
         const body = (await res.json().catch(() => ({}))) as { error?: string };
         throw new Error(body.error ?? "Could not understand the audio");
       }
-      const { text } = (await res.json()) as { text: string };
+      const { text, segments } = (await res.json()) as {
+        text: string;
+        segments?: ConfidenceSegment[];
+      };
       if (!activeRef.current) return;
 
       if (!text.trim()) {
@@ -201,7 +209,8 @@ export function VoiceCall() {
         return;
       }
 
-      push({ role: "user", content: text });
+      audioByTurnRef.current.set(transcriptRef.current.length, blob);
+      push({ role: "user", content: text, segments });
       await runAgentTurn(text);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Something went wrong");
@@ -209,8 +218,56 @@ export function VoiceCall() {
     }
   }, [push, runAgentTurn]);
 
+  const retranscribe = useCallback(
+    async (index: number) => {
+      const blob = audioByTurnRef.current.get(index);
+      if (!blob) {
+        toast.error("That audio is no longer available to re-transcribe.");
+        return;
+      }
+      setRetryingTurn(index);
+      try {
+        const form = new FormData();
+        form.append("audio", new File([blob], "recording.wav", { type: "audio/wav" }));
+        form.append("language", choiceRef.current);
+        form.append("quality", "high");
+        // Neighbouring turns give the decoder context for names, areas and budgets.
+        const context = transcriptRef.current
+          .slice(Math.max(0, index - 2), index)
+          .map((turn) => turn.content)
+          .join(" ");
+        if (context) form.append("hint", context);
+
+        const res = await fetch("/api/stt", { method: "POST", body: form });
+        if (!res.ok) {
+          const body = (await res.json().catch(() => ({}))) as { error?: string };
+          throw new Error(body.error ?? "Could not re-transcribe that audio");
+        }
+        const { text, segments } = (await res.json()) as {
+          text: string;
+          segments?: ConfidenceSegment[];
+        };
+        if (!text.trim()) {
+          toast.error("The re-transcription came back empty.");
+          return;
+        }
+        transcriptRef.current = transcriptRef.current.map((turn, i) =>
+          i === index ? { ...turn, content: text, segments, refined: true } : turn,
+        );
+        setTranscript(transcriptRef.current);
+        toast.success("Re-transcribed with the high-accuracy model.");
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : "Re-transcription failed");
+      } finally {
+        setRetryingTurn(null);
+      }
+    },
+    [],
+  );
+
   const startCall = useCallback(async () => {
     activeRef.current = true;
+    audioByTurnRef.current.clear();
     transcriptRef.current = [];
     leadRef.current = emptyLead;
     choiceRef.current = choice;
@@ -396,7 +453,19 @@ export function VoiceCall() {
                 tone={turn.role === "assistant" ? "muted" : "onPrimary"}
                 className="mb-1"
               />
-              {turn.content}
+              {turn.role === "user" ? (
+                <ConfidenceText
+                  text={turn.content}
+                  segments={turn.segments}
+                  tone="onPrimary"
+                  retrying={retryingTurn === index}
+                  onRetry={
+                    audioByTurnRef.current.has(index) ? () => void retranscribe(index) : undefined
+                  }
+                />
+              ) : (
+                turn.content
+              )}
             </div>
           ))}
           {phase === "thinking" && (

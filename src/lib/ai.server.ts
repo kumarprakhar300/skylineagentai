@@ -2,6 +2,8 @@ const GATEWAY = "https://ai.gateway.lovable.dev/v1";
 
 export const CHAT_MODEL = "google/gemini-3.6-flash";
 export const STT_MODEL = "openai/gpt-4o-mini-transcribe";
+/** Higher-accuracy model used when re-transcribing low-confidence audio. */
+export const STT_MODEL_HQ = "openai/gpt-4o-transcribe";
 export const TTS_MODEL = "openai/gpt-4o-mini-tts";
 
 function apiKey(): string {
@@ -40,18 +42,25 @@ export async function chat(
   return data.choices?.[0]?.message?.content ?? "";
 }
 
+export type TranscriptionResult = {
+  text: string;
+  tokens: { token: string; logprob: number }[];
+};
+
 export async function transcribe(
   file: File,
-  options: { language?: string | null; prompt?: string | null } = {},
-): Promise<string> {
+  options: { language?: string | null; prompt?: string | null; highQuality?: boolean } = {},
+): Promise<TranscriptionResult> {
   const form = new FormData();
-  form.append("model", STT_MODEL);
+  form.append("model", options.highQuality ? STT_MODEL_HQ : STT_MODEL);
   form.append("file", file, file.name || "recording.wav");
   // A bare ISO-639-1 code only; locales like "hi-IN" are rejected with a 400.
   if (options.language) form.append("language", options.language);
   // Domain vocabulary biases the decoder towards project names, BHK, lakh/crore etc.
   if (options.prompt) form.append("prompt", options.prompt);
   form.append("temperature", "0");
+  // Per-token logprobs power the transcript confidence indicators.
+  form.append("include[]", "logprobs");
 
   const res = await fetch(`${GATEWAY}/audio/transcriptions`, {
     method: "POST",
@@ -64,8 +73,15 @@ export async function transcribe(
     throw new GatewayError(res.status, body);
   }
 
-  const data = (await res.json()) as { text?: string };
-  return (data.text ?? "").trim();
+  const data = (await res.json()) as {
+    text?: string;
+    logprobs?: { token?: string; logprob?: number }[];
+  };
+  const tokens = (data.logprobs ?? [])
+    .filter((entry) => typeof entry.token === "string" && typeof entry.logprob === "number")
+    .map((entry) => ({ token: entry.token as string, logprob: entry.logprob as number }));
+
+  return { text: (data.text ?? "").trim(), tokens };
 }
 
 
