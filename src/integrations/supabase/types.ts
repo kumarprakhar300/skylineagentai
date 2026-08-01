@@ -171,6 +171,8 @@ export type Database = {
       project_catalog: {
         Row: {
           amenities: Json
+          benefits: Json
+          city: string
           configurations: Json
           created_at: string
           developer: string
@@ -184,11 +186,14 @@ export type Database = {
           rera_note: string
           singleton: boolean
           site_visit_note: string
+          sort_order: number
           status: string
           updated_at: string
         }
         Insert: {
           amenities?: Json
+          benefits?: Json
+          city?: string
           configurations?: Json
           created_at?: string
           developer: string
@@ -202,11 +207,14 @@ export type Database = {
           rera_note?: string
           singleton?: boolean
           site_visit_note?: string
+          sort_order?: number
           status?: string
           updated_at?: string
         }
         Update: {
           amenities?: Json
+          benefits?: Json
+          city?: string
           configurations?: Json
           created_at?: string
           developer?: string
@@ -220,6 +228,7 @@ export type Database = {
           rera_note?: string
           singleton?: boolean
           site_visit_note?: string
+          sort_order?: number
           status?: string
           updated_at?: string
         }

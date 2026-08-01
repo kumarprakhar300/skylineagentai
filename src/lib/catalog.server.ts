@@ -1,12 +1,14 @@
 import { createHash, timingSafeEqual } from "node:crypto";
 
 import {
-  defaultProject,
+  defaultProjects,
   type Configuration,
   type ProjectCatalog,
 } from "@/lib/agent/project";
 
 type CatalogRow = {
+  id: string;
+  city: string;
   name: string;
   developer: string;
   location: string;
@@ -19,7 +21,12 @@ type CatalogRow = {
   configurations: unknown;
   amenities: unknown;
   location_advantages: unknown;
+  benefits: unknown;
+  sort_order: number;
 };
+
+const SELECT_COLUMNS =
+  "id, city, name, developer, location, status, rera_note, price_range, possession, payment_note, site_visit_note, configurations, amenities, location_advantages, benefits, sort_order";
 
 function toStringList(value: unknown): string[] {
   if (!Array.isArray(value)) return [];
@@ -44,6 +51,8 @@ function toConfigurations(value: unknown): Configuration[] {
 
 function rowToCatalog(row: CatalogRow): ProjectCatalog {
   return {
+    id: row.id,
+    city: row.city ?? "",
     name: row.name,
     developer: row.developer,
     location: row.location,
@@ -56,11 +65,14 @@ function rowToCatalog(row: CatalogRow): ProjectCatalog {
     configurations: toConfigurations(row.configurations),
     amenities: toStringList(row.amenities),
     locationAdvantages: toStringList(row.location_advantages),
+    benefits: toStringList(row.benefits),
+    sortOrder: typeof row.sort_order === "number" ? row.sort_order : 0,
   };
 }
 
 export function catalogToRow(catalog: ProjectCatalog) {
   return {
+    city: catalog.city,
     name: catalog.name,
     developer: catalog.developer,
     location: catalog.location,
@@ -73,52 +85,53 @@ export function catalogToRow(catalog: ProjectCatalog) {
     configurations: catalog.configurations as unknown as never,
     amenities: catalog.amenities as unknown as never,
     location_advantages: catalog.locationAdvantages as unknown as never,
+    benefits: catalog.benefits as unknown as never,
+    sort_order: catalog.sortOrder ?? 0,
   };
 }
 
-/** Reads the live catalog. Falls back to the bundled demo values on failure. */
-export async function readCatalog(): Promise<ProjectCatalog> {
+/** Reads every live project. Falls back to the bundled demo values on failure. */
+export async function readCatalog(): Promise<ProjectCatalog[]> {
   try {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data, error } = await supabaseAdmin
       .from("project_catalog")
-      .select(
-        "name, developer, location, status, rera_note, price_range, possession, payment_note, site_visit_note, configurations, amenities, location_advantages",
-      )
-      .limit(1)
-      .maybeSingle();
+      .select(SELECT_COLUMNS)
+      .order("sort_order", { ascending: true })
+      .order("name", { ascending: true });
 
-    if (error || !data) {
+    if (error || !data || data.length === 0) {
       if (error) console.error("[catalog] read failed", error);
-      return defaultProject;
+      return defaultProjects;
     }
-    return rowToCatalog(data as unknown as CatalogRow);
+    return (data as unknown as CatalogRow[]).map(rowToCatalog);
   } catch (error) {
     console.error("[catalog] read threw", error);
-    return defaultProject;
+    return defaultProjects;
   }
 }
 
+/** Creates or updates a single project. */
 export async function writeCatalog(catalog: ProjectCatalog): Promise<void> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const row = catalogToRow(catalog);
 
-  const existing = await supabaseAdmin
-    .from("project_catalog")
-    .select("id")
-    .limit(1)
-    .maybeSingle();
-
-  if (existing.data?.id) {
+  if (catalog.id) {
     const { error } = await supabaseAdmin
       .from("project_catalog")
       .update(row)
-      .eq("id", existing.data.id);
+      .eq("id", catalog.id);
     if (error) throw error;
     return;
   }
 
   const { error } = await supabaseAdmin.from("project_catalog").insert(row);
+  if (error) throw error;
+}
+
+export async function deleteCatalogProject(id: string): Promise<void> {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { error } = await supabaseAdmin.from("project_catalog").delete().eq("id", id);
   if (error) throw error;
 }
 

@@ -110,7 +110,7 @@ function Docs() {
               rather than the browser demo's higher-quality voice pipeline.
             </li>
             <li>• No CRM push, no follow-up SMS/WhatsApp, no authentication on the lead dashboard.</li>
-            <li>• Only one project is in the knowledge base, not a full inventory catalogue.</li>
+            <li>• Five demo projects (one per metro city) are in the knowledge base, not a full live inventory.</li>
           </ul>
         </Section>
 
