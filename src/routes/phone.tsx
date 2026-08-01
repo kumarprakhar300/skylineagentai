@@ -32,25 +32,20 @@ function PhonePage() {
       : `${window.location.origin}/api/public/twilio/voice`;
 
   return (
-    <main className="min-h-screen bg-background">
-      <div className="mx-auto max-w-3xl px-5 py-10">
-        <Link
-          to="/"
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="size-4" /> Back to the call demo
-        </Link>
-
-        <h1 className="mt-4 flex items-center gap-2 text-3xl font-semibold tracking-tight">
+    <PageShell
+      eyebrow="Channel"
+      title={
+        <span className="flex items-center gap-2">
           <Phone className="size-6 text-primary" /> Phone call demo
-        </h1>
-        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-          The same agent brain also answers real phone calls through Twilio. The webhook below is
-          live in this app — it greets the caller, qualifies the requirement over speech, saves the
-          lead and writes the call summary, exactly like the browser demo.
-        </p>
+        </span>
+      }
+      description="The same agent brain also answers real phone calls through Twilio. The webhook below is live in this app — it greets the caller, qualifies the requirement over speech, saves the lead and writes the call summary, exactly like the browser demo."
+      width="narrow"
+      header={false}
+      backLink
+    >
+        <Card className="panel-3d p-6">
 
-        <Card className="mt-6 p-6">
           <h2 className="text-lg font-semibold">1. Point your Twilio number here</h2>
           <p className="mt-2 text-sm text-muted-foreground">
             In the Twilio Console open <strong>Phone Numbers → your number → Voice</strong>, set
