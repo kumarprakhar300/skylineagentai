@@ -106,7 +106,6 @@ export function LeadDetailPanel({
                         "bg-muted text-muted-foreground",
                     )}
                   >
-                    {lead.score_band === "hot" ? "🔥 " : ""}
                     {(lead.score_band ?? "cold").replace(/^./, (c) => c.toUpperCase())} ·{" "}
                     {lead.score}/100
                   </Badge>

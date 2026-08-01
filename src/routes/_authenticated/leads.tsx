@@ -609,7 +609,6 @@ function ScoreBadge({ lead }: { lead: LeadRow }) {
         band === "cold" && "bg-muted text-muted-foreground",
       )}
     >
-      {band === "hot" ? "🔥 " : ""}
       {band.charAt(0).toUpperCase() + band.slice(1)} · {lead.score}/100
     </Badge>
   );
