@@ -1,33 +1,63 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { z } from "zod";
 
 import { chat, gatewayErrorResponse } from "@/lib/ai.server";
-import { summaryPrompt, type LeadFields, type Turn } from "@/lib/agent/prompt";
+import { summaryPrompt, type LeadFields } from "@/lib/agent/prompt";
 import { cleanSpokenText } from "@/lib/agent/transcript-text";
 import { scoreLead, scoreLine } from "@/lib/agent/score";
 
-type Body = {
-  transcript?: Turn[];
-  lead?: Partial<LeadFields>;
-  language?: string;
-  channel?: string;
-};
+const leadField = z.string().trim().max(200).nullable().optional();
+
+const bodySchema = z.object({
+  transcript: z
+    .array(
+      z.object({
+        role: z.enum(["user", "assistant"]),
+        content: z.string().max(5000),
+      }),
+    )
+    .max(200)
+    .default([]),
+  lead: z
+    .object({
+      name: leadField,
+      phone: z.string().trim().max(32).nullable().optional(),
+      intent: leadField,
+      location: leadField,
+      property_type: leadField,
+      configuration: leadField,
+      budget: leadField,
+      purpose: leadField,
+      timeline: leadField,
+    })
+    .partial()
+    .default({}),
+  language: z.string().trim().max(32).nullable().optional(),
+  channel: z.enum(["browser", "phone"]).optional(),
+});
 
 export const Route = createFileRoute("/api/end-call")({
   server: {
     handlers: {
       POST: async ({ request }) => {
         try {
-          const body = (await request.json()) as Body;
+          const parsed = bodySchema.safeParse(await request.json());
+          if (!parsed.success) {
+            return Response.json({ error: "Invalid request body" }, { status: 400 });
+          }
+          const body = parsed.data;
+
           // Store the same normalised text the caller saw in the live transcript.
-          const transcript = (Array.isArray(body.transcript) ? body.transcript : [])
+          const transcript = body.transcript
             .map((turn) => ({ ...turn, content: cleanSpokenText(turn.content) }))
             .filter((turn) => turn.content.length > 0);
           if (transcript.length === 0) {
             return Response.json({ error: "Empty transcript" }, { status: 400 });
           }
 
-          const lead = body.lead ?? {};
+          const lead = (body.lead ?? {}) as Partial<LeadFields>;
           const score = scoreLead(lead, transcript);
+
 
           let summary = "";
           try {
