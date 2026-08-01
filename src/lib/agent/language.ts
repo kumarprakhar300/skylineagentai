@@ -26,7 +26,7 @@ export function sttLanguageCode(language: SpokenLanguage): string | null {
 /** Domain vocabulary + spelling hint that measurably improves recognition accuracy. */
 export function sttPrompt(language: SpokenLanguage): string {
   const vocabulary =
-    "Skyline Greens, Skyline Estates, Aarav, Wakad, Hinjewadi, Pune, Baner, Kharadi, Balewadi, " +
+    "Skyline Greens, Skyline Estates, Agent, Wakad, Hinjewadi, Pune, Baner, Kharadi, Balewadi, " +
     "2 BHK, 3 BHK, 4 BHK, BHK, RERA, carpet area, possession, booking amount, home loan, EMI, " +
     "lakh, lakhs, crore, crores, budget, site visit, brochure, investment, self-use, ready to move, " +
     "under construction, amenities, clubhouse, sq ft.";

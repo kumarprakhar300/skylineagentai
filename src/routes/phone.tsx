@@ -63,7 +63,7 @@ function PhonePage() {
         <Card className="panel-3d p-6">
           <h2 className="text-lg font-semibold">2. Call the number</h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            Aarav answers, speaks in Hinglish and switches to Hindi or English based on how you
+            The agent answers, speaks in Hinglish and switches to Hindi or English based on how you
             reply. Twilio's speech recognition transcribes each answer, the agent decides the next
             question, and the call ends politely once the requirement and contact details are
             captured. The record appears under{" "}
