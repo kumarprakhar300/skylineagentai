@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { SpeakerLabel } from "@/components/SpeakerLabel";
 import { languageOptions, type SpokenLanguage } from "@/lib/agent/language";
 import { emptyLead, leadFieldLabels, type LeadFields, type Turn } from "@/lib/agent/prompt";
 import type { LeadScore } from "@/lib/agent/score";
