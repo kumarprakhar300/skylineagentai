@@ -2,16 +2,43 @@
 
 const TARGET_RATE = 16000;
 
+/**
+ * Box-average downsample. Nearest-sample picking aliases high frequencies into
+ * the speech band, which is what makes words come out garbled in the transcript.
+ */
 function downsample(input: Float32Array, inputRate: number): Float32Array {
   if (inputRate === TARGET_RATE) return input;
   const ratio = inputRate / TARGET_RATE;
   const length = Math.floor(input.length / ratio);
   const output = new Float32Array(length);
   for (let i = 0; i < length; i++) {
-    output[i] = input[Math.floor(i * ratio)] ?? 0;
+    const start = Math.floor(i * ratio);
+    const end = Math.min(input.length, Math.floor((i + 1) * ratio));
+    let sum = 0;
+    let count = 0;
+    for (let j = start; j < end; j++) {
+      sum += input[j] ?? 0;
+      count++;
+    }
+    output[i] = count > 0 ? sum / count : (input[start] ?? 0);
   }
   return output;
 }
+
+/** Normalise quiet recordings so soft speech still reaches the model clearly. */
+function normalize(samples: Float32Array): Float32Array {
+  let peak = 0;
+  for (let i = 0; i < samples.length; i++) {
+    const value = Math.abs(samples[i] ?? 0);
+    if (value > peak) peak = value;
+  }
+  if (peak < 0.001 || peak > 0.85) return samples;
+  const gain = Math.min(6, 0.85 / peak);
+  const output = new Float32Array(samples.length);
+  for (let i = 0; i < samples.length; i++) output[i] = (samples[i] ?? 0) * gain;
+  return output;
+}
+
 
 export function encodeWav(chunks: Float32Array[], inputRate: number): Blob {
   const total = chunks.reduce((n, c) => n + c.length, 0);
