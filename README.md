@@ -1,7 +1,7 @@
 # Skyline Agent — Live Real-Estate AI Calling Agent
 
 A production-style **AI voice calling agent** for real-estate lead qualification. The agent
-("Aarav" from Skyline Estates) holds a natural, interruptible phone conversation in **English,
+("Agent" from Skyline Estates) holds a natural, interruptible phone conversation in **English,
 Hindi, or Hinglish**, qualifies the caller (intent, location, budget, configuration, timeline),
 scores the lead, writes a structured call summary, and stores everything in a database with a
 searchable, exportable dashboard.
@@ -165,7 +165,7 @@ admin; later sign-ups get no staff role until an admin promotes them on `/admin`
 1. Open `/` (the landing page).
 2. Pick a **language** next to **Start call**: Auto / English / Hindi / Hinglish.
 3. Click **Start call** and allow microphone access.
-4. Talk to Aarav — answer the qualification questions, ask about the project, or interrupt.
+4. Talk to the agent — answer the qualification questions, ask about the project, or interrupt.
 5. End the call. A summary, score, and transcript are saved; review them under **Leads & calls**.
 
 ---
@@ -211,7 +211,7 @@ In the Twilio Console, open **Phone Numbers → your number → Voice & Fax / Me
 
 ### 5. Call the number
 
-- Aarav answers in Hinglish, then mirrors whatever language you reply in (Hindi/English/Hinglish).
+- The agent answers in Hinglish, then mirrors whatever language you reply in (Hindi/English/Hinglish).
 - Twilio's speech recognition transcribes each answer; the agent decides the next question.
 - The call ends politely once the requirement and contact details are captured.
 - The record appears under **Leads & calls** with channel `phone`.
