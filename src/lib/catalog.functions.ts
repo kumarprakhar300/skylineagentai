@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { ProjectCatalog } from "@/lib/agent/project";
 
 const configurationSchema = z.object({
@@ -24,12 +25,7 @@ const catalogSchema = z.object({
   locationAdvantages: z.array(z.string().trim().min(1).max(160)).max(40).default([]),
 });
 
-const saveSchema = z.object({
-  passcode: z.string().min(1).max(200),
-  catalog: catalogSchema,
-});
-
-/** Public read — the catalog is shown on the demo pages. */
+/** Public read — the catalog is shown on the public landing page. */
 export const getProjectCatalog = createServerFn({ method: "GET" }).handler(
   async (): Promise<ProjectCatalog> => {
     const { readCatalog } = await import("@/lib/catalog.server");
@@ -37,20 +33,30 @@ export const getProjectCatalog = createServerFn({ method: "GET" }).handler(
   },
 );
 
-/** Verifies the admin passcode before returning the catalog for editing. */
-export const unlockProjectCatalog = createServerFn({ method: "POST" })
-  .inputValidator((data: { passcode: string }) => z.object({ passcode: z.string().min(1).max(200) }).parse(data))
-  .handler(async ({ data }) => {
-    const { passcodeIsValid, readCatalog } = await import("@/lib/catalog.server");
-    if (!passcodeIsValid(data.passcode)) return { ok: false as const };
+/** Admin-only read for the editor. */
+export const loadCatalogForEditing = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data: isAdmin } = await context.supabase.rpc("has_role", {
+      _user_id: context.userId,
+      _role: "admin",
+    });
+    if (isAdmin !== true) return { ok: false as const, error: "Admin access required" };
+    const { readCatalog } = await import("@/lib/catalog.server");
     return { ok: true as const, catalog: await readCatalog() };
   });
 
 export const saveProjectCatalog = createServerFn({ method: "POST" })
-  .inputValidator((data: unknown) => saveSchema.parse(data))
-  .handler(async ({ data }) => {
-    const { passcodeIsValid, writeCatalog } = await import("@/lib/catalog.server");
-    if (!passcodeIsValid(data.passcode)) return { ok: false as const, error: "Invalid passcode" };
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => z.object({ catalog: catalogSchema }).parse(data))
+  .handler(async ({ data, context }) => {
+    const { data: isAdmin } = await context.supabase.rpc("has_role", {
+      _user_id: context.userId,
+      _role: "admin",
+    });
+    if (isAdmin !== true) return { ok: false as const, error: "Admin access required" };
+
+    const { writeCatalog } = await import("@/lib/catalog.server");
     try {
       await writeCatalog(data.catalog as ProjectCatalog);
       return { ok: true as const };
