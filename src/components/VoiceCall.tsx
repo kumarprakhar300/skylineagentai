@@ -366,8 +366,9 @@ export function VoiceCall() {
             <div>
               <p className="text-sm font-semibold">Aarav · Skyline Estates</p>
               <p className="text-xs text-muted-foreground">
-                {phaseLabel[phase]} · {language}
+                {phaseLabel[phase]} · AGENT
               </p>
+
             </div>
           </div>
 
