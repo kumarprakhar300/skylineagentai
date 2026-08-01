@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { defaultProject, type Configuration, type ProjectCatalog } from "@/lib/agent/project";
 import { saveProjectCatalog, unlockProjectCatalog } from "@/lib/catalog.functions";
 
-export const Route = createFileRoute("/admin")({
+export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
     meta: [
       { title: "Edit Project Catalog — Skyline Estates AI Agent Admin" },

@@ -88,7 +88,7 @@ function str(value: unknown): string {
   return typeof value === "string" ? value : "";
 }
 
-export const Route = createFileRoute("/leads")({
+export const Route = createFileRoute("/_authenticated/leads")({
   validateSearch: (search: Record<string, unknown>): LeadsSearch => ({
     q: str(search['q']),
     band: str(search['band']) || ALL,

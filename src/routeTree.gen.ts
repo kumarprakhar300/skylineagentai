@@ -10,10 +10,10 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AdminRouteImport } from './routes/admin'
 import { Route as DocsRouteImport } from './routes/docs'
-import { Route as LeadsRouteImport } from './routes/leads'
 import { Route as PhoneRouteImport } from './routes/phone'
+import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedLeadsRouteImport } from './routes/_authenticated/leads'
 import { Route as ApiEndCallRouteImport } from './routes/api/end-call'
 import { Route as ApiSttRouteImport } from './routes/api/stt'
 import { Route as ApiTtsRouteImport } from './routes/api/tts'
@@ -25,24 +25,24 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminRoute = AdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const DocsRoute = DocsRouteImport.update({
   id: '/docs',
   path: '/docs',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LeadsRoute = LeadsRouteImport.update({
-  id: '/leads',
-  path: '/leads',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const PhoneRoute = PhoneRouteImport.update({
   id: '/phone',
   path: '/phone',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
+  id: '/_authenticated/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedLeadsRoute = AuthenticatedLeadsRouteImport.update({
+  id: '/_authenticated/leads',
+  path: '/leads',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiEndCallRoute = ApiEndCallRouteImport.update({
@@ -73,10 +73,10 @@ const ApiPublicTwilioVoiceRoute = ApiPublicTwilioVoiceRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
   '/docs': typeof DocsRoute
-  '/leads': typeof LeadsRoute
   '/phone': typeof PhoneRoute
+  '/admin': typeof AuthenticatedAdminRoute
+  '/leads': typeof AuthenticatedLeadsRoute
   '/api/end-call': typeof ApiEndCallRoute
   '/api/stt': typeof ApiSttRoute
   '/api/tts': typeof ApiTtsRoute
@@ -85,10 +85,10 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
   '/docs': typeof DocsRoute
-  '/leads': typeof LeadsRoute
   '/phone': typeof PhoneRoute
+  '/admin': typeof AuthenticatedAdminRoute
+  '/leads': typeof AuthenticatedLeadsRoute
   '/api/end-call': typeof ApiEndCallRoute
   '/api/stt': typeof ApiSttRoute
   '/api/tts': typeof ApiTtsRoute
@@ -98,10 +98,10 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
   '/docs': typeof DocsRoute
-  '/leads': typeof LeadsRoute
   '/phone': typeof PhoneRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/_authenticated/leads': typeof AuthenticatedLeadsRoute
   '/api/end-call': typeof ApiEndCallRoute
   '/api/stt': typeof ApiSttRoute
   '/api/tts': typeof ApiTtsRoute
@@ -112,10 +112,10 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/admin'
     | '/docs'
-    | '/leads'
     | '/phone'
+    | '/admin'
+    | '/leads'
     | '/api/end-call'
     | '/api/stt'
     | '/api/tts'
@@ -124,10 +124,10 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/admin'
     | '/docs'
-    | '/leads'
     | '/phone'
+    | '/admin'
+    | '/leads'
     | '/api/end-call'
     | '/api/stt'
     | '/api/tts'
@@ -136,10 +136,10 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/admin'
     | '/docs'
-    | '/leads'
     | '/phone'
+    | '/_authenticated/admin'
+    | '/_authenticated/leads'
     | '/api/end-call'
     | '/api/stt'
     | '/api/tts'
@@ -149,10 +149,10 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AdminRoute: typeof AdminRoute
   DocsRoute: typeof DocsRoute
-  LeadsRoute: typeof LeadsRoute
   PhoneRoute: typeof PhoneRoute
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedLeadsRoute: typeof AuthenticatedLeadsRoute
   ApiEndCallRoute: typeof ApiEndCallRoute
   ApiSttRoute: typeof ApiSttRoute
   ApiTtsRoute: typeof ApiTtsRoute
@@ -169,13 +169,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/docs': {
       id: '/docs'
       path: '/docs'
@@ -183,18 +176,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DocsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/leads': {
-      id: '/leads'
-      path: '/leads'
-      fullPath: '/leads'
-      preLoaderRoute: typeof LeadsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/phone': {
       id: '/phone'
       path: '/phone'
       fullPath: '/phone'
       preLoaderRoute: typeof PhoneRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/admin': {
+      id: '/_authenticated/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthenticatedAdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/leads': {
+      id: '/_authenticated/leads'
+      path: '/leads'
+      fullPath: '/leads'
+      preLoaderRoute: typeof AuthenticatedLeadsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/end-call': {
@@ -237,10 +237,10 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AdminRoute: AdminRoute,
   DocsRoute: DocsRoute,
-  LeadsRoute: LeadsRoute,
   PhoneRoute: PhoneRoute,
+  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedLeadsRoute: AuthenticatedLeadsRoute,
   ApiEndCallRoute: ApiEndCallRoute,
   ApiSttRoute: ApiSttRoute,
   ApiTtsRoute: ApiTtsRoute,
