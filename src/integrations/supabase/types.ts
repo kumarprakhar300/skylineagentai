@@ -177,8 +177,11 @@ export type Database = {
           created_at: string
           developer: string
           id: string
+          latitude: number | null
           location: string
           location_advantages: Json
+          longitude: number | null
+          map_zoom: number
           name: string
           payment_note: string
           possession: string
@@ -198,8 +201,11 @@ export type Database = {
           created_at?: string
           developer: string
           id?: string
+          latitude?: number | null
           location: string
           location_advantages?: Json
+          longitude?: number | null
+          map_zoom?: number
           name: string
           payment_note?: string
           possession?: string
@@ -219,8 +225,11 @@ export type Database = {
           created_at?: string
           developer?: string
           id?: string
+          latitude?: number | null
           location?: string
           location_advantages?: Json
+          longitude?: number | null
+          map_zoom?: number
           name?: string
           payment_note?: string
           possession?: string

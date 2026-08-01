@@ -26,6 +26,10 @@ export type ProjectCatalog = {
   benefits: string[];
   paymentNote: string;
   siteVisitNote: string;
+  /** Map pin for the live location map (optional). */
+  latitude?: number;
+  longitude?: number;
+  mapZoom?: number;
   sortOrder?: number;
 };
 
@@ -71,6 +75,9 @@ export const defaultProjects: ProjectCatalog[] = [
     paymentNote:
       "Flexible construction-linked payment plan available; home loan support from leading banks (details shared by the sales team, nothing guaranteed on call)",
     siteVisitNote: "Site visits available all days, 10 AM to 7 PM",
+    latitude: 18.5987,
+    longitude: 73.7625,
+    mapZoom: 15,
     sortOrder: 10,
   },
   {
@@ -114,6 +121,9 @@ export const defaultProjects: ProjectCatalog[] = [
     paymentNote:
       "Flexible 20:40:40 construction-linked plan; stamp duty support offer running in this demo; loan desk with 6 banks on site",
     siteVisitNote: "Site visits all days, 10 AM to 8 PM; pick-up from Powai plaza on request",
+    latitude: 19.1176,
+    longitude: 72.906,
+    mapZoom: 15,
     sortOrder: 20,
   },
   {
@@ -157,6 +167,9 @@ export const defaultProjects: ProjectCatalog[] = [
     paymentNote:
       "Subvention style 10:80:10 plan in this demo; no floor rise on lower blocks; loan tie-ups with leading banks",
     siteVisitNote: "Site visits all days, 9:30 AM to 7:30 PM; 3 BHK sample flat is ready",
+    latitude: 28.4089,
+    longitude: 77.05,
+    mapZoom: 14,
     sortOrder: 30,
   },
   {
@@ -200,6 +213,9 @@ export const defaultProjects: ProjectCatalog[] = [
     paymentNote:
       "Construction-linked plan with 10% booking; NRI documentation desk available in this demo",
     siteVisitNote: "Site visits all days, 10 AM to 7 PM; virtual walkthrough for NRI buyers",
+    latitude: 12.9698,
+    longitude: 77.75,
+    mapZoom: 15,
     sortOrder: 40,
   },
   {
@@ -243,6 +259,9 @@ export const defaultProjects: ProjectCatalog[] = [
     paymentNote:
       "Flexible plan with 10% booking and milestone payments; no pre-EMI till slab 20 in this demo",
     siteVisitNote: "Site visits all days, 10 AM to 8 PM; drone plot view at the experience centre",
+    latitude: 17.4401,
+    longitude: 78.3489,
+    mapZoom: 15,
     sortOrder: 50,
   },
 ];

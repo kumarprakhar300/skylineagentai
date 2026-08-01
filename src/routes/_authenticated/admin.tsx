@@ -243,7 +243,32 @@ function Admin() {
             value={draft.siteVisitNote}
             onChange={(v) => set("siteVisitNote", v)}
           />
+          <Field
+            label="Map latitude"
+            value={draft.latitude === undefined ? "" : String(draft.latitude)}
+            onChange={(v) => {
+              const n = Number(v);
+              set("latitude", v.trim() === "" || Number.isNaN(n) ? undefined : n);
+            }}
+          />
+          <Field
+            label="Map longitude"
+            value={draft.longitude === undefined ? "" : String(draft.longitude)}
+            onChange={(v) => {
+              const n = Number(v);
+              set("longitude", v.trim() === "" || Number.isNaN(n) ? undefined : n);
+            }}
+          />
+          <Field
+            label="Map zoom (1-21)"
+            value={draft.mapZoom === undefined ? "" : String(draft.mapZoom)}
+            onChange={(v) => {
+              const n = Number.parseInt(v, 10);
+              set("mapZoom", Number.isNaN(n) ? undefined : Math.min(21, Math.max(1, n)));
+            }}
+          />
         </div>
+
         <div className="mt-4">
           <Label htmlFor="payment-note" className="text-xs text-muted-foreground">
             Payment / loan note

@@ -22,11 +22,14 @@ type CatalogRow = {
   amenities: unknown;
   location_advantages: unknown;
   benefits: unknown;
+  latitude: number | null;
+  longitude: number | null;
+  map_zoom: number | null;
   sort_order: number;
 };
 
 const SELECT_COLUMNS =
-  "id, city, name, developer, location, status, rera_note, price_range, possession, payment_note, site_visit_note, configurations, amenities, location_advantages, benefits, sort_order";
+  "id, city, name, developer, location, status, rera_note, price_range, possession, payment_note, site_visit_note, configurations, amenities, location_advantages, benefits, latitude, longitude, map_zoom, sort_order";
 
 function toStringList(value: unknown): string[] {
   if (!Array.isArray(value)) return [];
@@ -66,6 +69,9 @@ function rowToCatalog(row: CatalogRow): ProjectCatalog {
     amenities: toStringList(row.amenities),
     locationAdvantages: toStringList(row.location_advantages),
     benefits: toStringList(row.benefits),
+    ...(typeof row.latitude === "number" ? { latitude: row.latitude } : {}),
+    ...(typeof row.longitude === "number" ? { longitude: row.longitude } : {}),
+    mapZoom: typeof row.map_zoom === "number" ? row.map_zoom : 14,
     sortOrder: typeof row.sort_order === "number" ? row.sort_order : 0,
   };
 }
@@ -86,6 +92,9 @@ export function catalogToRow(catalog: ProjectCatalog) {
     amenities: catalog.amenities as unknown as never,
     location_advantages: catalog.locationAdvantages as unknown as never,
     benefits: catalog.benefits as unknown as never,
+    latitude: catalog.latitude ?? null,
+    longitude: catalog.longitude ?? null,
+    map_zoom: catalog.mapZoom ?? 14,
     sort_order: catalog.sortOrder ?? 0,
   };
 }

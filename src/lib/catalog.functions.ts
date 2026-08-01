@@ -26,6 +26,9 @@ const catalogSchema = z.object({
   amenities: z.array(z.string().trim().min(1).max(160)).max(40).default([]),
   locationAdvantages: z.array(z.string().trim().min(1).max(160)).max(40).default([]),
   benefits: z.array(z.string().trim().min(1).max(240)).max(40).default([]),
+  latitude: z.number().min(-90).max(90).optional(),
+  longitude: z.number().min(-180).max(180).optional(),
+  mapZoom: z.number().int().min(1).max(21).optional(),
   sortOrder: z.number().int().min(0).max(10_000).optional(),
 });
 
