@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { Loader2, Plus, Save, ShieldAlert, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { PageShell } from "@/components/PageShell";
@@ -12,8 +12,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
-import { defaultProject, type Configuration, type ProjectCatalog } from "@/lib/agent/project";
-import { loadCatalogForEditing, saveProjectCatalog } from "@/lib/catalog.functions";
+import { defaultProjects, type Configuration, type ProjectCatalog } from "@/lib/agent/project";
+import {
+  deleteProjectFromCatalog,
+  loadCatalogForEditing,
+  saveProjectCatalog,
+} from "@/lib/catalog.functions";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
@@ -43,7 +47,7 @@ function Shell({ children }: { children: React.ReactNode }) {
     <PageShell
       eyebrow="Knowledge base"
       title="Project catalog"
-      description="Everything the AI agent knows about the project lives here. Saving updates the agent's knowledge on the very next call — no redeploy needed."
+      description="Every project the AI agent can pitch lives here — one per metro city. Saving updates the agent's knowledge on the very next call, no redeploy needed."
       width="narrow"
     >
       {children}
@@ -55,28 +59,32 @@ function Shell({ children }: { children: React.ReactNode }) {
 function Admin() {
   const load = useServerFn(loadCatalogForEditing);
   const save = useServerFn(saveProjectCatalog);
+  const remove = useServerFn(deleteProjectFromCatalog);
 
   const [state, setState] = useState<"loading" | "ready" | "denied">("loading");
   const [busy, setBusy] = useState(false);
-  const [draft, setDraft] = useState<ProjectCatalog>(defaultProject);
+  const [projects, setProjects] = useState<ProjectCatalog[]>(defaultProjects);
+  const [selected, setSelected] = useState(0);
+
+  const reload = useCallback(async () => {
+    const result = await load({ data: undefined });
+    if (!result.ok) {
+      setState("denied");
+      return;
+    }
+    setProjects(result.projects.length > 0 ? result.projects : defaultProjects);
+    setState("ready");
+  }, [load]);
 
   useEffect(() => {
     let active = true;
-    void load({ data: undefined })
-      .then((result) => {
-        if (!active) return;
-        if (!result.ok) {
-          setState("denied");
-          return;
-        }
-        setDraft(result.catalog);
-        setState("ready");
-      })
-      .catch(() => active && setState("denied"));
+    void reload().catch(() => active && setState("denied"));
     return () => {
       active = false;
     };
-  }, [load]);
+  }, [reload]);
+
+  const draft = projects[Math.min(selected, projects.length - 1)] ?? defaultProjects[0]!;
 
   async function handleSave() {
     setBusy(true);
@@ -86,22 +94,78 @@ function Admin() {
         toast.error(result.error ?? "Could not save");
         return;
       }
-      toast.success("Catalog updated — the agent uses it from the next call");
+      toast.success(`${draft.name} updated — the agent uses it from the next call`);
+      if (!draft.id) await reload();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not save the catalog");
+      toast.error(error instanceof Error ? error.message : "Could not save the project");
     } finally {
       setBusy(false);
     }
   }
 
+  async function handleDelete() {
+    if (!draft.id) {
+      setProjects((prev) => prev.filter((_, i) => i !== selected));
+      setSelected(0);
+      return;
+    }
+    setBusy(true);
+    try {
+      const result = await remove({ data: { id: draft.id } });
+      if (!result.ok) {
+        toast.error(result.error ?? "Could not delete");
+        return;
+      }
+      toast.success(`${draft.name} removed from the catalog`);
+      setSelected(0);
+      await reload();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not delete the project");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function addProject() {
+    setProjects((prev) => [
+      ...prev,
+      {
+        city: "",
+        name: "New project",
+        developer: "Skyline Estates (demo developer)",
+        location: "",
+        status: "",
+        reraNote: "RERA number is a placeholder in this demo build",
+        priceRange: "",
+        possession: "",
+        paymentNote: "",
+        siteVisitNote: "",
+        configurations: [],
+        amenities: [],
+        locationAdvantages: [],
+        benefits: [],
+        sortOrder: (prev.length + 1) * 10,
+      },
+    ]);
+    setSelected(projects.length);
+  }
+
   const set = <K extends keyof ProjectCatalog>(key: K, value: ProjectCatalog[K]) =>
-    setDraft((prev) => ({ ...prev, [key]: value }));
+    setProjects((prev) => prev.map((p, i) => (i === selected ? { ...p, [key]: value } : p)));
 
   const setConfig = (index: number, patch: Partial<Configuration>) =>
-    setDraft((prev) => ({
-      ...prev,
-      configurations: prev.configurations.map((c, i) => (i === index ? { ...c, ...patch } : c)),
-    }));
+    setProjects((prev) =>
+      prev.map((p, i) =>
+        i === selected
+          ? {
+              ...p,
+              configurations: p.configurations.map((c, ci) =>
+                ci === index ? { ...c, ...patch } : c,
+              ),
+            }
+          : p,
+      ),
+    );
 
   if (state === "loading") {
     return (
@@ -132,8 +196,33 @@ function Admin() {
   return (
     <Shell>
       <Card className="panel-3d p-4 sm:p-6">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-base font-semibold tracking-tight sm:text-lg">
+            Projects ({projects.length})
+          </h2>
+          <Button variant="outline" size="sm" onClick={addProject}>
+            <Plus className="size-4" /> Add project
+          </Button>
+        </div>
+        <div className="-mx-1 mt-3 flex gap-2 overflow-x-auto px-1 pb-1">
+          {projects.map((p, i) => (
+            <Button
+              key={p.id ?? `${p.name}-${i}`}
+              size="sm"
+              variant={i === selected ? "default" : "outline"}
+              className="shrink-0"
+              onClick={() => setSelected(i)}
+            >
+              {p.city || p.name || "Untitled"}
+            </Button>
+          ))}
+        </div>
+      </Card>
+
+      <Card className="panel-3d p-4 sm:p-6">
         <h2 className="text-base font-semibold tracking-tight sm:text-lg">Project basics</h2>
         <div className="mt-4 grid gap-3 sm:grid-cols-2 sm:gap-4">
+          <Field label="Metro city" value={draft.city} onChange={(v) => set("city", v)} />
           <Field label="Project name" value={draft.name} onChange={(v) => set("name", v)} />
           <Field label="Developer" value={draft.developer} onChange={(v) => set("developer", v)} />
           <Field label="Location" value={draft.location} onChange={(v) => set("location", v)} />
@@ -255,18 +344,41 @@ function Admin() {
         />
       </Card>
 
+      <Card className="panel-3d p-4 sm:p-6">
+        <h2 className="text-base font-semibold tracking-tight sm:text-lg">Customer benefits</h2>
+        <p className="mt-1 text-xs text-muted-foreground">
+          One benefit per line. The agent uses these to pitch value — savings, commute, possession,
+          rental potential — instead of reading out amenities.
+        </p>
+        <Textarea
+          className="mt-3"
+          rows={6}
+          aria-label="Customer benefits, one per line"
+          value={draft.benefits.join("\n")}
+          onChange={(e) => set("benefits", e.target.value.split("\n"))}
+        />
+      </Card>
+
       <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
         <Button className="w-full sm:w-auto" onClick={handleSave} disabled={busy}>
           {busy ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
-          Save catalog
+          Save {draft.city || draft.name}
         </Button>
         <Button
           variant="ghost"
           className="w-full sm:w-auto"
-          onClick={() => setDraft(defaultProject)}
+          onClick={() => void reload()}
           disabled={busy}
         >
-          Reset to demo defaults
+          Discard changes
+        </Button>
+        <Button
+          variant="ghost"
+          className="w-full text-destructive sm:ml-auto sm:w-auto"
+          onClick={() => void handleDelete()}
+          disabled={busy || projects.length <= 1}
+        >
+          <Trash2 className="size-4" /> Delete project
         </Button>
       </div>
     </Shell>
