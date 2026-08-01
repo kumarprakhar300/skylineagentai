@@ -200,7 +200,16 @@ function Index() {
             </Card>
           ))}
         </div>
+
+        <div className="mt-8">
+          <ProjectMap projects={projects} />
+          <p className="mt-2 text-xs text-muted-foreground">
+            Pick a city to see the exact site location, switch to satellite or street view, and open
+            turn-by-turn directions — the same address Aarav quotes on the call.
+          </p>
+        </div>
       </section>
+
 
       <section className="mx-auto max-w-6xl px-5 pb-16">
         <div className="scene-3d grid gap-6">
