@@ -15,6 +15,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as DocsRouteImport } from './routes/docs'
 import { Route as PhoneRouteImport } from './routes/phone'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authenticated/analytics'
 import { Route as AuthenticatedLeadsRouteImport } from './routes/_authenticated/leads'
 import { Route as ApiEndCallRouteImport } from './routes/api/end-call'
 import { Route as ApiSttRouteImport } from './routes/api/stt'
@@ -49,6 +50,11 @@ const PhoneRoute = PhoneRouteImport.update({
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAnalyticsRoute = AuthenticatedAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedLeadsRoute = AuthenticatedLeadsRouteImport.update({
@@ -88,6 +94,7 @@ export interface FileRoutesByFullPath {
   '/docs': typeof DocsRoute
   '/phone': typeof PhoneRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/analytics': typeof AuthenticatedAnalyticsRoute
   '/leads': typeof AuthenticatedLeadsRoute
   '/api/end-call': typeof ApiEndCallRoute
   '/api/stt': typeof ApiSttRoute
@@ -101,6 +108,7 @@ export interface FileRoutesByTo {
   '/docs': typeof DocsRoute
   '/phone': typeof PhoneRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/analytics': typeof AuthenticatedAnalyticsRoute
   '/leads': typeof AuthenticatedLeadsRoute
   '/api/end-call': typeof ApiEndCallRoute
   '/api/stt': typeof ApiSttRoute
@@ -116,6 +124,7 @@ export interface FileRoutesById {
   '/docs': typeof DocsRoute
   '/phone': typeof PhoneRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/_authenticated/analytics': typeof AuthenticatedAnalyticsRoute
   '/_authenticated/leads': typeof AuthenticatedLeadsRoute
   '/api/end-call': typeof ApiEndCallRoute
   '/api/stt': typeof ApiSttRoute
@@ -131,6 +140,7 @@ export interface FileRouteTypes {
     | '/docs'
     | '/phone'
     | '/admin'
+    | '/analytics'
     | '/leads'
     | '/api/end-call'
     | '/api/stt'
@@ -144,6 +154,7 @@ export interface FileRouteTypes {
     | '/docs'
     | '/phone'
     | '/admin'
+    | '/analytics'
     | '/leads'
     | '/api/end-call'
     | '/api/stt'
@@ -158,6 +169,7 @@ export interface FileRouteTypes {
     | '/docs'
     | '/phone'
     | '/_authenticated/admin'
+    | '/_authenticated/analytics'
     | '/_authenticated/leads'
     | '/api/end-call'
     | '/api/stt'
@@ -223,6 +235,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/analytics': {
+      id: '/_authenticated/analytics'
+      path: '/analytics'
+      fullPath: '/analytics'
+      preLoaderRoute: typeof AuthenticatedAnalyticsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/leads': {
       id: '/_authenticated/leads'
       path: '/leads'
@@ -270,11 +289,13 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedAnalyticsRoute: typeof AuthenticatedAnalyticsRoute
   AuthenticatedLeadsRoute: typeof AuthenticatedLeadsRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedAnalyticsRoute: AuthenticatedAnalyticsRoute,
   AuthenticatedLeadsRoute: AuthenticatedLeadsRoute,
 }
 

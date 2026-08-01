@@ -145,6 +145,7 @@ function Leads() {
   const { data } = useSuspenseQuery(leadsQuery);
   const search = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });
+  const queryClient = useQueryClient();
 
   const setSearch = (patch: Partial<LeadsSearch>) =>
     navigate({ search: (prev: LeadsSearch) => ({ ...prev, ...patch }) });
@@ -153,6 +154,15 @@ function Leads() {
 
   const locations = uniqueSorted(data.leads.map((l) => l.location));
   const budgets = uniqueSorted(data.leads.map((l) => l.budget));
+
+  const refresh = () => queryClient.invalidateQueries({ queryKey: ["leads"] });
+
+  const total = data.calls.length;
+  const hot = data.leads.filter((l) => l.score_band === "hot").length;
+  const qualified = data.leads.filter((l) => !!l.budget && !!l.location).length;
+  const avgScore = data.leads.length
+    ? Math.round(data.leads.reduce((sum, l) => sum + (l.score ?? 0), 0) / data.leads.length)
+    : 0;
 
   const q = search.q.trim().toLowerCase();
   const fromTime = search.from ? new Date(`${search.from}T00:00:00`).getTime() : null;
@@ -164,6 +174,8 @@ function Leads() {
     if (search.location !== ALL && (lead?.location ?? "") !== search.location) return false;
     if (search.budget !== ALL && (lead?.budget ?? "") !== search.budget) return false;
     if (search.band !== ALL && (lead?.score_band ?? "") !== search.band) return false;
+    if (search.status !== ALL && (lead?.status ?? "new") !== search.status) return false;
+
 
     const started = new Date(call.started_at).getTime();
     if (fromTime !== null && started < fromTime) return false;
@@ -274,14 +286,23 @@ function Leads() {
     search.location !== ALL ||
     search.budget !== ALL ||
     search.band !== ALL ||
+    search.status !== ALL ||
     search.sort !== "recent" ||
     !!search.from ||
     !!search.to;
 
   return (
     <Shell>
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <Metric label="Calls handled" value={String(total)} />
+        <Metric label="Hot leads" value={String(hot)} />
+        <Metric label="Fully qualified" value={String(qualified)} />
+        <Metric label="Avg lead score" value={`${avgScore}/100`} />
+      </div>
+
       <Card className="p-5">
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-6">
+
           <div className="lg:col-span-2">
             <Label htmlFor="lead-search" className="text-xs text-muted-foreground">
               Search transcripts &amp; summaries
@@ -343,6 +364,23 @@ function Leads() {
                 <SelectItem value="hot">Hot (70+)</SelectItem>
                 <SelectItem value="warm">Warm (40-69)</SelectItem>
                 <SelectItem value="cold">Cold (&lt;40)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <Label className="text-xs text-muted-foreground">Pipeline status</Label>
+            <Select value={search.status} onValueChange={(v) => setSearch({ status: v })}>
+              <SelectTrigger className="mt-1.5">
+                <SelectValue placeholder="All statuses" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={ALL}>All statuses</SelectItem>
+                {LEAD_STATUSES.map((s) => (
+                  <SelectItem key={s.value} value={s.value}>
+                    {s.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -413,17 +451,8 @@ function Leads() {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() =>
-                setSearch({
-                  q: "",
-                  location: ALL,
-                  budget: ALL,
-                  band: ALL,
-                  sort: "recent",
-                  from: "",
-                  to: "",
-                })
-              }
+              onClick={() => setSearch(leadsDefaultSearch)}
+
             >
               <X className="size-4" /> Clear filters
             </Button>
@@ -520,6 +549,8 @@ function Leads() {
                 </div>
               )}
 
+              {lead && <LeadPipeline lead={lead} onSaved={refresh} />}
+
               {Array.isArray(call.transcript) && call.transcript.length > 0 && (
                 <details className="mt-5">
                   <summary className="cursor-pointer text-sm font-medium">
@@ -567,6 +598,108 @@ function Row({ label, value }: { label: string; value: string | null | undefined
     <div className="flex justify-between gap-3">
       <dt className="text-muted-foreground">{label}</dt>
       <dd className={value ? "font-medium" : "text-muted-foreground/50"}>{value ?? "—"}</dd>
+    </div>
+  );
+}
+
+function Metric({ label, value }: { label: string; value: string }) {
+  return (
+    <Card className="tilt-card p-4">
+      <p className="text-xs uppercase tracking-wide text-muted-foreground">{label}</p>
+      <p className="mt-1 font-serif text-2xl font-semibold">{value}</p>
+    </Card>
+  );
+}
+
+/** Post-call follow-up: status, callback time and private sales notes. */
+function LeadPipeline({ lead, onSaved }: { lead: LeadRow; onSaved: () => void }) {
+  const [status, setStatus] = useState(lead.status ?? "new");
+  const [notes, setNotes] = useState(lead.owner_notes ?? "");
+  const [callback, setCallback] = useState(
+    lead.callback_at ? new Date(lead.callback_at).toISOString().slice(0, 16) : "",
+  );
+  const [busy, setBusy] = useState(false);
+
+  const dirty =
+    status !== (lead.status ?? "new") ||
+    notes !== (lead.owner_notes ?? "") ||
+    callback !== (lead.callback_at ? new Date(lead.callback_at).toISOString().slice(0, 16) : "");
+
+  async function save() {
+    setBusy(true);
+    const { error } = await supabase
+      .from("leads")
+      .update({
+        status,
+        owner_notes: notes.trim() || null,
+        callback_at: callback ? new Date(callback).toISOString() : null,
+      } as never)
+      .eq("id", lead.id);
+    setBusy(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success("Lead updated");
+    onSaved();
+  }
+
+  return (
+    <div className="mt-5 rounded-lg border border-border bg-secondary/30 p-4">
+      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        Follow-up
+      </p>
+      <div className="mt-3 grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+        <div>
+          <Label className="text-xs text-muted-foreground">Status</Label>
+          <Select value={status} onValueChange={setStatus}>
+            <SelectTrigger className="mt-1.5">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {LEAD_STATUSES.map((s) => (
+                <SelectItem key={s.value} value={s.value}>
+                  {s.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label htmlFor={`cb-${lead.id}`} className="text-xs text-muted-foreground">
+            Callback / site visit
+          </Label>
+          <Input
+            id={`cb-${lead.id}`}
+            type="datetime-local"
+            className="mt-1.5"
+            value={callback}
+            onChange={(e) => setCallback(e.target.value)}
+          />
+        </div>
+      </div>
+      <div className="mt-3">
+        <Label htmlFor={`notes-${lead.id}`} className="text-xs text-muted-foreground">
+          Internal notes
+        </Label>
+        <Textarea
+          id={`notes-${lead.id}`}
+          className="mt-1.5"
+          rows={2}
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          placeholder="What the sales team should know before calling back"
+        />
+      </div>
+      <div className="mt-3 flex items-center gap-3">
+        <Button size="sm" onClick={save} disabled={busy || !dirty}>
+          {busy ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
+          Save follow-up
+        </Button>
+        <span className="text-xs text-muted-foreground">
+          Currently: {statusLabel(lead.status)}
+        </span>
+      </div>
     </div>
   );
 }

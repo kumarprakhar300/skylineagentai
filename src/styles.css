@@ -161,3 +161,73 @@
   );
   background-size: 18px 18px;
 }
+
+/* ---- Depth / 3D presentation layer ---- */
+
+@utility scene-3d {
+  perspective: 1400px;
+  perspective-origin: 50% 40%;
+}
+
+@utility tilt-card {
+  transform: perspective(1200px) rotateX(0deg) translateZ(0);
+  transform-style: preserve-3d;
+  transition:
+    transform 400ms cubic-bezier(0.2, 0.7, 0.2, 1),
+    box-shadow 400ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  will-change: transform;
+
+  &:hover {
+    transform: perspective(1200px) rotateX(4deg) rotateY(-4deg) translateY(-4px) translateZ(14px);
+    box-shadow:
+      0 1px 1px oklch(0.2 0.03 158 / 0.06),
+      0 18px 40px -18px oklch(0.2 0.03 158 / 0.35);
+  }
+}
+
+@utility glass-panel {
+  background: color-mix(in oklab, var(--card) 78%, transparent);
+  backdrop-filter: blur(14px) saturate(1.1);
+  border: 1px solid color-mix(in oklab, var(--border) 70%, transparent);
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, white 35%, transparent),
+    0 24px 60px -28px oklch(0.2 0.03 158 / 0.4);
+}
+
+/* Stacked isometric "tower" used as the hero visual. */
+@utility tower {
+  transform-style: preserve-3d;
+  transform: rotateX(58deg) rotateZ(-38deg);
+  animation: tower-float 9s ease-in-out infinite;
+}
+
+@utility tower-slab {
+  transform-style: preserve-3d;
+  border-radius: 0.75rem;
+  border: 1px solid color-mix(in oklab, var(--primary) 28%, transparent);
+  background: linear-gradient(
+    135deg,
+    color-mix(in oklab, var(--primary) 22%, var(--card)),
+    color-mix(in oklab, var(--accent) 26%, var(--card))
+  );
+  box-shadow: 0 22px 40px -26px oklch(0.2 0.03 158 / 0.55);
+}
+
+@keyframes tower-float {
+  0%,
+  100% {
+    transform: rotateX(58deg) rotateZ(-38deg) translate3d(0, 0, 0);
+  }
+  50% {
+    transform: rotateX(54deg) rotateZ(-34deg) translate3d(0, 0, 18px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tower {
+    animation: none;
+  }
+  .tilt-card:hover {
+    transform: none;
+  }
+}
