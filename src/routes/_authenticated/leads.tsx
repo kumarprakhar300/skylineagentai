@@ -504,9 +504,18 @@ function Leads() {
                 <Badge variant="secondary">{call.channel}</Badge>
                 {call.language && <Badge variant="outline">{call.language}</Badge>}
                 {lead && typeof lead.score === "number" && <ScoreBadge lead={lead} />}
+                <Badge variant="outline">{statusLabel(lead?.status)}</Badge>
                 <span className="text-xs text-muted-foreground">
                   {new Date(call.started_at).toLocaleString("en-IN")}
                 </span>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="ml-auto"
+                  onClick={() => setOpenCallId(call.id)}
+                >
+                  <PanelRight className="size-4" /> Open details
+                </Button>
               </div>
 
               <div className="mt-4 grid gap-6 lg:grid-cols-2">
@@ -519,41 +528,35 @@ function Leads() {
                     <Row label="Phone" value={lead?.phone} />
                     <Row label="Buy / invest" value={lead?.intent} />
                     <Row label="Location" value={lead?.location} />
-                    <Row label="Property type" value={lead?.property_type} />
                     <Row label="Configuration" value={lead?.configuration} />
                     <Row label="Budget" value={lead?.budget} />
-                    <Row label="Purpose" value={lead?.purpose} />
                     <Row label="Timeline" value={lead?.timeline} />
-                    <Row
-                      label="Lead score"
-                      value={
-                        typeof lead?.score === "number"
-                          ? `${lead.score}/100 (${lead.score_band ?? "—"})`
-                          : null
-                      }
-                    />
                   </dl>
-                  {lead?.score_reasons && lead.score_reasons.length > 0 && (
-                    <ul className="mt-3 space-y-1 text-xs text-muted-foreground">
-                      {lead.score_reasons.map((reason) => (
-                        <li key={reason}>• {reason}</li>
-                      ))}
-                    </ul>
-                  )}
                 </div>
 
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                     AI call summary
                   </p>
-                  <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed">
+                  <p className="mt-2 line-clamp-6 whitespace-pre-wrap text-sm leading-relaxed">
                     {call.summary || "—"}
                   </p>
+                  <button
+                    type="button"
+                    onClick={() => setOpenCallId(call.id)}
+                    className="mt-3 text-sm font-medium text-primary underline-offset-4 hover:underline"
+                  >
+                    Score signals, follow-up &amp; transcript →
+                  </button>
                 </div>
               </div>
 
               {matchingTurns.length > 0 && (
-                <div className="mt-5 rounded-md border border-border bg-muted/40 p-3">
+                <button
+                  type="button"
+                  onClick={() => setOpenCallId(call.id)}
+                  className="mt-5 block w-full rounded-md border border-border bg-muted/40 p-3 text-left transition-colors hover:bg-muted/70"
+                >
                   <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                     {matchingTurns.length} transcript match
                     {matchingTurns.length === 1 ? "" : "es"}
@@ -568,32 +571,21 @@ function Leads() {
                       </p>
                     ))}
                   </div>
-                </div>
-              )}
-
-              {lead && <LeadPipeline lead={lead} onSaved={refresh} />}
-
-              {Array.isArray(call.transcript) && call.transcript.length > 0 && (
-                <details className="mt-5">
-                  <summary className="cursor-pointer text-sm font-medium">
-                    View transcript ({call.transcript.length} turns)
-                  </summary>
-                  <div className="mt-3 space-y-2 text-sm">
-                    {call.transcript.map((turn, index) => (
-                      <p key={index}>
-                        <span className="font-semibold">
-                          {turn.role === "user" ? "Customer" : "Aarav"}:
-                        </span>{" "}
-                        <span className="text-muted-foreground">{turn.content}</span>
-                      </p>
-                    ))}
-                  </div>
-                </details>
+                </button>
               )}
             </Card>
           );
         })
       )}
+
+      <LeadDetailPanel
+        open={!!openCall}
+        onOpenChange={(next) => setOpenCallId(next ? openCallId : null)}
+        call={openCall ?? null}
+        lead={(openCall && leadByCall.get(openCall.id)) || null}
+        highlight={search.q.trim()}
+        onSaveLead={saveLead}
+      />
     </Shell>
   );
 }
@@ -633,112 +625,3 @@ function Metric({ label, value }: { label: string; value: string }) {
   );
 }
 
-/** Post-call follow-up: status, callback time and private sales notes. */
-function LeadPipeline({ lead, onSaved }: { lead: LeadRow; onSaved: () => void }) {
-  const queryClient = useQueryClient();
-  const [status, setStatus] = useState(lead.status ?? "new");
-  const [notes, setNotes] = useState(lead.owner_notes ?? "");
-  const [callback, setCallback] = useState(
-    lead.callback_at ? new Date(lead.callback_at).toISOString().slice(0, 16) : "",
-  );
-  const [busy, setBusy] = useState(false);
-
-  const dirty =
-    status !== (lead.status ?? "new") ||
-    notes !== (lead.owner_notes ?? "") ||
-    callback !== (lead.callback_at ? new Date(lead.callback_at).toISOString().slice(0, 16) : "");
-
-  async function save() {
-    setBusy(true);
-    const patch = {
-      status,
-      owner_notes: notes.trim() || null,
-      callback_at: callback ? new Date(callback).toISOString() : null,
-    };
-
-    // Optimistic: the badge, metrics and status filter update instantly while
-    // the write is still in flight.
-    const previous = queryClient.getQueryData(leadsQuery.queryKey);
-    queryClient.setQueryData(leadsQuery.queryKey, (current) =>
-      current
-        ? {
-            ...current,
-            leads: current.leads.map((row) => (row.id === lead.id ? { ...row, ...patch } : row)),
-          }
-        : current,
-    );
-
-    const { error } = await supabase
-      .from("leads")
-      .update(patch as never)
-      .eq("id", lead.id);
-    setBusy(false);
-    if (error) {
-      queryClient.setQueryData(leadsQuery.queryKey, previous);
-      toast.error(error.message);
-      return;
-    }
-    toast.success("Lead updated");
-    onSaved();
-  }
-
-
-  return (
-    <div className="mt-5 rounded-lg border border-border bg-secondary/30 p-4">
-      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-        Follow-up
-      </p>
-      <div className="mt-3 grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-        <div>
-          <Label className="text-xs text-muted-foreground">Status</Label>
-          <Select value={status} onValueChange={setStatus}>
-            <SelectTrigger className="mt-1.5">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {LEAD_STATUSES.map((s) => (
-                <SelectItem key={s.value} value={s.value}>
-                  {s.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div>
-          <Label htmlFor={`cb-${lead.id}`} className="text-xs text-muted-foreground">
-            Callback / site visit
-          </Label>
-          <Input
-            id={`cb-${lead.id}`}
-            type="datetime-local"
-            className="mt-1.5"
-            value={callback}
-            onChange={(e) => setCallback(e.target.value)}
-          />
-        </div>
-      </div>
-      <div className="mt-3">
-        <Label htmlFor={`notes-${lead.id}`} className="text-xs text-muted-foreground">
-          Internal notes
-        </Label>
-        <Textarea
-          id={`notes-${lead.id}`}
-          className="mt-1.5"
-          rows={2}
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          placeholder="What the sales team should know before calling back"
-        />
-      </div>
-      <div className="mt-3 flex items-center gap-3">
-        <Button size="sm" onClick={save} disabled={busy || !dirty}>
-          {busy ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
-          Save follow-up
-        </Button>
-        <span className="text-xs text-muted-foreground">
-          Currently: {statusLabel(lead.status)}
-        </span>
-      </div>
-    </div>
-  );
-}
