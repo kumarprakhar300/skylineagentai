@@ -4,6 +4,8 @@ import { agentTurn } from "@/lib/agent/agent-turn.server";
 import { chat } from "@/lib/ai.server";
 import { summaryPrompt, type LeadFields, type Turn } from "@/lib/agent/prompt";
 import { scoreLead, scoreLine } from "@/lib/agent/score";
+import { twilioSignatureIsValid } from "@/lib/twilio-signature.server";
+
 
 const DEVANAGARI = /[\u0900-\u097F]/;
 
@@ -40,10 +42,36 @@ export const Route = createFileRoute("/api/public/twilio/voice")({
     handlers: {
       POST: async ({ request }) => {
         try {
+          const authToken = process.env["TWILIO_AUTH_TOKEN"];
+          if (!authToken) {
+            console.error("[twilio] TWILIO_AUTH_TOKEN is not configured; rejecting webhook");
+            return new Response("Webhook not configured", { status: 503 });
+          }
+
           const form = await request.formData();
+
+          // Verify the request really came from Twilio before touching the DB or paid AI calls.
+          const params: Record<string, string> = {};
+          for (const [key, value] of form.entries()) {
+            if (typeof value === "string") params[key] = value;
+          }
+          const signature = request.headers.get("x-twilio-signature") ?? "";
+          const url = new URL(request.url);
+          url.protocol = "https:";
+          url.port = "";
+          if (!signature || !twilioSignatureIsValid(authToken, url.toString(), params, signature)) {
+            console.warn("[twilio] rejected request with invalid signature");
+            return new Response("Invalid signature", { status: 403 });
+          }
+
           const callSid = String(form.get("CallSid") ?? "");
-          const speech = String(form.get("SpeechResult") ?? "").trim();
-          const fromNumber = String(form.get("From") ?? "").trim();
+          const speech = String(form.get("SpeechResult") ?? "")
+            .trim()
+            .slice(0, 2000);
+          const fromNumber = String(form.get("From") ?? "")
+            .trim()
+            .slice(0, 32);
+
 
           if (!callSid) {
             return twiml(say("Sorry, this call could not be connected."));
