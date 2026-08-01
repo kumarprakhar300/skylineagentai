@@ -1,8 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { leadsDefaultSearch } from "@/lib/leads-search";
-import { ArrowLeft, Phone } from "lucide-react";
+import { Phone } from "lucide-react";
 
+import { PageShell } from "@/components/PageShell";
 import { Card } from "@/components/ui/card";
+import { leadsDefaultSearch } from "@/lib/leads-search";
 
 export const Route = createFileRoute("/phone")({
   head: () => ({
@@ -32,25 +33,20 @@ function PhonePage() {
       : `${window.location.origin}/api/public/twilio/voice`;
 
   return (
-    <main className="min-h-screen bg-background">
-      <div className="mx-auto max-w-3xl px-5 py-10">
-        <Link
-          to="/"
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="size-4" /> Back to the call demo
-        </Link>
-
-        <h1 className="mt-4 flex items-center gap-2 text-3xl font-semibold tracking-tight">
+    <PageShell
+      eyebrow="Channel"
+      title={
+        <span className="flex items-center gap-2">
           <Phone className="size-6 text-primary" /> Phone call demo
-        </h1>
-        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-          The same agent brain also answers real phone calls through Twilio. The webhook below is
-          live in this app — it greets the caller, qualifies the requirement over speech, saves the
-          lead and writes the call summary, exactly like the browser demo.
-        </p>
+        </span>
+      }
+      description="The same agent brain also answers real phone calls through Twilio. The webhook below is live in this app — it greets the caller, qualifies the requirement over speech, saves the lead and writes the call summary, exactly like the browser demo."
+      width="narrow"
+      header={false}
+      backLink
+    >
+        <Card className="panel-3d p-6">
 
-        <Card className="mt-6 p-6">
           <h2 className="text-lg font-semibold">1. Point your Twilio number here</h2>
           <p className="mt-2 text-sm text-muted-foreground">
             In the Twilio Console open <strong>Phone Numbers → your number → Voice</strong>, set
@@ -64,7 +60,7 @@ function PhonePage() {
           </p>
         </Card>
 
-        <Card className="mt-5 p-6">
+        <Card className="panel-3d p-6">
           <h2 className="text-lg font-semibold">2. Call the number</h2>
           <p className="mt-2 text-sm text-muted-foreground">
             Aarav answers, speaks in Hinglish and switches to Hindi or English based on how you
@@ -79,7 +75,7 @@ function PhonePage() {
           </p>
         </Card>
 
-        <Card className="mt-5 border-accent/40 bg-accent/10 p-6">
+        <Card className="panel-3d border-accent/40 bg-accent/10 p-6">
           <h2 className="text-lg font-semibold">Notes for the reviewer</h2>
           <ul className="mt-2 space-y-2 text-sm text-muted-foreground">
             <li>
@@ -97,7 +93,7 @@ function PhonePage() {
             </li>
           </ul>
         </Card>
-      </div>
-    </main>
+    </PageShell>
+
   );
 }

@@ -4,7 +4,7 @@ import { Loader2, Plus, Save, ShieldAlert, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-import { AppHeader } from "@/components/AppHeader";
+import { PageShell } from "@/components/PageShell";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -39,19 +39,17 @@ export const Route = createFileRoute("/_authenticated/admin")({
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
-    <main className="min-h-screen bg-background">
-      <AppHeader />
-      <div className="mx-auto max-w-4xl px-5 py-10">
-        <h1 className="text-3xl font-semibold tracking-tight">Project catalog</h1>
-        <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-          Everything the AI agent knows about the project lives here. Saving updates the agent's
-          knowledge on the very next call — no redeploy needed.
-        </p>
-        <div className="mt-8 space-y-5">{children}</div>
-      </div>
-    </main>
+    <PageShell
+      eyebrow="Knowledge base"
+      title="Project catalog"
+      description="Everything the AI agent knows about the project lives here. Saving updates the agent's knowledge on the very next call — no redeploy needed."
+      width="narrow"
+    >
+      {children}
+    </PageShell>
   );
 }
+
 
 function Admin() {
   const load = useServerFn(loadCatalogForEditing);
@@ -107,7 +105,7 @@ function Admin() {
   if (state === "loading") {
     return (
       <Shell>
-        <Card className="space-y-3 p-6">
+        <Card className="panel-3d space-y-3 p-6">
           <Skeleton className="h-5 w-40" />
           <Skeleton className="h-9 w-full" />
           <Skeleton className="h-9 w-full" />
@@ -120,7 +118,7 @@ function Admin() {
   if (state === "denied") {
     return (
       <Shell>
-        <Card className="max-w-md p-6">
+        <Card className="panel-3d max-w-md p-6">
           <div className="flex items-center gap-2">
             <ShieldAlert className="size-4 text-destructive" />
             <p className="font-medium">Admin access required</p>
@@ -136,8 +134,8 @@ function Admin() {
 
   return (
     <Shell>
-      <Card className="p-6">
-        <h2 className="text-lg font-semibold">Project basics</h2>
+      <Card className="panel-3d p-6">
+        <h2 className="text-lg font-semibold tracking-tight">Project basics</h2>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <Field label="Project name" value={draft.name} onChange={(v) => set("name", v)} />
           <Field label="Developer" value={draft.developer} onChange={(v) => set("developer", v)} />
@@ -174,9 +172,9 @@ function Admin() {
         </div>
       </Card>
 
-      <Card className="p-6">
+      <Card className="panel-3d p-6">
         <div className="flex items-center justify-between gap-3">
-          <h2 className="text-lg font-semibold">Configurations &amp; pricing</h2>
+          <h2 className="text-lg font-semibold tracking-tight">Configurations &amp; pricing</h2>
           <Button
             variant="outline"
             size="sm"
@@ -229,8 +227,8 @@ function Admin() {
         </div>
       </Card>
 
-      <Card className="p-6">
-        <h2 className="text-lg font-semibold">Amenities</h2>
+      <Card className="panel-3d p-6">
+        <h2 className="text-lg font-semibold tracking-tight">Amenities</h2>
         <p className="mt-1 text-xs text-muted-foreground">One amenity per line.</p>
         <Textarea
           className="mt-3"
@@ -241,8 +239,8 @@ function Admin() {
         />
       </Card>
 
-      <Card className="p-6">
-        <h2 className="text-lg font-semibold">Location advantages</h2>
+      <Card className="panel-3d p-6">
+        <h2 className="text-lg font-semibold tracking-tight">Location advantages</h2>
         <p className="mt-1 text-xs text-muted-foreground">One advantage per line.</p>
         <Textarea
           className="mt-3"

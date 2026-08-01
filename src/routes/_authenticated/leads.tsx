@@ -4,7 +4,7 @@ import { Download, Loader2, Save, Search, X } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { AppHeader } from "@/components/AppHeader";
+import { PageShell } from "@/components/PageShell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -102,7 +102,7 @@ export const Route = createFileRoute("/_authenticated/leads")({
   component: Leads,
   pendingComponent: () => (
     <Shell>
-      <Card className="space-y-3 p-6">
+      <Card className="panel-3d space-y-3 p-6">
         <Skeleton className="h-5 w-48" />
         <Skeleton className="h-24 w-full" />
         <Skeleton className="h-24 w-full" />
@@ -111,7 +111,7 @@ export const Route = createFileRoute("/_authenticated/leads")({
   ),
   errorComponent: ({ error }) => (
     <Shell>
-      <Card className="p-6 text-sm">
+      <Card className="panel-3d p-6 text-sm">
         Could not load leads: {error instanceof Error ? error.message : "unknown error"}
       </Card>
     </Shell>
@@ -120,19 +120,16 @@ export const Route = createFileRoute("/_authenticated/leads")({
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
-    <main className="min-h-screen bg-background">
-      <AppHeader />
-      <div className="mx-auto max-w-6xl px-5 py-10">
-        <h1 className="text-3xl font-semibold tracking-tight">Leads &amp; call records</h1>
-        <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-          Every completed call is stored with its transcript, detected language, extracted
-          requirement and AI-written summary.
-        </p>
-        <div className="mt-8 space-y-5">{children}</div>
-      </div>
-    </main>
+    <PageShell
+      eyebrow="Pipeline"
+      title={<>Leads &amp; call records</>}
+      description="Every completed call is stored with its transcript, detected language, extracted requirement and AI-written summary."
+    >
+      {children}
+    </PageShell>
   );
 }
+
 
 
 function uniqueSorted(values: (string | null | undefined)[]): string[] {
@@ -300,7 +297,7 @@ function Leads() {
         <Metric label="Avg lead score" value={`${avgScore}/100`} />
       </div>
 
-      <Card className="p-5">
+      <Card className="panel-3d p-5">
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-6">
 
           <div className="lg:col-span-2">
@@ -462,12 +459,12 @@ function Leads() {
       </Card>
 
       {data.calls.length === 0 ? (
-        <Card className="p-6 text-sm text-muted-foreground">
+        <Card className="panel-3d p-6 text-sm text-muted-foreground">
           No calls recorded yet. Start a call on the demo page and end it — the lead and summary
           will appear here.
         </Card>
       ) : filtered.length === 0 ? (
-        <Card className="p-6 text-sm text-muted-foreground">
+        <Card className="panel-3d p-6 text-sm text-muted-foreground">
           No calls match these filters. Try clearing the search or widening the date range.
         </Card>
       ) : (
@@ -477,7 +474,7 @@ function Leads() {
             ? (call.transcript ?? []).filter((t) => t.content.toLowerCase().includes(q))
             : [];
           return (
-            <Card key={call.id} className="p-6">
+            <Card key={call.id} className="tilt-card panel-3d p-6">
               <div className="flex flex-wrap items-center gap-2">
                 <Badge variant="secondary">{call.channel}</Badge>
                 {call.language && <Badge variant="outline">{call.language}</Badge>}
@@ -604,7 +601,7 @@ function Row({ label, value }: { label: string; value: string | null | undefined
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <Card className="tilt-card p-4">
+    <Card className="tilt-card panel-3d p-4">
       <p className="text-xs uppercase tracking-wide text-muted-foreground">{label}</p>
       <p className="mt-1 font-serif text-2xl font-semibold">{value}</p>
     </Card>

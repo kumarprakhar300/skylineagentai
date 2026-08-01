@@ -194,6 +194,29 @@
     0 24px 60px -28px oklch(0.2 0.03 158 / 0.4);
 }
 
+/* Static depth panel: glass surface with a soft cast shadow, no hover motion. */
+@utility panel-3d {
+  background: color-mix(in oklab, var(--card) 88%, transparent);
+  backdrop-filter: blur(10px) saturate(1.05);
+  border: 1px solid color-mix(in oklab, var(--border) 80%, transparent);
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, white 28%, transparent),
+    0 1px 2px oklch(0.2 0.03 158 / 0.05),
+    0 18px 44px -30px oklch(0.2 0.03 158 / 0.45);
+}
+
+/* Ambient page backdrop used behind every page header. */
+@utility page-aura {
+  pointer-events: none;
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 30rem;
+  background:
+    radial-gradient(60rem 22rem at 15% -6rem, color-mix(in oklab, var(--primary) 12%, transparent), transparent 70%),
+    radial-gradient(40rem 18rem at 90% -4rem, color-mix(in oklab, var(--accent) 12%, transparent), transparent 70%);
+}
+
+
 /* Stacked isometric "tower" used as the hero visual. */
 @utility tower {
   transform-style: preserve-3d;

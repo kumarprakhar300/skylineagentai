@@ -1,6 +1,6 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft } from "lucide-react";
+import { createFileRoute } from "@tanstack/react-router";
 
+import { PageShell } from "@/components/PageShell";
 import { Card } from "@/components/ui/card";
 import { conversationStages } from "@/lib/agent/prompt";
 
@@ -28,20 +28,15 @@ export const Route = createFileRoute("/docs")({
 
 function Docs() {
   return (
-    <main className="min-h-screen bg-background">
-      <div className="mx-auto max-w-3xl px-5 py-10">
-        <Link
-          to="/"
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="size-4" /> Back to the call demo
-        </Link>
+    <PageShell
+      eyebrow="Architecture"
+      title="How it works"
+      description="A single agent brain drives both the browser call and the Twilio phone call. Everything below is implemented in this app."
+      width="narrow"
+      header={false}
+      backLink
+    >
 
-        <h1 className="mt-4 text-3xl font-semibold tracking-tight">How it works</h1>
-        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-          A single agent brain drives both the browser call and the Twilio phone call. Everything
-          below is implemented in this app.
-        </p>
 
         <Section title="Voice loop (browser)">
           <ol className="space-y-2 text-sm text-muted-foreground">
@@ -126,16 +121,16 @@ function Docs() {
             keys stay server-side; the browser only talks to this app's own endpoints.
           </p>
         </Section>
-      </div>
-    </main>
+    </PageShell>
   );
 }
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <Card className="mt-5 p-6">
-      <h2 className="text-lg font-semibold">{title}</h2>
+    <Card className="panel-3d p-6">
+      <h2 className="text-lg font-semibold tracking-tight">{title}</h2>
       <div className="mt-3">{children}</div>
     </Card>
   );
+
 }

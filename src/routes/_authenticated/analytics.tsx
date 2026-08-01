@@ -1,7 +1,7 @@
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 
-import { AppHeader } from "@/components/AppHeader";
+import { PageShell } from "@/components/PageShell";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
@@ -64,7 +64,7 @@ export const Route = createFileRoute("/_authenticated/analytics")({
   ),
   errorComponent: ({ error }) => (
     <Shell>
-      <Card className="p-6 text-sm">
+      <Card className="panel-3d p-6 text-sm">
         Could not load analytics: {error instanceof Error ? error.message : "unknown error"}
       </Card>
     </Shell>
@@ -73,19 +73,16 @@ export const Route = createFileRoute("/_authenticated/analytics")({
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
-    <main className="min-h-screen bg-background">
-      <AppHeader />
-      <div className="mx-auto max-w-6xl px-5 py-10">
-        <h1 className="text-3xl font-semibold tracking-tight">Analytics</h1>
-        <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-          How the AI agent is performing across every call — qualification quality, intent mix and
-          where leads sit in the pipeline.
-        </p>
-        <div className="mt-8 space-y-5">{children}</div>
-      </div>
-    </main>
+    <PageShell
+      eyebrow="Performance"
+      title="Analytics"
+      description="How the AI agent is performing across every call — qualification quality, intent mix and where leads sit in the pipeline."
+    >
+      {children}
+    </PageShell>
   );
 }
+
 
 function count<T>(rows: T[], predicate: (row: T) => boolean) {
   return rows.filter(predicate).length;
@@ -138,18 +135,18 @@ function Analytics() {
       </div>
 
       <div className="grid gap-5 lg:grid-cols-2">
-        <Card className="tilt-card p-6">
-          <h2 className="text-lg font-semibold">Lead score mix</h2>
+        <Card className="tilt-card panel-3d p-6">
+          <h2 className="text-lg font-semibold tracking-tight">Lead score mix</h2>
           <Bars rows={bands} total={leads.length} />
         </Card>
-        <Card className="tilt-card p-6">
-          <h2 className="text-lg font-semibold">Pipeline status</h2>
+        <Card className="tilt-card panel-3d p-6">
+          <h2 className="text-lg font-semibold tracking-tight">Pipeline status</h2>
           <Bars rows={statuses} total={leads.length} />
         </Card>
       </div>
 
-      <Card className="p-6">
-        <h2 className="text-lg font-semibold">Most requested locations</h2>
+      <Card className="panel-3d p-6">
+        <h2 className="text-lg font-semibold tracking-tight">Most requested locations</h2>
         {locations.length === 0 ? (
           <p className="mt-2 text-sm text-muted-foreground">No location data yet.</p>
         ) : (
@@ -165,7 +162,7 @@ function Analytics() {
 
 function Stat({ label, value, sub }: { label: string; value: string; sub: string }) {
   return (
-    <Card className="tilt-card p-4">
+    <Card className="tilt-card panel-3d p-4">
       <p className="text-xs uppercase tracking-wide text-muted-foreground">{label}</p>
       <p className="mt-1 font-serif text-3xl font-semibold">{value}</p>
       <p className="mt-1 text-xs text-muted-foreground">{sub}</p>
