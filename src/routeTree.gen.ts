@@ -13,9 +13,6 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as DocsRouteImport } from './routes/docs'
-import { Route as MobcheckRouteImport } from './routes/mobcheck'
-import { Route as Mobcheck2RouteImport } from './routes/mobcheck2'
-import { Route as Mobcheck3RouteImport } from './routes/mobcheck3'
 import { Route as PhoneRouteImport } from './routes/phone'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authenticated/analytics'
@@ -43,21 +40,6 @@ const AuthRoute = AuthRouteImport.update({
 const DocsRoute = DocsRouteImport.update({
   id: '/docs',
   path: '/docs',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MobcheckRoute = MobcheckRouteImport.update({
-  id: '/mobcheck',
-  path: '/mobcheck',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const Mobcheck2Route = Mobcheck2RouteImport.update({
-  id: '/mobcheck2',
-  path: '/mobcheck2',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const Mobcheck3Route = Mobcheck3RouteImport.update({
-  id: '/mobcheck3',
-  path: '/mobcheck3',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PhoneRoute = PhoneRouteImport.update({
@@ -110,9 +92,6 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/docs': typeof DocsRoute
-  '/mobcheck': typeof MobcheckRoute
-  '/mobcheck2': typeof Mobcheck2Route
-  '/mobcheck3': typeof Mobcheck3Route
   '/phone': typeof PhoneRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/analytics': typeof AuthenticatedAnalyticsRoute
@@ -127,9 +106,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/docs': typeof DocsRoute
-  '/mobcheck': typeof MobcheckRoute
-  '/mobcheck2': typeof Mobcheck2Route
-  '/mobcheck3': typeof Mobcheck3Route
   '/phone': typeof PhoneRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/analytics': typeof AuthenticatedAnalyticsRoute
@@ -146,9 +122,6 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/docs': typeof DocsRoute
-  '/mobcheck': typeof MobcheckRoute
-  '/mobcheck2': typeof Mobcheck2Route
-  '/mobcheck3': typeof Mobcheck3Route
   '/phone': typeof PhoneRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/analytics': typeof AuthenticatedAnalyticsRoute
@@ -165,9 +138,6 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/docs'
-    | '/mobcheck'
-    | '/mobcheck2'
-    | '/mobcheck3'
     | '/phone'
     | '/admin'
     | '/analytics'
@@ -182,9 +152,6 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/docs'
-    | '/mobcheck'
-    | '/mobcheck2'
-    | '/mobcheck3'
     | '/phone'
     | '/admin'
     | '/analytics'
@@ -200,9 +167,6 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/docs'
-    | '/mobcheck'
-    | '/mobcheck2'
-    | '/mobcheck3'
     | '/phone'
     | '/_authenticated/admin'
     | '/_authenticated/analytics'
@@ -219,9 +183,6 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   DocsRoute: typeof DocsRoute
-  MobcheckRoute: typeof MobcheckRoute
-  Mobcheck2Route: typeof Mobcheck2Route
-  Mobcheck3Route: typeof Mobcheck3Route
   PhoneRoute: typeof PhoneRoute
   ApiEndCallRoute: typeof ApiEndCallRoute
   ApiSttRoute: typeof ApiSttRoute
@@ -258,27 +219,6 @@ declare module '@tanstack/react-router' {
       path: '/docs'
       fullPath: '/docs'
       preLoaderRoute: typeof DocsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/mobcheck': {
-      id: '/mobcheck'
-      path: '/mobcheck'
-      fullPath: '/mobcheck'
-      preLoaderRoute: typeof MobcheckRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/mobcheck2': {
-      id: '/mobcheck2'
-      path: '/mobcheck2'
-      fullPath: '/mobcheck2'
-      preLoaderRoute: typeof Mobcheck2RouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/mobcheck3': {
-      id: '/mobcheck3'
-      path: '/mobcheck3'
-      fullPath: '/mobcheck3'
-      preLoaderRoute: typeof Mobcheck3RouteImport
       parentRoute: typeof rootRouteImport
     }
     '/phone': {
@@ -367,9 +307,6 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   DocsRoute: DocsRoute,
-  MobcheckRoute: MobcheckRoute,
-  Mobcheck2Route: Mobcheck2Route,
-  Mobcheck3Route: Mobcheck3Route,
   PhoneRoute: PhoneRoute,
   ApiEndCallRoute: ApiEndCallRoute,
   ApiSttRoute: ApiSttRoute,
@@ -380,3 +317,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
