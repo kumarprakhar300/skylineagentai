@@ -78,42 +78,8 @@ const leadsQuery = queryOptions({
   },
 });
 
-type LeadsSearch = {
-  q: string;
-  band: string;
-  sort: string;
-  location: string;
-  budget: string;
-  from: string;
-  to: string;
-};
-
-const ALL = "all";
-
-export const leadsDefaultSearch: LeadsSearch = {
-  q: "",
-  location: ALL,
-  budget: ALL,
-  band: ALL,
-  sort: "recent",
-  from: "",
-  to: "",
-};
-
-function str(value: unknown): string {
-  return typeof value === "string" ? value : "";
-}
-
 export const Route = createFileRoute("/_authenticated/leads")({
-  validateSearch: (search: Record<string, unknown>): LeadsSearch => ({
-    q: str(search['q']),
-    band: str(search['band']) || ALL,
-    sort: str(search['sort']) === "score" ? "score" : "recent",
-    location: str(search['location']) || ALL,
-    budget: str(search['budget']) || ALL,
-    from: str(search['from']),
-    to: str(search['to']),
-  }),
+  validateSearch: validateLeadsSearch,
   head: () => ({
     meta: [
       { title: "Captured Leads & Call Summaries — Skyline Estates AI Agent" },
@@ -125,14 +91,24 @@ export const Route = createFileRoute("/_authenticated/leads")({
       { property: "og:title", content: "Captured leads & call summaries" },
       {
         property: "og:description",
-        content: "Search transcripts and filter qualified real estate leads by location, budget and date.",
+        content:
+          "Search transcripts and filter qualified real estate leads by location, budget and date.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "robots", content: "noindex" },
     ],
   }),
-  ssr: false,
   component: Leads,
+  pendingComponent: () => (
+    <Shell>
+      <Card className="space-y-3 p-6">
+        <Skeleton className="h-5 w-48" />
+        <Skeleton className="h-24 w-full" />
+        <Skeleton className="h-24 w-full" />
+      </Card>
+    </Shell>
+  ),
   errorComponent: ({ error }) => (
     <Shell>
       <Card className="p-6 text-sm">
@@ -145,14 +121,9 @@ export const Route = createFileRoute("/_authenticated/leads")({
 function Shell({ children }: { children: React.ReactNode }) {
   return (
     <main className="min-h-screen bg-background">
+      <AppHeader />
       <div className="mx-auto max-w-6xl px-5 py-10">
-        <Link
-          to="/"
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="size-4" /> Back to the call demo
-        </Link>
-        <h1 className="mt-4 text-3xl font-semibold tracking-tight">Leads &amp; call records</h1>
+        <h1 className="text-3xl font-semibold tracking-tight">Leads &amp; call records</h1>
         <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
           Every completed call is stored with its transcript, detected language, extracted
           requirement and AI-written summary.
@@ -162,6 +133,7 @@ function Shell({ children }: { children: React.ReactNode }) {
     </main>
   );
 }
+
 
 function uniqueSorted(values: (string | null | undefined)[]): string[] {
   return Array.from(new Set(values.filter((v): v is string => !!v && v.trim() !== ""))).sort((a, b) =>
