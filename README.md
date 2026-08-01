@@ -32,6 +32,16 @@ It runs in two channels from **one shared agent brain**:
 
 ---
 
+## 🔗 Live Demo
+
+- **Live app:** <https://skylineagentai.lovable.app>
+- **Voice demo:** open the live app and click **Start call** (browser mic + speaker)
+- **Phone demo:** follow the [Twilio setup](#live-twilio-phone-call-demo) below, then call your Twilio number
+
+---
+
+
+
 ## What it does
 
 | Capability | Where |
