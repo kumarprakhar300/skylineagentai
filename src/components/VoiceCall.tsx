@@ -175,15 +175,19 @@ export function VoiceCall() {
     setPhase("thinking");
 
     try {
+      const spokenMs = recorder.spokenMs();
       const blob = await recorder.stop();
-      if (blob.size < 4000) {
+      // Too short / silence only: keep listening instead of sending noise to the model.
+      if (blob.size < 8000 || spokenMs < 300) {
         void listenRef.current();
         return;
       }
 
       const form = new FormData();
       form.append("audio", new File([blob], "recording.wav", { type: "audio/wav" }));
+      form.append("language", choiceRef.current);
       const res = await fetch("/api/stt", { method: "POST", body: form });
+
       if (!res.ok) {
         const body = (await res.json().catch(() => ({}))) as { error?: string };
         throw new Error(body.error ?? "Could not understand the audio");
