@@ -71,8 +71,8 @@ function Index() {
             </h1>
             <p className="mt-4 max-w-2xl text-base leading-relaxed text-muted-foreground">
               Aarav greets the customer, finds out whether they want to buy or invest, qualifies
-              location, configuration, budget, purpose and timeline, answers questions about the
-              sample project, then captures the lead and writes a call summary.
+              location, configuration, budget, purpose and timeline, answers questions about any
+              of the five metro-city projects, then captures the lead and writes a call summary.
             </p>
 
             <div className="mt-6 flex flex-wrap gap-2 text-xs">
