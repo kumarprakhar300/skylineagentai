@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { chat, gatewayErrorResponse } from "@/lib/ai.server";
 import { summaryPrompt, type LeadFields, type Turn } from "@/lib/agent/prompt";
+import { cleanSpokenText } from "@/lib/agent/transcript-text";
 import { scoreLead, scoreLine } from "@/lib/agent/score";
 
 type Body = {
@@ -17,7 +18,10 @@ export const Route = createFileRoute("/api/end-call")({
       POST: async ({ request }) => {
         try {
           const body = (await request.json()) as Body;
-          const transcript = Array.isArray(body.transcript) ? body.transcript : [];
+          // Store the same normalised text the caller saw in the live transcript.
+          const transcript = (Array.isArray(body.transcript) ? body.transcript : [])
+            .map((turn) => ({ ...turn, content: cleanSpokenText(turn.content) }))
+            .filter((turn) => turn.content.length > 0);
           if (transcript.length === 0) {
             return Response.json({ error: "Empty transcript" }, { status: 400 });
           }
@@ -27,9 +31,9 @@ export const Route = createFileRoute("/api/end-call")({
 
           let summary = "";
           try {
-            summary = (
-              await chat([{ role: "user", content: summaryPrompt(transcript) }])
-            ).trim();
+            summary = cleanSpokenText(
+              await chat([{ role: "user", content: summaryPrompt(transcript) }]),
+            );
           } catch (error) {
             console.error("[end-call] summary failed", error);
             summary = "Summary could not be generated for this call.";
