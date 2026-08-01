@@ -25,7 +25,7 @@ type Phase = "idle" | "connecting" | "speaking" | "listening" | "thinking" | "sa
 const phaseLabel: Record<Phase, string> = {
   idle: "Ready to call",
   connecting: "Connecting…",
-  speaking: "Aarav is speaking",
+  speaking: "Agent is speaking",
   listening: "Listening — please speak",
   thinking: "Thinking…",
   saving: "Wrapping up the call",
@@ -364,7 +364,7 @@ export function VoiceCall() {
               )}
             </span>
             <div>
-              <p className="text-sm font-semibold">Aarav · Skyline Estates</p>
+              <p className="text-sm font-semibold">Agent · Skyline Estates</p>
               <p className="text-xs text-muted-foreground">
                 {phaseLabel[phase]} · AGENT
               </p>
@@ -429,7 +429,7 @@ export function VoiceCall() {
             <div className="mx-auto max-w-sm pt-16 text-center text-sm text-muted-foreground">
               <p>
                 Pick the language you will speak, press{" "}
-                <span className="font-semibold text-foreground">Start call</span>, and Aarav answers
+                <span className="font-semibold text-foreground">Start call</span>, and the agent answers
                 out loud while the transcript appears here.
               </p>
               <p className="mt-2 text-xs">
@@ -471,7 +471,7 @@ export function VoiceCall() {
           ))}
           {phase === "thinking" && (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Loader2 className="size-4 animate-spin" /> Aarav is thinking…
+              <Loader2 className="size-4 animate-spin" /> Agent is thinking…
             </div>
           )}
         </div>

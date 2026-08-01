@@ -72,7 +72,7 @@ function Index() {
               <span className="text-primary">Hindi, Hinglish, English.</span>
             </h1>
             <p className="mt-4 max-w-2xl text-base leading-relaxed text-muted-foreground">
-              Aarav greets the customer, finds out whether they want to buy or invest, qualifies
+              The agent greets the customer, finds out whether they want to buy or invest, qualifies
               location, configuration, budget, purpose and timeline, answers questions about any
               of the five metro-city projects, then captures the lead and writes a call summary.
             </p>
@@ -129,7 +129,7 @@ function Index() {
               {projects.length} projects across {cityCount} metro cities
             </h2>
             <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-              Aarav matches the customer's city first, then pitches the benefits that matter to
+              The agent matches the customer's city first, then pitches the benefits that matter to
               them — entry price, possession date, commute and rental potential. Every figure below
               is demo data and is quoted as indicative on the call.
             </p>
@@ -207,7 +207,7 @@ function Index() {
           <ProjectMap projects={projects} />
           <p className="mt-2 text-xs text-muted-foreground">
             Pick a city to see the exact site location, switch to satellite or street view, and open
-            turn-by-turn directions — the same address Aarav quotes on the call.
+            turn-by-turn directions — the same address the agent quotes on the call.
           </p>
         </div>
       </section>

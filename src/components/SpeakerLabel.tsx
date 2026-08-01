@@ -6,11 +6,11 @@ type Role = "user" | "assistant" | string;
 
 /** Display identity for each side of the conversation. */
 export function speakerName(role: Role): string {
-  return role === "user" ? "Customer" : "Agent · Aarav";
+  return role === "user" ? "Customer" : "Agent";
 }
 
 export function speakerShortName(role: Role): string {
-  return role === "user" ? "Customer" : "Aarav";
+  return role === "user" ? "Customer" : "Agent";
 }
 
 /**
