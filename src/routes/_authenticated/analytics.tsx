@@ -38,7 +38,10 @@ const analyticsQuery = queryOptions({
       calls: (calls.data ?? []) as { id: string; channel: string; status: string }[],
     };
   },
+  // Charts render from cache on re-entry and refresh quietly behind the scenes.
+  staleTime: 30_000,
 });
+
 
 export const Route = createFileRoute("/_authenticated/analytics")({
   head: () => ({
