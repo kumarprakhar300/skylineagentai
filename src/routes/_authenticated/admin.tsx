@@ -4,7 +4,7 @@ import { Loader2, Plus, Save, ShieldAlert, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-import { AppHeader } from "@/components/AppHeader";
+import { PageShell } from "@/components/PageShell";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
