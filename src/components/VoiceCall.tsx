@@ -233,7 +233,7 @@ export function VoiceCall() {
         error instanceof Error ? error.message : "Could not start the call. Allow microphone access.",
       );
     }
-  }, [runAgentTurn]);
+  }, [choice, runAgentTurn]);
 
   const endCall = useCallback(async () => {
     if (!activeRef.current) return;
