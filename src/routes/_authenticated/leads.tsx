@@ -635,6 +635,7 @@ function Metric({ label, value }: { label: string; value: string }) {
 
 /** Post-call follow-up: status, callback time and private sales notes. */
 function LeadPipeline({ lead, onSaved }: { lead: LeadRow; onSaved: () => void }) {
+  const queryClient = useQueryClient();
   const [status, setStatus] = useState(lead.status ?? "new");
   const [notes, setNotes] = useState(lead.owner_notes ?? "");
   const [callback, setCallback] = useState(
@@ -649,22 +650,38 @@ function LeadPipeline({ lead, onSaved }: { lead: LeadRow; onSaved: () => void })
 
   async function save() {
     setBusy(true);
+    const patch = {
+      status,
+      owner_notes: notes.trim() || null,
+      callback_at: callback ? new Date(callback).toISOString() : null,
+    };
+
+    // Optimistic: the badge, metrics and status filter update instantly while
+    // the write is still in flight.
+    const previous = queryClient.getQueryData(leadsQuery.queryKey);
+    queryClient.setQueryData(leadsQuery.queryKey, (current) =>
+      current
+        ? {
+            ...current,
+            leads: current.leads.map((row) => (row.id === lead.id ? { ...row, ...patch } : row)),
+          }
+        : current,
+    );
+
     const { error } = await supabase
       .from("leads")
-      .update({
-        status,
-        owner_notes: notes.trim() || null,
-        callback_at: callback ? new Date(callback).toISOString() : null,
-      } as never)
+      .update(patch as never)
       .eq("id", lead.id);
     setBusy(false);
     if (error) {
+      queryClient.setQueryData(leadsQuery.queryKey, previous);
       toast.error(error.message);
       return;
     }
     toast.success("Lead updated");
     onSaved();
   }
+
 
   return (
     <div className="mt-5 rounded-lg border border-border bg-secondary/30 p-4">
