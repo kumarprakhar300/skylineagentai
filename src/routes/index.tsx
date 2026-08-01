@@ -3,7 +3,9 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Database, FileText, Languages, ShieldCheck, Sparkles } from "lucide-react";
 
 import { AppHeader } from "@/components/AppHeader";
+import { ProjectMap } from "@/components/ProjectMap";
 import { VoiceCall } from "@/components/VoiceCall";
+
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { getProjectCatalog } from "@/lib/catalog.functions";
