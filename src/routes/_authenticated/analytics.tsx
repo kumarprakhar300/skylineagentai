@@ -73,19 +73,16 @@ export const Route = createFileRoute("/_authenticated/analytics")({
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
-    <main className="min-h-screen bg-background">
-      <AppHeader />
-      <div className="mx-auto max-w-6xl px-5 py-10">
-        <h1 className="text-3xl font-semibold tracking-tight">Analytics</h1>
-        <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-          How the AI agent is performing across every call — qualification quality, intent mix and
-          where leads sit in the pipeline.
-        </p>
-        <div className="mt-8 space-y-5">{children}</div>
-      </div>
-    </main>
+    <PageShell
+      eyebrow="Performance"
+      title="Analytics"
+      description="How the AI agent is performing across every call — qualification quality, intent mix and where leads sit in the pipeline."
+    >
+      {children}
+    </PageShell>
   );
 }
+
 
 function count<T>(rows: T[], predicate: (row: T) => boolean) {
   return rows.filter(predicate).length;
