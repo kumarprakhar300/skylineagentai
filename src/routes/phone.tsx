@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { leadsDefaultSearch } from "@/routes/leads";
+import { leadsDefaultSearch } from "@/lib/leads-search";
 import { ArrowLeft, Phone } from "lucide-react";
 
 import { Card } from "@/components/ui/card";

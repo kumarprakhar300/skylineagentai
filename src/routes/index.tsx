@@ -1,6 +1,6 @@
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { leadsDefaultSearch } from "@/routes/leads";
+import { leadsDefaultSearch } from "@/lib/leads-search";
 import { Building2, Database, FileText, Languages, ShieldCheck, Sparkles } from "lucide-react";
 
 import { VoiceCall } from "@/components/VoiceCall";
