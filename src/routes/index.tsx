@@ -53,27 +53,63 @@ function Index() {
       <AppHeader />
 
 
-      <section className="mx-auto max-w-6xl px-5 pt-12">
-        <Badge variant="secondary" className="gap-1.5">
-          <Sparkles className="size-3.5" /> Live browser voice demo
-        </Badge>
-        <h1 className="mt-4 max-w-3xl text-4xl font-semibold leading-[1.1] tracking-tight sm:text-5xl">
-          An AI real estate sales executive that actually talks —{" "}
-          <span className="text-primary">Hindi, Hinglish, English.</span>
-        </h1>
-        <p className="mt-4 max-w-2xl text-base leading-relaxed text-muted-foreground">
-          Aarav greets the customer, finds out whether they want to buy or invest, qualifies
-          location, configuration, budget, purpose and timeline, answers questions about the sample
-          project, then captures the lead and writes a call summary.
-        </p>
+      <section className="scene-3d relative overflow-hidden">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -right-24 top-10 size-[26rem] rounded-full bg-primary/10 blur-3xl"
+        />
+        <div className="mx-auto grid max-w-6xl items-center gap-10 px-5 pt-12 lg:grid-cols-[1.15fr_0.85fr]">
+          <div>
+            <Badge variant="secondary" className="gap-1.5">
+              <Sparkles className="size-3.5" /> Live browser voice demo
+            </Badge>
+            <h1 className="mt-4 max-w-3xl text-4xl font-semibold leading-[1.1] tracking-tight sm:text-5xl">
+              An AI real estate sales executive that actually talks —{" "}
+              <span className="text-primary">Hindi, Hinglish, English.</span>
+            </h1>
+            <p className="mt-4 max-w-2xl text-base leading-relaxed text-muted-foreground">
+              Aarav greets the customer, finds out whether they want to buy or invest, qualifies
+              location, configuration, budget, purpose and timeline, answers questions about the
+              sample project, then captures the lead and writes a call summary.
+            </p>
 
-        <div className="mt-6 flex flex-wrap gap-2 text-xs">
-          <Feature icon={<Languages className="size-3.5" />}>Mirrors the caller's language</Feature>
-          <Feature icon={<Database className="size-3.5" />}>Every lead stored in the database</Feature>
-          <Feature icon={<FileText className="size-3.5" />}>AI call summary on hang-up</Feature>
-          <Feature icon={<ShieldCheck className="size-3.5" />}>No guaranteed-return claims</Feature>
+            <div className="mt-6 flex flex-wrap gap-2 text-xs">
+              <Feature icon={<Languages className="size-3.5" />}>
+                Mirrors the caller's language
+              </Feature>
+              <Feature icon={<Database className="size-3.5" />}>
+                Every lead stored in the database
+              </Feature>
+              <Feature icon={<FileText className="size-3.5" />}>AI call summary on hang-up</Feature>
+              <Feature icon={<ShieldCheck className="size-3.5" />}>
+                No guaranteed-return claims
+              </Feature>
+            </div>
+          </div>
+
+          <div aria-hidden="true" className="hidden justify-center lg:flex">
+            <div className="tower grid gap-4">
+              {[
+                { w: "13rem", h: "8rem", z: "0px", o: "0.95" },
+                { w: "15rem", h: "9rem", z: "42px", o: "0.8" },
+                { w: "11rem", h: "7rem", z: "84px", o: "0.65" },
+              ].map((slab, index) => (
+                <div
+                  key={index}
+                  className="tower-slab"
+                  style={{
+                    width: slab.w,
+                    height: slab.h,
+                    opacity: slab.o,
+                    transform: `translateZ(${slab.z})`,
+                  }}
+                />
+              ))}
+            </div>
+          </div>
         </div>
       </section>
+
 
       <section className="mx-auto max-w-6xl px-5 py-10">
         <VoiceCall />
