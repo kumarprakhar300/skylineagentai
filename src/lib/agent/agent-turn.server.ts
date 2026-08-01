@@ -75,7 +75,13 @@ export async function agentTurn(
 
   return {
     reply,
-    language: typeof parsed.language === "string" ? parsed.language : "hinglish",
+    language:
+      preferredLanguage !== "auto"
+        ? preferredLanguage
+        : typeof parsed.language === "string"
+          ? parsed.language
+          : "hinglish",
+
     lead,
     shouldEnd: parsed.should_end === true,
   };
