@@ -64,7 +64,7 @@ export const Route = createFileRoute("/_authenticated/analytics")({
   ),
   errorComponent: ({ error }) => (
     <Shell>
-      <Card className="p-6 text-sm">
+      <Card className="panel-3d p-6 text-sm">
         Could not load analytics: {error instanceof Error ? error.message : "unknown error"}
       </Card>
     </Shell>
@@ -135,17 +135,17 @@ function Analytics() {
       </div>
 
       <div className="grid gap-5 lg:grid-cols-2">
-        <Card className="tilt-card p-6">
+        <Card className="tilt-card panel-3d p-6">
           <h2 className="text-lg font-semibold">Lead score mix</h2>
           <Bars rows={bands} total={leads.length} />
         </Card>
-        <Card className="tilt-card p-6">
+        <Card className="tilt-card panel-3d p-6">
           <h2 className="text-lg font-semibold">Pipeline status</h2>
           <Bars rows={statuses} total={leads.length} />
         </Card>
       </div>
 
-      <Card className="p-6">
+      <Card className="panel-3d p-6">
         <h2 className="text-lg font-semibold">Most requested locations</h2>
         {locations.length === 0 ? (
           <p className="mt-2 text-sm text-muted-foreground">No location data yet.</p>
@@ -162,7 +162,7 @@ function Analytics() {
 
 function Stat({ label, value, sub }: { label: string; value: string; sub: string }) {
   return (
-    <Card className="tilt-card p-4">
+    <Card className="tilt-card panel-3d p-4">
       <p className="text-xs uppercase tracking-wide text-muted-foreground">{label}</p>
       <p className="mt-1 font-serif text-3xl font-semibold">{value}</p>
       <p className="mt-1 text-xs text-muted-foreground">{sub}</p>

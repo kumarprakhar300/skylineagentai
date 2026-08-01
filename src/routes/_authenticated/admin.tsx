@@ -105,7 +105,7 @@ function Admin() {
   if (state === "loading") {
     return (
       <Shell>
-        <Card className="space-y-3 p-6">
+        <Card className="panel-3d space-y-3 p-6">
           <Skeleton className="h-5 w-40" />
           <Skeleton className="h-9 w-full" />
           <Skeleton className="h-9 w-full" />
@@ -118,7 +118,7 @@ function Admin() {
   if (state === "denied") {
     return (
       <Shell>
-        <Card className="max-w-md p-6">
+        <Card className="panel-3d max-w-md p-6">
           <div className="flex items-center gap-2">
             <ShieldAlert className="size-4 text-destructive" />
             <p className="font-medium">Admin access required</p>
@@ -134,7 +134,7 @@ function Admin() {
 
   return (
     <Shell>
-      <Card className="p-6">
+      <Card className="panel-3d p-6">
         <h2 className="text-lg font-semibold">Project basics</h2>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <Field label="Project name" value={draft.name} onChange={(v) => set("name", v)} />
@@ -172,7 +172,7 @@ function Admin() {
         </div>
       </Card>
 
-      <Card className="p-6">
+      <Card className="panel-3d p-6">
         <div className="flex items-center justify-between gap-3">
           <h2 className="text-lg font-semibold">Configurations &amp; pricing</h2>
           <Button
@@ -227,7 +227,7 @@ function Admin() {
         </div>
       </Card>
 
-      <Card className="p-6">
+      <Card className="panel-3d p-6">
         <h2 className="text-lg font-semibold">Amenities</h2>
         <p className="mt-1 text-xs text-muted-foreground">One amenity per line.</p>
         <Textarea
@@ -239,7 +239,7 @@ function Admin() {
         />
       </Card>
 
-      <Card className="p-6">
+      <Card className="panel-3d p-6">
         <h2 className="text-lg font-semibold">Location advantages</h2>
         <p className="mt-1 text-xs text-muted-foreground">One advantage per line.</p>
         <Textarea

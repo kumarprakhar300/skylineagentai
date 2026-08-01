@@ -102,7 +102,7 @@ export const Route = createFileRoute("/_authenticated/leads")({
   component: Leads,
   pendingComponent: () => (
     <Shell>
-      <Card className="space-y-3 p-6">
+      <Card className="panel-3d space-y-3 p-6">
         <Skeleton className="h-5 w-48" />
         <Skeleton className="h-24 w-full" />
         <Skeleton className="h-24 w-full" />
@@ -111,7 +111,7 @@ export const Route = createFileRoute("/_authenticated/leads")({
   ),
   errorComponent: ({ error }) => (
     <Shell>
-      <Card className="p-6 text-sm">
+      <Card className="panel-3d p-6 text-sm">
         Could not load leads: {error instanceof Error ? error.message : "unknown error"}
       </Card>
     </Shell>
@@ -297,7 +297,7 @@ function Leads() {
         <Metric label="Avg lead score" value={`${avgScore}/100`} />
       </div>
 
-      <Card className="p-5">
+      <Card className="panel-3d p-5">
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-6">
 
           <div className="lg:col-span-2">
@@ -459,12 +459,12 @@ function Leads() {
       </Card>
 
       {data.calls.length === 0 ? (
-        <Card className="p-6 text-sm text-muted-foreground">
+        <Card className="panel-3d p-6 text-sm text-muted-foreground">
           No calls recorded yet. Start a call on the demo page and end it — the lead and summary
           will appear here.
         </Card>
       ) : filtered.length === 0 ? (
-        <Card className="p-6 text-sm text-muted-foreground">
+        <Card className="panel-3d p-6 text-sm text-muted-foreground">
           No calls match these filters. Try clearing the search or widening the date range.
         </Card>
       ) : (
@@ -601,7 +601,7 @@ function Row({ label, value }: { label: string; value: string | null | undefined
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <Card className="tilt-card p-4">
+    <Card className="tilt-card panel-3d p-4">
       <p className="text-xs uppercase tracking-wide text-muted-foreground">{label}</p>
       <p className="mt-1 font-serif text-2xl font-semibold">{value}</p>
     </Card>
