@@ -76,7 +76,11 @@ const leadsQuery = queryOptions({
       calls: (calls.data ?? []) as unknown as CallRow[],
     };
   },
+  // Filtering/sorting happens in the URL, so returning to the dashboard should
+  // paint instantly from cache and revalidate in the background.
+  staleTime: 30_000,
 });
+
 
 export const Route = createFileRoute("/_authenticated/leads")({
   validateSearch: validateLeadsSearch,
