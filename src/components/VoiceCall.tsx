@@ -313,13 +313,35 @@ export function VoiceCall() {
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-2">
+          <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
             {phase === "idle" || phase === "ended" ? (
-              <Button onClick={() => void startCall()} className="gap-2">
-                <PhoneCall className="size-4" />
-                {phase === "ended" ? "Start a fresh call" : "Start call"}
-              </Button>
+              <>
+                <Select
+                  value={choice}
+                  onValueChange={(value) => setChoice(value as SpokenLanguage)}
+                >
+                  <SelectTrigger
+                    aria-label="Language you will speak"
+                    className="h-9 w-full min-w-[10.5rem] gap-2 sm:w-auto"
+                  >
+                    <Languages className="size-4 shrink-0 text-muted-foreground" />
+                    <SelectValue placeholder="Language" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {languageOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button onClick={() => void startCall()} className="w-full gap-2 sm:w-auto">
+                  <PhoneCall className="size-4" />
+                  {phase === "ended" ? "Start a fresh call" : "Start call"}
+                </Button>
+              </>
             ) : (
+
               <>
                 {phase === "speaking" && (
                   <Button variant="secondary" onClick={interrupt} className="gap-2">
