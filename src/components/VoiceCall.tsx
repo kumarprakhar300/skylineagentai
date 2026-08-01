@@ -112,7 +112,9 @@ export function VoiceCall() {
         body: JSON.stringify({
           history: transcriptRef.current,
           userText,
+          language: choiceRef.current,
         }),
+
       });
       if (!res.ok) {
         const body = (await res.json().catch(() => ({}))) as { error?: string };
