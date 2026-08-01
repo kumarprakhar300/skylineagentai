@@ -1,11 +1,22 @@
+// Values starting with these characters are treated as formulas by Excel / Sheets.
+const FORMULA_PREFIX = /^[=+\-@\t\r]/;
+
 function cell(value: unknown): string {
-  const text =
+  let text =
     value === null || value === undefined
       ? ""
       : Array.isArray(value)
         ? value.join(" | ")
         : String(value);
-  return `"${text.replace(/"/g, '""').replace(/\r?\n/g, " ")}"`;
+
+  text = text.replace(/"/g, '""').replace(/\r?\n/g, " ");
+
+  // Neutralise CSV formula injection so exported leads can't run code in a spreadsheet.
+  if (FORMULA_PREFIX.test(text)) {
+    text = `'${text}`;
+  }
+
+  return `"${text}"`;
 }
 
 export function toCsv(headers: string[], rows: unknown[][]): string {
