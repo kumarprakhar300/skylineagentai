@@ -120,7 +120,7 @@ export const Scene4: React.FC = () => {
 
       <Sequence from={118}>
         <Body size={26} style={{ marginTop: 34 }}>
-          Confidence-scored transcript \u00b7 Devanagari-safe punctuation \u00b7 tap to re-transcribe
+          Confidence-scored transcript · Devanagari-safe punctuation · tap to re-transcribe
         </Body>
       </Sequence>
     </AbsoluteFill>

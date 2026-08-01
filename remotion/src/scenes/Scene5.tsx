@@ -25,7 +25,7 @@ export const Scene5: React.FC = () => {
             Web voice demo
           </div>
           <div style={{ marginTop: 30, display: "flex", flexDirection: "column", gap: 18 }}>
-            {["Pick language \u00b7 Start call", "Silence detection + barge-in", "Live transcript on screen"].map(
+            {["Pick language · Start call", "Silence detection + barge-in", "Live transcript on screen"].map(
               (s, i) => {
                 const p = spring({ frame: frame - (26 + i * 8), fps, config: { damping: 200 } });
                 return (
@@ -42,7 +42,7 @@ export const Scene5: React.FC = () => {
                       color: `${C.cream}dd`,
                     }}
                   >
-                    <span style={{ color: C.goldSoft, fontSize: 22 }}>\u25c6</span>
+                    <span style={{ color: C.goldSoft, fontSize: 22 }}>◆</span>
                     {s}
                   </div>
                 );
@@ -63,7 +63,7 @@ export const Scene5: React.FC = () => {
               color: C.goldSoft,
             }}
           >
-            Ready to call \u00b7 AGENT
+            Ready to call · AGENT
           </div>
         </Panel>
 
@@ -97,7 +97,7 @@ export const Scene5: React.FC = () => {
                 boxShadow: `0 0 40px -8px ${C.gold}77`,
               }}
             >
-              \u260e
+              ☎
             </div>
             <div style={{ fontFamily: "Manrope", fontSize: 27, color: `${C.cream}dd`, lineHeight: 1.5 }}>
               Signed webhook \u2192 Polly voice
@@ -115,7 +115,7 @@ export const Scene5: React.FC = () => {
               color: `${C.cream}88`,
             }}
           >
-            /api/twilio/voice \u00b7 /api/end-call \u00b7 shared agent brain
+            /api/twilio/voice · /api/end-call · shared agent brain
           </div>
         </Panel>
       </div>
