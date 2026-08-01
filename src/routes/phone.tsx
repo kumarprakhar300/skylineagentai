@@ -1,8 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { leadsDefaultSearch } from "@/lib/leads-search";
-import { ArrowLeft, Phone } from "lucide-react";
+import { Phone } from "lucide-react";
 
+import { PageShell } from "@/components/PageShell";
 import { Card } from "@/components/ui/card";
+import { leadsDefaultSearch } from "@/lib/leads-search";
 
 export const Route = createFileRoute("/phone")({
   head: () => ({
