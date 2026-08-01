@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
+import { cn } from "@/lib/utils";
 import type { Turn } from "@/lib/agent/prompt";
 
 type LeadRow = {
@@ -456,6 +457,23 @@ function Leads() {
         })
       )}
     </Shell>
+  );
+}
+
+function ScoreBadge({ lead }: { lead: LeadRow }) {
+  const band = lead.score_band ?? "cold";
+  return (
+    <Badge
+      className={cn(
+        "border",
+        band === "hot" && "border-transparent bg-primary text-primary-foreground",
+        band === "warm" && "border-transparent bg-accent text-accent-foreground",
+        band === "cold" && "bg-muted text-muted-foreground",
+      )}
+    >
+      {band === "hot" ? "🔥 " : ""}
+      {band.charAt(0).toUpperCase() + band.slice(1)} · {lead.score}/100
+    </Badge>
   );
 }
 
