@@ -70,6 +70,9 @@ export type Database = {
           phone: string | null
           property_type: string | null
           purpose: string | null
+          score: number
+          score_band: string
+          score_reasons: Json
           timeline: string | null
           updated_at: string
         }
@@ -86,6 +89,9 @@ export type Database = {
           phone?: string | null
           property_type?: string | null
           purpose?: string | null
+          score?: number
+          score_band?: string
+          score_reasons?: Json
           timeline?: string | null
           updated_at?: string
         }
@@ -102,6 +108,9 @@ export type Database = {
           phone?: string | null
           property_type?: string | null
           purpose?: string | null
+          score?: number
+          score_band?: string
+          score_reasons?: Json
           timeline?: string | null
           updated_at?: string
         }
