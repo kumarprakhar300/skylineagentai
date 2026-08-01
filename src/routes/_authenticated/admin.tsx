@@ -105,15 +105,11 @@ function Admin() {
   if (state === "loading") {
     return (
       <Shell>
-        <Card className="panel-3d space-y-3 p-6">
-          <Skeleton className="h-5 w-40" />
-          <Skeleton className="h-9 w-full" />
-          <Skeleton className="h-9 w-full" />
-          <Skeleton className="h-9 w-2/3" />
-        </Card>
+        <CatalogFormSkeleton />
       </Shell>
     );
   }
+
 
   if (state === "denied") {
     return (
