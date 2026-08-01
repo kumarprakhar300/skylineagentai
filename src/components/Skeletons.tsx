@@ -25,12 +25,20 @@ export function FilterBarSkeleton() {
           <Skeleton className="h-3 w-40" />
           <Skeleton className="mt-2 h-9 w-full" />
         </div>
-        {Array.from({ length: 5 }).map((_, index) => (
+        {Array.from({ length: 3 }).map((_, index) => (
           <div key={index}>
             <Skeleton className="h-3 w-20" />
             <Skeleton className="mt-2 h-9 w-full" />
           </div>
         ))}
+        <div className="grid grid-cols-2 gap-2">
+          {Array.from({ length: 2 }).map((_, index) => (
+            <div key={index}>
+              <Skeleton className="h-3 w-10" />
+              <Skeleton className="mt-2 h-9 w-full" />
+            </div>
+          ))}
+        </div>
       </div>
       <div className="mt-4 flex items-center justify-between gap-3">
         <Skeleton className="h-3 w-32" />
