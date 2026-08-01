@@ -626,9 +626,7 @@ function Leads() {
                   <div className="mt-2 space-y-1.5 text-sm">
                     {matchingTurns.slice(0, 3).map((turn, index) => (
                       <p key={index}>
-                        <span className="font-semibold">
-                          {turn.role === "user" ? "Customer" : "Aarav"}:
-                        </span>{" "}
+                        <span className="font-semibold">{speakerShortName(turn.role)}:</span>{" "}
                         <span className="text-muted-foreground">{turn.content}</span>
                       </p>
                     ))}
