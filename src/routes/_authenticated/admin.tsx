@@ -1,16 +1,18 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { ArrowLeft, Loader2, Lock, Plus, Save, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { Loader2, Plus, Save, ShieldAlert, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
+import { AppHeader } from "@/components/AppHeader";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { defaultProject, type Configuration, type ProjectCatalog } from "@/lib/agent/project";
-import { saveProjectCatalog, unlockProjectCatalog } from "@/lib/catalog.functions";
+import { loadCatalogForEditing, saveProjectCatalog } from "@/lib/catalog.functions";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
@@ -19,33 +21,28 @@ export const Route = createFileRoute("/_authenticated/admin")({
       {
         name: "description",
         content:
-          "Passcode-protected admin editor for the demo real estate catalog: amenities, configurations, pricing and possession timeline — updated live without redeploying.",
+          "Admin editor for the demo real estate catalog: amenities, configurations, pricing and possession timeline — updated live without redeploying.",
       },
       { property: "og:title", content: "Edit the project catalog" },
       {
         property: "og:description",
-        content: "Update the AI calling agent's project knowledge — pricing, configurations, amenities and possession — instantly.",
+        content:
+          "Update the AI calling agent's project knowledge — pricing, configurations, amenities and possession — instantly.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "robots", content: "noindex" },
     ],
   }),
-  ssr: false,
   component: Admin,
 });
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
     <main className="min-h-screen bg-background">
+      <AppHeader />
       <div className="mx-auto max-w-4xl px-5 py-10">
-        <Link
-          to="/"
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="size-4" /> Back to the call demo
-        </Link>
-        <h1 className="mt-4 text-3xl font-semibold tracking-tight">Project catalog</h1>
+        <h1 className="text-3xl font-semibold tracking-tight">Project catalog</h1>
         <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
           Everything the AI agent knows about the project lives here. Saving updates the agent's
           knowledge on the very next call — no redeploy needed.
@@ -57,36 +54,35 @@ function Shell({ children }: { children: React.ReactNode }) {
 }
 
 function Admin() {
-  const unlock = useServerFn(unlockProjectCatalog);
+  const load = useServerFn(loadCatalogForEditing);
   const save = useServerFn(saveProjectCatalog);
 
-  const [passcode, setPasscode] = useState("");
-  const [unlocked, setUnlocked] = useState(false);
+  const [state, setState] = useState<"loading" | "ready" | "denied">("loading");
   const [busy, setBusy] = useState(false);
   const [draft, setDraft] = useState<ProjectCatalog>(defaultProject);
 
-  async function handleUnlock(event: React.FormEvent) {
-    event.preventDefault();
-    setBusy(true);
-    try {
-      const result = await unlock({ data: { passcode } });
-      if (!result.ok) {
-        toast.error("Incorrect passcode");
-        return;
-      }
-      setDraft(result.catalog);
-      setUnlocked(true);
-    } catch {
-      toast.error("Could not verify the passcode");
-    } finally {
-      setBusy(false);
-    }
-  }
+  useEffect(() => {
+    let active = true;
+    void load({ data: undefined })
+      .then((result) => {
+        if (!active) return;
+        if (!result.ok) {
+          setState("denied");
+          return;
+        }
+        setDraft(result.catalog);
+        setState("ready");
+      })
+      .catch(() => active && setState("denied"));
+    return () => {
+      active = false;
+    };
+  }, [load]);
 
   async function handleSave() {
     setBusy(true);
     try {
-      const result = await save({ data: { passcode, catalog: draft } });
+      const result = await save({ data: { catalog: draft } });
       if (!result.ok) {
         toast.error(result.error ?? "Could not save");
         return;
@@ -108,30 +104,31 @@ function Admin() {
       configurations: prev.configurations.map((c, i) => (i === index ? { ...c, ...patch } : c)),
     }));
 
-  if (!unlocked) {
+  if (state === "loading") {
+    return (
+      <Shell>
+        <Card className="space-y-3 p-6">
+          <Skeleton className="h-5 w-40" />
+          <Skeleton className="h-9 w-full" />
+          <Skeleton className="h-9 w-full" />
+          <Skeleton className="h-9 w-2/3" />
+        </Card>
+      </Shell>
+    );
+  }
+
+  if (state === "denied") {
     return (
       <Shell>
         <Card className="max-w-md p-6">
           <div className="flex items-center gap-2">
-            <Lock className="size-4 text-muted-foreground" />
-            <p className="font-medium">Admin passcode required</p>
+            <ShieldAlert className="size-4 text-destructive" />
+            <p className="font-medium">Admin access required</p>
           </div>
           <p className="mt-2 text-sm text-muted-foreground">
-            The passcode is stored as a server-side secret and never reaches the browser bundle.
+            Your account is signed in but does not hold the admin role, so it cannot change what the
+            AI agent tells customers. The first account created in this workspace is the admin.
           </p>
-          <form onSubmit={handleUnlock} className="mt-4 space-y-3">
-            <Input
-              type="password"
-              autoComplete="current-password"
-              value={passcode}
-              onChange={(e) => setPasscode(e.target.value)}
-              placeholder="Enter admin passcode"
-            />
-            <Button type="submit" disabled={busy || passcode.length === 0}>
-              {busy ? <Loader2 className="size-4 animate-spin" /> : <Lock className="size-4" />}
-              Unlock editor
-            </Button>
-          </form>
         </Card>
       </Shell>
     );
@@ -164,8 +161,11 @@ function Admin() {
           />
         </div>
         <div className="mt-4">
-          <Label className="text-xs text-muted-foreground">Payment / loan note</Label>
+          <Label htmlFor="payment-note" className="text-xs text-muted-foreground">
+            Payment / loan note
+          </Label>
           <Textarea
+            id="payment-note"
             className="mt-1.5"
             rows={3}
             value={draft.paymentNote}
@@ -196,16 +196,19 @@ function Admin() {
               <Input
                 value={config.type}
                 placeholder="3 BHK"
+                aria-label={`Configuration ${index + 1} type`}
                 onChange={(e) => setConfig(index, { type: e.target.value })}
               />
               <Input
                 value={config.carpet}
                 placeholder="1,050 sq ft"
+                aria-label={`Configuration ${index + 1} carpet area`}
                 onChange={(e) => setConfig(index, { carpet: e.target.value })}
               />
               <Input
                 value={config.price}
                 placeholder="1.15 crore – 1.4 crore"
+                aria-label={`Configuration ${index + 1} price`}
                 onChange={(e) => setConfig(index, { price: e.target.value })}
               />
               <Button
@@ -232,6 +235,7 @@ function Admin() {
         <Textarea
           className="mt-3"
           rows={8}
+          aria-label="Amenities, one per line"
           value={draft.amenities.join("\n")}
           onChange={(e) => set("amenities", e.target.value.split("\n"))}
         />
@@ -243,6 +247,7 @@ function Admin() {
         <Textarea
           className="mt-3"
           rows={6}
+          aria-label="Location advantages, one per line"
           value={draft.locationAdvantages.join("\n")}
           onChange={(e) => set("locationAdvantages", e.target.value.split("\n"))}
         />
@@ -270,10 +275,13 @@ function Field({
   value: string;
   onChange: (value: string) => void;
 }) {
+  const id = `field-${label.toLowerCase().replace(/[^a-z]+/g, "-")}`;
   return (
     <div>
-      <Label className="text-xs text-muted-foreground">{label}</Label>
-      <Input className="mt-1.5" value={value} onChange={(e) => onChange(e.target.value)} />
+      <Label htmlFor={id} className="text-xs text-muted-foreground">
+        {label}
+      </Label>
+      <Input id={id} className="mt-1.5" value={value} onChange={(e) => onChange(e.target.value)} />
     </div>
   );
 }
