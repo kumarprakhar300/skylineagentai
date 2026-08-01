@@ -5,7 +5,7 @@ import { Body, Display, Eyebrow } from "../components/Kit";
 type Turn = { who: "agent" | "cust"; text: string; note?: string };
 
 const turns: Turn[] = [
-  { who: "agent", text: "Namaste! Main Aarav bol raha hoon, Skyline Greens se. 2 minute baat kar sakte hain?" },
+  { who: "agent", text: "Namaste! Main Skyline Greens se bol raha hoon. 2 minute baat kar sakte hain?" },
   { who: "cust", text: "Haan bolo, but 3 BHK hi chahiye \u2014", note: "interruption detected" },
   { who: "agent", text: "Bilkul \u2014 3 BHK, 1,480 sq.ft., \u20b91.32 Cr. Baner mein hai. Budget comfortable hai?" },
   { who: "cust", text: "\u092c\u091c\u091f \u0967.\u0968\u096b \u0915\u0930\u094b\u0921\u093c \u0924\u0915 \u0939\u0940 \u0939\u0948\u0964", note: "budget \u2192 \u20b91.20 Cr" },
@@ -38,7 +38,7 @@ const Bubble: React.FC<{ turn: Turn; delay: number }> = ({ turn, delay }) => {
             textAlign: isAgent ? "left" : "right",
           }}
         >
-          {isAgent ? "Agent \u00b7 Aarav" : "Customer"}
+          {isAgent ? "Agent" : "Customer"}
         </div>
         <div
           style={{
