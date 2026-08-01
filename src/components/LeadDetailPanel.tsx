@@ -19,6 +19,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { SpeakerLabel } from "@/components/SpeakerLabel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { LEAD_STATUSES, statusLabel } from "@/lib/leads-search";
@@ -74,13 +75,12 @@ export function LeadDetailPanel({
 
   const turns = call?.transcript ?? [];
   const term = transcriptQuery.trim();
-  const visibleTurns = useMemo(
-    () =>
-      term
-        ? turns.filter((t) => t.content.toLowerCase().includes(term.toLowerCase()))
-        : turns,
-    [turns, term],
-  );
+  const visibleTurns = useMemo(() => {
+    const numbered = turns.map((t, index) => ({ ...t, turnNumber: index + 1 }));
+    return term
+      ? numbered.filter((t) => t.content.toLowerCase().includes(term.toLowerCase()))
+      : numbered;
+  }, [turns, term]);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -249,16 +249,11 @@ export function LeadDetailPanel({
                               : "border border-border bg-secondary/40",
                           )}
                         >
-                          <p
-                            className={cn(
-                              "text-[11px] font-semibold uppercase tracking-wide",
-                              turn.role === "user"
-                                ? "text-primary-foreground/70"
-                                : "text-muted-foreground",
-                            )}
-                          >
-                            {turn.role === "user" ? "Customer" : "Aarav"}
-                          </p>
+                          <SpeakerLabel
+                            role={turn.role}
+                            turnNumber={turn.turnNumber}
+                            tone={turn.role === "user" ? "onPrimary" : "muted"}
+                          />
                           <p className="mt-1 whitespace-pre-wrap">
                             <Highlighted text={turn.content} term={term} />
                           </p>

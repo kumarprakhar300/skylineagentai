@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { SpeakerLabel } from "@/components/SpeakerLabel";
 import { languageOptions, type SpokenLanguage } from "@/lib/agent/language";
 import { emptyLead, leadFieldLabels, type LeadFields, type Turn } from "@/lib/agent/prompt";
 import type { LeadScore } from "@/lib/agent/score";
@@ -389,9 +390,12 @@ export function VoiceCall() {
                   : "ml-auto bg-primary text-primary-foreground",
               )}
             >
-              <span className="mb-0.5 block text-[11px] uppercase tracking-wide opacity-60">
-                {turn.role === "assistant" ? "Aarav" : "Customer"}
-              </span>
+              <SpeakerLabel
+                role={turn.role}
+                turnNumber={index + 1}
+                tone={turn.role === "assistant" ? "muted" : "onPrimary"}
+                className="mb-1"
+              />
               {turn.content}
             </div>
           ))}
