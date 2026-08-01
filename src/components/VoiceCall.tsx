@@ -367,11 +367,18 @@ export function VoiceCall() {
 
         <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto px-5 py-5">
           {transcript.length === 0 && (
-            <p className="mx-auto max-w-sm pt-16 text-center text-sm text-muted-foreground">
-              Press <span className="font-semibold text-foreground">Start call</span> and speak in
-              Hindi, Hinglish or English. Aarav answers out loud and the transcript appears here.
-            </p>
+            <div className="mx-auto max-w-sm pt-16 text-center text-sm text-muted-foreground">
+              <p>
+                Pick the language you will speak, press{" "}
+                <span className="font-semibold text-foreground">Start call</span>, and Aarav answers
+                out loud while the transcript appears here.
+              </p>
+              <p className="mt-2 text-xs">
+                {languageOptions.find((option) => option.value === choice)?.hint}
+              </p>
+            </div>
           )}
+
           {transcript.map((turn, index) => (
             <div
               key={index}
