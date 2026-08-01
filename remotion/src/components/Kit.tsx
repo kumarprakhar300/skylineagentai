@@ -22,7 +22,7 @@ export const Eyebrow: React.FC<{ children: React.ReactNode; delay?: number }> = 
       <div style={{ width: 54, height: 2, background: C.gold }} />
       <span
         style={{
-          fontFamily: "Manrope",
+          fontFamily: FONT_BODY,
           fontWeight: 700,
           letterSpacing: 6,
           fontSize: 20,
@@ -77,7 +77,7 @@ export const Display: React.FC<{
   return (
     <div
       style={{
-        fontFamily: "Fraunces",
+        fontFamily: FONT_DISPLAY,
         fontWeight: 600,
         fontSize: size,
         lineHeight: 1.02,
@@ -105,7 +105,7 @@ export const Body: React.FC<{
   return (
     <div
       style={{
-        fontFamily: "Manrope",
+        fontFamily: FONT_BODY,
         fontWeight: 500,
         fontSize: size,
         lineHeight: 1.5,

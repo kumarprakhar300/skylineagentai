@@ -16,7 +16,7 @@ import { Scene7 } from "./scenes/Scene7";
 
 loadDisplay("normal", { weights: ["600"], subsets: ["latin"] });
 loadDisplay("italic", { weights: ["600"], subsets: ["latin"] });
-loadBody("normal", { weights: ["500", "600", "700", "800"], subsets: ["latin", "devanagari"] });
+loadBody("normal", { weights: ["500", "600", "700", "800"], subsets: ["latin"] });
 
 const t = (frames: number) => springTiming({ config: { damping: 200 }, durationInFrames: frames });
 

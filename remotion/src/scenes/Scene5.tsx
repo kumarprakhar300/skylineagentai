@@ -18,10 +18,10 @@ export const Scene5: React.FC = () => {
 
       <div style={{ display: "flex", gap: 44, marginTop: 62 }}>
         <Panel delay={16} style={{ flex: 1, padding: 46 }}>
-          <div style={{ fontFamily: "Manrope", fontWeight: 800, letterSpacing: 3, fontSize: 21, color: C.gold }}>
+          <div style={{ fontFamily: FONT_BODY, fontWeight: 800, letterSpacing: 3, fontSize: 21, color: C.gold }}>
             CHANNEL 01
           </div>
-          <div style={{ fontFamily: "Fraunces", fontSize: 54, color: C.cream, marginTop: 14 }}>
+          <div style={{ fontFamily: FONT_DISPLAY, fontSize: 54, color: C.cream, marginTop: 14 }}>
             Web voice demo
           </div>
           <div style={{ marginTop: 30, display: "flex", flexDirection: "column", gap: 18 }}>
@@ -37,7 +37,7 @@ export const Scene5: React.FC = () => {
                       gap: 16,
                       opacity: p,
                       transform: `translateX(${interpolate(p, [0, 1], [-18, 0])}px)`,
-                      fontFamily: "Manrope",
+                      fontFamily: FONT_BODY,
                       fontSize: 27,
                       color: `${C.cream}dd`,
                     }}
@@ -57,7 +57,7 @@ export const Scene5: React.FC = () => {
               display: "inline-block",
               border: `1px solid ${C.gold}55`,
               background: `${C.forest}66`,
-              fontFamily: "Manrope",
+              fontFamily: FONT_BODY,
               fontWeight: 700,
               fontSize: 24,
               color: C.goldSoft,
@@ -68,10 +68,10 @@ export const Scene5: React.FC = () => {
         </Panel>
 
         <Panel delay={26} style={{ flex: 1, padding: 46, position: "relative" }}>
-          <div style={{ fontFamily: "Manrope", fontWeight: 800, letterSpacing: 3, fontSize: 21, color: C.gold }}>
+          <div style={{ fontFamily: FONT_BODY, fontWeight: 800, letterSpacing: 3, fontSize: 21, color: C.gold }}>
             CHANNEL 02
           </div>
-          <div style={{ fontFamily: "Fraunces", fontSize: 54, color: C.cream, marginTop: 14 }}>
+          <div style={{ fontFamily: FONT_DISPLAY, fontSize: 54, color: C.cream, marginTop: 14 }}>
             Twilio phone call
           </div>
           <div
@@ -99,7 +99,7 @@ export const Scene5: React.FC = () => {
             >
               ☎
             </div>
-            <div style={{ fontFamily: "Manrope", fontSize: 27, color: `${C.cream}dd`, lineHeight: 1.5 }}>
+            <div style={{ fontFamily: FONT_BODY, fontSize: 27, color: `${C.cream}dd`, lineHeight: 1.5 }}>
               Signed webhook → Polly voice
               <br />
               Aditi / Raveena for Hindi
@@ -110,7 +110,7 @@ export const Scene5: React.FC = () => {
           <div
             style={{
               marginTop: 38,
-              fontFamily: "Manrope",
+              fontFamily: FONT_BODY,
               fontSize: 23,
               color: `${C.cream}88`,
             }}

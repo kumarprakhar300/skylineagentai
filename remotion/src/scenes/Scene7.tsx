@@ -48,7 +48,7 @@ export const Scene7: React.FC = () => {
             >
               <span
                 style={{
-                  fontFamily: "Manrope",
+                  fontFamily: FONT_BODY,
                   fontWeight: 700,
                   fontSize: 21,
                   letterSpacing: 3,
@@ -59,7 +59,7 @@ export const Scene7: React.FC = () => {
               >
                 {k}
               </span>
-              <span style={{ fontFamily: "Manrope", fontSize: 32, color: C.cream }}>{v}</span>
+              <span style={{ fontFamily: FONT_BODY, fontSize: 32, color: C.cream }}>{v}</span>
             </div>
           );
         })}

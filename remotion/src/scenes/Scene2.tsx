@@ -36,7 +36,7 @@ export const Scene2: React.FC = () => {
             <Panel key={l.code} delay={delay} style={{ flex: 1, padding: 34, minHeight: 280 }}>
               <div
                 style={{
-                  fontFamily: "Manrope",
+                  fontFamily: FONT_BODY,
                   fontWeight: 800,
                   fontSize: 22,
                   letterSpacing: 3,
@@ -47,7 +47,7 @@ export const Scene2: React.FC = () => {
               </div>
               <div
                 style={{
-                  fontFamily: "Fraunces",
+                  fontFamily: FONT_DISPLAY,
                   fontSize: 42,
                   color: C.cream,
                   marginTop: 14,
@@ -57,7 +57,7 @@ export const Scene2: React.FC = () => {
               </div>
               <div
                 style={{
-                  fontFamily: "Manrope",
+                  fontFamily: FONT_BODY,
                   fontSize: 24,
                   color: `${C.cream}aa`,
                   marginTop: 20,

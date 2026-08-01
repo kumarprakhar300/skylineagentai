@@ -28,7 +28,7 @@ const Bubble: React.FC<{ turn: Turn; delay: number }> = ({ turn, delay }) => {
       <div style={{ maxWidth: 720 }}>
         <div
           style={{
-            fontFamily: "Manrope",
+            fontFamily: FONT_BODY,
             fontWeight: 700,
             fontSize: 19,
             letterSpacing: 2.5,
@@ -50,7 +50,7 @@ const Bubble: React.FC<{ turn: Turn; delay: number }> = ({ turn, delay }) => {
               ? `linear-gradient(150deg, ${C.forest}, #0C2A1E)`
               : "linear-gradient(150deg, rgba(246,242,232,0.13), rgba(246,242,232,0.05))",
             border: `1px solid ${isAgent ? `${C.gold}44` : `${C.cream}22`}`,
-            fontFamily: "Manrope",
+            fontFamily: FONT_BODY,
             fontSize: 29,
             lineHeight: 1.45,
             color: C.cream,
@@ -63,7 +63,7 @@ const Bubble: React.FC<{ turn: Turn; delay: number }> = ({ turn, delay }) => {
           <div
             style={{
               marginTop: 12,
-              fontFamily: "Manrope",
+              fontFamily: FONT_BODY,
               fontWeight: 700,
               fontSize: 20,
               color: C.clay,

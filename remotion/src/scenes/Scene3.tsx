@@ -78,7 +78,7 @@ export const Scene3: React.FC = () => {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    fontFamily: "Manrope",
+                    fontFamily: FONT_BODY,
                     fontWeight: 800,
                     fontSize: 28,
                     color: lit > 0.5 ? C.goldSoft : `${C.cream}88`,
@@ -89,7 +89,7 @@ export const Scene3: React.FC = () => {
                 </div>
                 <div
                   style={{
-                    fontFamily: "Fraunces",
+                    fontFamily: FONT_DISPLAY,
                     fontSize: 38,
                     color: C.cream,
                     marginTop: 26,
@@ -100,7 +100,7 @@ export const Scene3: React.FC = () => {
                 </div>
                 <div
                   style={{
-                    fontFamily: "Manrope",
+                    fontFamily: FONT_BODY,
                     fontSize: 21,
                     color: `${C.cream}88`,
                     marginTop: 10,

@@ -23,14 +23,14 @@ export const Scene6: React.FC = () => {
       <div style={{ display: "flex", gap: 34, marginTop: 56 }}>
         {/* score dial */}
         <Panel delay={14} style={{ width: 430, padding: 40 }}>
-          <div style={{ fontFamily: "Manrope", fontWeight: 700, letterSpacing: 3, fontSize: 20, color: C.gold }}>
+          <div style={{ fontFamily: FONT_BODY, fontWeight: 700, letterSpacing: 3, fontSize: 20, color: C.gold }}>
             LEAD SCORE
           </div>
           <div style={{ display: "flex", alignItems: "flex-end", gap: 14, marginTop: 18 }}>
-            <div style={{ fontFamily: "Fraunces", fontSize: 128, color: C.cream, lineHeight: 1 }}>
+            <div style={{ fontFamily: FONT_DISPLAY, fontSize: 128, color: C.cream, lineHeight: 1 }}>
               {score}
             </div>
-            <div style={{ fontFamily: "Manrope", fontSize: 30, color: `${C.cream}88`, paddingBottom: 20 }}>
+            <div style={{ fontFamily: FONT_BODY, fontSize: 30, color: `${C.cream}88`, paddingBottom: 20 }}>
               /100
             </div>
           </div>
@@ -59,7 +59,7 @@ export const Scene6: React.FC = () => {
               borderRadius: 999,
               background: `${C.clay}33`,
               border: `1px solid ${C.clay}88`,
-              fontFamily: "Manrope",
+              fontFamily: FONT_BODY,
               fontWeight: 800,
               fontSize: 24,
               color: C.goldSoft,
@@ -71,7 +71,7 @@ export const Scene6: React.FC = () => {
 
         {/* analytics bars */}
         <Panel delay={22} style={{ flex: 1, padding: 40 }}>
-          <div style={{ fontFamily: "Manrope", fontWeight: 700, letterSpacing: 3, fontSize: 20, color: C.gold }}>
+          <div style={{ fontFamily: FONT_BODY, fontWeight: 700, letterSpacing: 3, fontSize: 20, color: C.gold }}>
             CALLS BY CITY
           </div>
           <div style={{ display: "flex", alignItems: "flex-end", gap: 22, height: 210, marginTop: 30 }}>
@@ -96,7 +96,7 @@ export const Scene6: React.FC = () => {
           <div
             style={{
               marginTop: 20,
-              fontFamily: "Manrope",
+              fontFamily: FONT_BODY,
               fontSize: 21,
               color: `${C.cream}88`,
               display: "flex",
@@ -111,7 +111,7 @@ export const Scene6: React.FC = () => {
 
         {/* feature chips */}
         <Panel delay={30} style={{ width: 430, padding: 40 }}>
-          <div style={{ fontFamily: "Manrope", fontWeight: 700, letterSpacing: 3, fontSize: 20, color: C.gold }}>
+          <div style={{ fontFamily: FONT_BODY, fontWeight: 700, letterSpacing: 3, fontSize: 20, color: C.gold }}>
             IN THE DASHBOARD
           </div>
           <div style={{ marginTop: 26, display: "flex", flexWrap: "wrap", gap: 14 }}>
@@ -132,7 +132,7 @@ export const Scene6: React.FC = () => {
                     borderRadius: 999,
                     border: `1px solid ${C.cream}2a`,
                     background: `${C.cream}0d`,
-                    fontFamily: "Manrope",
+                    fontFamily: FONT_BODY,
                     fontWeight: 600,
                     fontSize: 23,
                     color: `${C.cream}dd`,
