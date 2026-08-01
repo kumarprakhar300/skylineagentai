@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import { normalizeLanguage, sttLanguageCode, sttPrompt } from "@/lib/agent/language";
+import { cleanSpokenText } from "@/lib/agent/transcript-text";
 import { gatewayErrorResponse, transcribe } from "@/lib/ai.server";
 
 export const Route = createFileRoute("/api/stt")({
@@ -19,11 +20,11 @@ export const Route = createFileRoute("/api/stt")({
           }
 
           const language = normalizeLanguage(form.get("language"));
-          const text = await transcribe(file, {
+          const raw = await transcribe(file, {
             language: sttLanguageCode(language),
             prompt: sttPrompt(language),
           });
-          return Response.json({ text });
+          return Response.json({ text: cleanSpokenText(raw) });
         } catch (error) {
           return gatewayErrorResponse(error);
         }
