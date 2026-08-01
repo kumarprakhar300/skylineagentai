@@ -121,16 +121,16 @@ function Docs() {
             keys stay server-side; the browser only talks to this app's own endpoints.
           </p>
         </Section>
-      </div>
-    </main>
+    </PageShell>
   );
 }
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <Card className="mt-5 p-6">
-      <h2 className="text-lg font-semibold">{title}</h2>
+    <Card className="panel-3d p-6">
+      <h2 className="text-lg font-semibold tracking-tight">{title}</h2>
       <div className="mt-3">{children}</div>
     </Card>
   );
+
 }
