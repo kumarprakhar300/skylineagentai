@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { emptyLead, leadFieldLabels, type LeadFields, type Turn } from "@/lib/agent/prompt";
+import type { LeadScore } from "@/lib/agent/score";
 import { startRecording, type RecorderHandle } from "@/lib/audio";
 import { cn } from "@/lib/utils";
 
@@ -25,6 +26,7 @@ export function VoiceCall() {
   const [transcript, setTranscript] = useState<Turn[]>([]);
   const [lead, setLead] = useState<LeadFields>(emptyLead);
   const [summary, setSummary] = useState<string | null>(null);
+  const [score, setScore] = useState<LeadScore | null>(null);
   const [language, setLanguage] = useState<string>("hinglish");
 
   const transcriptRef = useRef<Turn[]>([]);
@@ -237,9 +239,10 @@ export function VoiceCall() {
           channel: "browser",
         }),
       });
-      const data = (await res.json().catch(() => ({}))) as { summary?: string; error?: string };
+      const data = (await res.json().catch(() => ({}))) as { summary?: string; score?: LeadScore; error?: string };
       if (!res.ok) throw new Error(data.error ?? "Could not save the call");
       setSummary(data.summary ?? "");
+      setScore(data.score ?? null);
       toast.success("Call summary generated and lead saved");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Could not save the call");
@@ -375,7 +378,15 @@ export function VoiceCall() {
 
         {summary !== null && (
           <Card className="border-accent/40 bg-accent/10 p-5">
-            <h3 className="text-base font-semibold">Call summary</h3>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h3 className="text-base font-semibold">Call summary</h3>
+              {score && (
+                <span className="rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground">
+                  {score.band === "hot" ? "🔥 " : ""}
+                  Lead score {score.score}/100 · {score.band}
+                </span>
+              )}
+            </div>
             <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed">
               {summary || "No summary was generated."}
             </p>
