@@ -465,15 +465,34 @@ function Leads() {
       </Card>
 
       {data.calls.length === 0 ? (
-        <Card className="panel-3d p-6 text-sm text-muted-foreground">
-          No calls recorded yet. Start a call on the demo page and end it — the lead and summary
-          will appear here.
-        </Card>
+        <EmptyState
+          icon={<PhoneCall className="size-5" />}
+          title="No calls recorded yet"
+          description="Run a call on the demo page and hang up — the qualified requirement, lead score and AI summary land here within a couple of seconds."
+          action={
+            <Button asChild size="sm">
+              <Link to="/">Start a demo call</Link>
+            </Button>
+          }
+        />
       ) : filtered.length === 0 ? (
-        <Card className="panel-3d p-6 text-sm text-muted-foreground">
-          No calls match these filters. Try clearing the search or widening the date range.
-        </Card>
+        <EmptyState
+          icon={<SearchX className="size-5" />}
+          title="No calls match these filters"
+          description={
+            <>
+              {data.calls.length} call{data.calls.length === 1 ? "" : "s"} stored, but none match the
+              current search, score band, status or date range.
+            </>
+          }
+          action={
+            <Button variant="outline" size="sm" onClick={() => setSearch(leadsDefaultSearch)}>
+              <X className="size-4" /> Clear all filters
+            </Button>
+          }
+        />
       ) : (
+
         filtered.map((call) => {
           const lead = leadByCall.get(call.id);
           const matchingTurns = q
