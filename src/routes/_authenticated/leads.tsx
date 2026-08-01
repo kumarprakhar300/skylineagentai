@@ -451,17 +451,8 @@ function Leads() {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() =>
-                setSearch({
-                  q: "",
-                  location: ALL,
-                  budget: ALL,
-                  band: ALL,
-                  sort: "recent",
-                  from: "",
-                  to: "",
-                })
-              }
+              onClick={() => setSearch(leadsDefaultSearch)}
+
             >
               <X className="size-4" /> Clear filters
             </Button>
