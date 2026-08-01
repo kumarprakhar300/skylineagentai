@@ -549,9 +549,11 @@ function Leads() {
                 </div>
               )}
 
+              {lead && <LeadPipeline lead={lead} onSaved={refresh} />}
+
               {Array.isArray(call.transcript) && call.transcript.length > 0 && (
                 <details className="mt-5">
-                  <summary className="cursor-pointer text-sm font-medium">
+
                     View transcript ({call.transcript.length} turns)
                   </summary>
                   <div className="mt-3 space-y-2 text-sm">
