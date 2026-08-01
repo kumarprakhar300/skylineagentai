@@ -601,3 +601,105 @@ function Row({ label, value }: { label: string; value: string | null | undefined
     </div>
   );
 }
+
+function Metric({ label, value }: { label: string; value: string }) {
+  return (
+    <Card className="tilt-card p-4">
+      <p className="text-xs uppercase tracking-wide text-muted-foreground">{label}</p>
+      <p className="mt-1 font-serif text-2xl font-semibold">{value}</p>
+    </Card>
+  );
+}
+
+/** Post-call follow-up: status, callback time and private sales notes. */
+function LeadPipeline({ lead, onSaved }: { lead: LeadRow; onSaved: () => void }) {
+  const [status, setStatus] = useState(lead.status ?? "new");
+  const [notes, setNotes] = useState(lead.owner_notes ?? "");
+  const [callback, setCallback] = useState(
+    lead.callback_at ? new Date(lead.callback_at).toISOString().slice(0, 16) : "",
+  );
+  const [busy, setBusy] = useState(false);
+
+  const dirty =
+    status !== (lead.status ?? "new") ||
+    notes !== (lead.owner_notes ?? "") ||
+    callback !== (lead.callback_at ? new Date(lead.callback_at).toISOString().slice(0, 16) : "");
+
+  async function save() {
+    setBusy(true);
+    const { error } = await supabase
+      .from("leads")
+      .update({
+        status,
+        owner_notes: notes.trim() || null,
+        callback_at: callback ? new Date(callback).toISOString() : null,
+      })
+      .eq("id", lead.id);
+    setBusy(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success("Lead updated");
+    onSaved();
+  }
+
+  return (
+    <div className="mt-5 rounded-lg border border-border bg-secondary/30 p-4">
+      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        Follow-up
+      </p>
+      <div className="mt-3 grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+        <div>
+          <Label className="text-xs text-muted-foreground">Status</Label>
+          <Select value={status} onValueChange={setStatus}>
+            <SelectTrigger className="mt-1.5">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {LEAD_STATUSES.map((s) => (
+                <SelectItem key={s.value} value={s.value}>
+                  {s.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label htmlFor={`cb-${lead.id}`} className="text-xs text-muted-foreground">
+            Callback / site visit
+          </Label>
+          <Input
+            id={`cb-${lead.id}`}
+            type="datetime-local"
+            className="mt-1.5"
+            value={callback}
+            onChange={(e) => setCallback(e.target.value)}
+          />
+        </div>
+      </div>
+      <div className="mt-3">
+        <Label htmlFor={`notes-${lead.id}`} className="text-xs text-muted-foreground">
+          Internal notes
+        </Label>
+        <Textarea
+          id={`notes-${lead.id}`}
+          className="mt-1.5"
+          rows={2}
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          placeholder="What the sales team should know before calling back"
+        />
+      </div>
+      <div className="mt-3 flex items-center gap-3">
+        <Button size="sm" onClick={save} disabled={busy || !dirty}>
+          {busy ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
+          Save follow-up
+        </Button>
+        <span className="text-xs text-muted-foreground">
+          Currently: {statusLabel(lead.status)}
+        </span>
+      </div>
+    </div>
+  );
+}
