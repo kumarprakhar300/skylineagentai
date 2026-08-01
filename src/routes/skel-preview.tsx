@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { PhoneCall } from "lucide-react";
 import { EmptyState } from "@/components/EmptyState";
 import { LeadsPageSkeleton, AnalyticsPageSkeleton } from "@/components/Skeletons";
-export const Route = createFileRoute("/__skeleton-preview")({
+export const Route = createFileRoute("/skel-preview")({
   component: () => (
     <main className="mx-auto max-w-6xl space-y-5 p-8">
       <LeadsPageSkeleton rows={1} />
