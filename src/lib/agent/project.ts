@@ -2,11 +2,29 @@
  * DEMO PROJECT KNOWLEDGE BASE
  *
  * This is a fictional real estate project created for an interview demo.
- * No confidential or company-owned data is used. Edit anything here and the
- * agent immediately knows the new details (no other file needs to change).
+ * The live values are stored in the database (table `project_catalog`) and can
+ * be edited from the /admin page without redeploying the app. The values below
+ * are only used as a fallback when the catalog row cannot be read.
  */
 
-export const project = {
+export type Configuration = { type: string; carpet: string; price: string };
+
+export type ProjectCatalog = {
+  name: string;
+  developer: string;
+  location: string;
+  status: string;
+  reraNote: string;
+  configurations: Configuration[];
+  priceRange: string;
+  possession: string;
+  amenities: string[];
+  locationAdvantages: string[];
+  paymentNote: string;
+  siteVisitNote: string;
+};
+
+export const defaultProject: ProjectCatalog = {
   name: "Skyline Greens",
   developer: "Skyline Estates (demo developer)",
   location: "Wakad, Pune, Maharashtra",
@@ -39,9 +57,9 @@ export const project = {
   paymentNote:
     "Flexible construction-linked payment plan available; home loan support from leading banks (details shared by the sales team, nothing guaranteed on call)",
   siteVisitNote: "Site visits available all days, 10 AM to 7 PM",
-} as const;
+};
 
-export function projectBrief(): string {
+export function projectBrief(project: ProjectCatalog): string {
   return [
     `Project: ${project.name} by ${project.developer}`,
     `Location: ${project.location}`,
