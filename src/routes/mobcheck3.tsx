@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { Loader2, Plus, Save, ShieldAlert, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 
 import { PageShell } from "@/components/PageShell";
@@ -59,24 +59,6 @@ function Admin() {
   const [state, setState] = useState<"loading" | "ready" | "denied">("ready");
   const [busy, setBusy] = useState(false);
   const [draft, setDraft] = useState<ProjectCatalog>(defaultProject);
-
-  useEffect(() => {
-    let active = true;
-    void load({ data: undefined })
-      .then((result) => {
-        if (!active) return;
-        if (!result.ok) {
-          setState("denied");
-          return;
-        }
-        setDraft(result.catalog);
-        setState("ready");
-      })
-      .catch(() => active && setState("denied"));
-    return () => {
-      active = false;
-    };
-  }, [load]);
 
   async function handleSave() {
     setBusy(true);
