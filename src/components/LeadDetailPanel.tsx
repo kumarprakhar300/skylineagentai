@@ -125,7 +125,7 @@ export function LeadDetailPanel({
 
             <Tabs value={tab} onValueChange={setTab} className="min-h-0 flex-1 gap-0">
               <div className="border-b border-border px-6 py-3">
-                <TabsList className="w-full">
+                <TabsList className="w-full justify-start overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                   <TabsTrigger value="summary" className="flex-1">
                     Summary
                   </TabsTrigger>
@@ -141,7 +141,7 @@ export function LeadDetailPanel({
                 </TabsList>
               </div>
 
-              <div className="min-h-0 flex-1 overflow-y-auto p-6">
+              <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-6">
                 <TabsContent value="summary" className="mt-0 space-y-5">
                   <section>
                     <SectionLabel>AI call summary</SectionLabel>
