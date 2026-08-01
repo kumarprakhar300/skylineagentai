@@ -286,14 +286,23 @@ function Leads() {
     search.location !== ALL ||
     search.budget !== ALL ||
     search.band !== ALL ||
+    search.status !== ALL ||
     search.sort !== "recent" ||
     !!search.from ||
     !!search.to;
 
   return (
     <Shell>
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <Metric label="Calls handled" value={String(total)} />
+        <Metric label="Hot leads" value={String(hot)} />
+        <Metric label="Fully qualified" value={String(qualified)} />
+        <Metric label="Avg lead score" value={`${avgScore}/100`} />
+      </div>
+
       <Card className="p-5">
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-6">
+
           <div className="lg:col-span-2">
             <Label htmlFor="lead-search" className="text-xs text-muted-foreground">
               Search transcripts &amp; summaries
