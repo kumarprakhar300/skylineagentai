@@ -1,12 +1,13 @@
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { leadsDefaultSearch } from "@/lib/leads-search";
-import { Building2, Database, FileText, Languages, ShieldCheck, Sparkles } from "lucide-react";
+import { Database, FileText, Languages, ShieldCheck, Sparkles } from "lucide-react";
 
+import { AppHeader } from "@/components/AppHeader";
 import { VoiceCall } from "@/components/VoiceCall";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { getProjectCatalog } from "@/lib/catalog.functions";
+import { leadsDefaultSearch } from "@/lib/leads-search";
 
 const catalogQuery = queryOptions({
   queryKey: ["project-catalog"],
