@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as DocsRouteImport } from './routes/docs'
 import { Route as PhoneRouteImport } from './routes/phone'
+import { Route as SkelPreviewRouteImport } from './routes/skel-preview'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authenticated/analytics'
 import { Route as AuthenticatedLeadsRouteImport } from './routes/_authenticated/leads'
@@ -45,6 +46,11 @@ const DocsRoute = DocsRouteImport.update({
 const PhoneRoute = PhoneRouteImport.update({
   id: '/phone',
   path: '/phone',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SkelPreviewRoute = SkelPreviewRouteImport.update({
+  id: '/skel-preview',
+  path: '/skel-preview',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
@@ -93,6 +99,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/docs': typeof DocsRoute
   '/phone': typeof PhoneRoute
+  '/skel-preview': typeof SkelPreviewRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/analytics': typeof AuthenticatedAnalyticsRoute
   '/leads': typeof AuthenticatedLeadsRoute
@@ -107,6 +114,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/docs': typeof DocsRoute
   '/phone': typeof PhoneRoute
+  '/skel-preview': typeof SkelPreviewRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/analytics': typeof AuthenticatedAnalyticsRoute
   '/leads': typeof AuthenticatedLeadsRoute
@@ -123,6 +131,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/docs': typeof DocsRoute
   '/phone': typeof PhoneRoute
+  '/skel-preview': typeof SkelPreviewRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/analytics': typeof AuthenticatedAnalyticsRoute
   '/_authenticated/leads': typeof AuthenticatedLeadsRoute
@@ -139,6 +148,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/docs'
     | '/phone'
+    | '/skel-preview'
     | '/admin'
     | '/analytics'
     | '/leads'
@@ -153,6 +163,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/docs'
     | '/phone'
+    | '/skel-preview'
     | '/admin'
     | '/analytics'
     | '/leads'
@@ -168,6 +179,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/docs'
     | '/phone'
+    | '/skel-preview'
     | '/_authenticated/admin'
     | '/_authenticated/analytics'
     | '/_authenticated/leads'
@@ -184,6 +196,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   DocsRoute: typeof DocsRoute
   PhoneRoute: typeof PhoneRoute
+  SkelPreviewRoute: typeof SkelPreviewRoute
   ApiEndCallRoute: typeof ApiEndCallRoute
   ApiSttRoute: typeof ApiSttRoute
   ApiTtsRoute: typeof ApiTtsRoute
@@ -226,6 +239,13 @@ declare module '@tanstack/react-router' {
       path: '/phone'
       fullPath: '/phone'
       preLoaderRoute: typeof PhoneRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/skel-preview': {
+      id: '/skel-preview'
+      path: '/skel-preview'
+      fullPath: '/skel-preview'
+      preLoaderRoute: typeof SkelPreviewRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/admin': {
@@ -308,6 +328,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   DocsRoute: DocsRoute,
   PhoneRoute: PhoneRoute,
+  SkelPreviewRoute: SkelPreviewRoute,
   ApiEndCallRoute: ApiEndCallRoute,
   ApiSttRoute: ApiSttRoute,
   ApiTtsRoute: ApiTtsRoute,
