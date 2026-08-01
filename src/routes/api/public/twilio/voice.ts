@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { agentTurn } from "@/lib/agent/agent-turn.server";
 import { chat } from "@/lib/ai.server";
 import { summaryPrompt, type LeadFields, type Turn } from "@/lib/agent/prompt";
+import { scoreLead, scoreLine } from "@/lib/agent/score";
 
 const DEVANAGARI = /[\u0900-\u097F]/;
 
@@ -117,6 +118,9 @@ export const Route = createFileRoute("/api/public/twilio/voice")({
             summary = "Summary could not be generated for this call.";
           }
 
+          const score = scoreLead(lead, nextTranscript);
+          summary = `${summary}\n\n${scoreLine(score)}`;
+
           await supabaseAdmin
             .from("calls")
             .update({
@@ -140,6 +144,9 @@ export const Route = createFileRoute("/api/public/twilio/voice")({
             budget: lead.budget,
             purpose: lead.purpose,
             timeline: lead.timeline,
+            score: score.score,
+            score_band: score.band,
+            score_reasons: score.reasons as unknown as never,
             notes: summary,
           });
 
