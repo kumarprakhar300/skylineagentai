@@ -47,6 +47,9 @@ type LeadRow = {
   score: number | null;
   score_band: string | null;
   score_reasons: string[] | null;
+  status: string | null;
+  owner_notes: string | null;
+  callback_at: string | null;
   created_at: string;
 };
 
