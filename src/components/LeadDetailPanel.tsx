@@ -124,7 +124,7 @@ export function LeadDetailPanel({
             </SheetHeader>
 
             <Tabs value={tab} onValueChange={setTab} className="min-h-0 flex-1 gap-0">
-              <div className="border-b border-border px-6 py-3">
+              <div className="border-b border-border px-4 py-3 sm:px-6">
                 <TabsList className="w-full justify-start overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                   <TabsTrigger value="summary" className="flex-1">
                     Summary
