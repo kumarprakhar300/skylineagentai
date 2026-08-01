@@ -1,10 +1,16 @@
+import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Building2, Database, FileText, Languages, ShieldCheck, Sparkles } from "lucide-react";
 
 import { VoiceCall } from "@/components/VoiceCall";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { project } from "@/lib/agent/project";
+import { getProjectCatalog } from "@/lib/catalog.functions";
+
+const catalogQuery = queryOptions({
+  queryKey: ["project-catalog"],
+  queryFn: () => getProjectCatalog(),
+});
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -25,10 +31,21 @@ export const Route = createFileRoute("/")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
+  loader: ({ context }) => {
+    context.queryClient.ensureQueryData(catalogQuery);
+  },
   component: Index,
+  errorComponent: ({ error }) => (
+    <main className="mx-auto max-w-2xl px-5 py-16 text-sm">
+      Could not load the demo page: {error instanceof Error ? error.message : "unknown error"}
+    </main>
+  ),
+  notFoundComponent: () => <main className="px-5 py-16">Page not found.</main>,
 });
 
 function Index() {
+  const { data: project } = useSuspenseQuery(catalogQuery);
+
   return (
     <main className="min-h-screen bg-background">
       <header className="border-b bg-secondary/40 grain">
@@ -54,6 +71,12 @@ function Index() {
               className="rounded-md px-3 py-1.5 font-medium transition-colors hover:bg-secondary"
             >
               How it works
+            </Link>
+            <Link
+              to="/admin"
+              className="rounded-md px-3 py-1.5 font-medium transition-colors hover:bg-secondary"
+            >
+              Edit catalog
             </Link>
             <Link
               to="/phone"
