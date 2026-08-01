@@ -93,6 +93,18 @@ function PhonePage() {
             </li>
           </ul>
         </Card>
+
+        <Card className="panel-3d border-destructive/30 p-6">
+          <h2 className="text-lg font-semibold">3. Add your Twilio Auth Token</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            The webhook cryptographically verifies that each request really comes from Twilio, so
+            no one can forge calls. To enable it, copy your <strong>Auth Token</strong> from the
+            Twilio Console (Console dashboard → <em>Account SID & Auth Token</em>) and save it
+            as a secret named <code className="rounded bg-secondary px-1 py-0.5">TWILIO_AUTH_TOKEN</code> in
+            your project's secret settings. Until it is set, the webhook rejects all phone calls
+            for safety.
+          </p>
+        </Card>
     </PageShell>
 
   );
