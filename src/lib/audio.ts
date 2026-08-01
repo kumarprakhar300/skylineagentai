@@ -48,7 +48,7 @@ export function encodeWav(chunks: Float32Array[], inputRate: number): Blob {
     merged.set(chunk, offset);
     offset += chunk.length;
   }
-  const samples = downsample(merged, inputRate);
+  const samples = normalize(downsample(merged, inputRate));
 
   const buffer = new ArrayBuffer(44 + samples.length * 2);
   const view = new DataView(buffer);
