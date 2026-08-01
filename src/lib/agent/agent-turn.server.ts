@@ -1,6 +1,8 @@
 import { chat } from "@/lib/ai.server";
 import { readCatalog } from "@/lib/catalog.server";
+import { languageInstruction, type SpokenLanguage } from "@/lib/agent/language";
 import { emptyLead, systemPrompt, type LeadFields, type Turn } from "@/lib/agent/prompt";
+
 
 export type AgentTurnResult = {
   reply: string;
@@ -31,14 +33,22 @@ function parseJson(raw: string): AgentJson {
 }
 
 /** One conversational turn. Shared by the browser demo and the Twilio phone demo. */
-export async function agentTurn(history: Turn[], userText: string): Promise<AgentTurnResult> {
+export async function agentTurn(
+  history: Turn[],
+  userText: string,
+  preferredLanguage: SpokenLanguage = "auto",
+): Promise<AgentTurnResult> {
   const messages = [
-    { role: "system" as const, content: systemPrompt(await readCatalog()) },
+    {
+      role: "system" as const,
+      content: `${systemPrompt(await readCatalog())}\n\n${languageInstruction(preferredLanguage)}`,
+    },
     ...history.slice(-24).map((t) => ({
       role: t.role === "user" ? ("user" as const) : ("assistant" as const),
       content: t.content,
     })),
   ];
+
 
   if (userText.trim()) {
     messages.push({ role: "user", content: userText.trim() });
@@ -65,7 +75,13 @@ export async function agentTurn(history: Turn[], userText: string): Promise<Agen
 
   return {
     reply,
-    language: typeof parsed.language === "string" ? parsed.language : "hinglish",
+    language:
+      preferredLanguage !== "auto"
+        ? preferredLanguage
+        : typeof parsed.language === "string"
+          ? parsed.language
+          : "hinglish",
+
     lead,
     shouldEnd: parsed.should_end === true,
   };

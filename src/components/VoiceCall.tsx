@@ -1,9 +1,17 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Loader2, Mic, PhoneCall, PhoneOff, Radio, Square, Volume2 } from "lucide-react";
+import { Languages, Loader2, Mic, PhoneCall, PhoneOff, Radio, Square, Volume2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { languageOptions, type SpokenLanguage } from "@/lib/agent/language";
 import { emptyLead, leadFieldLabels, type LeadFields, type Turn } from "@/lib/agent/prompt";
 import type { LeadScore } from "@/lib/agent/score";
 import { startRecording, type RecorderHandle } from "@/lib/audio";
@@ -27,15 +35,18 @@ export function VoiceCall() {
   const [lead, setLead] = useState<LeadFields>(emptyLead);
   const [summary, setSummary] = useState<string | null>(null);
   const [score, setScore] = useState<LeadScore | null>(null);
+  const [choice, setChoice] = useState<SpokenLanguage>("auto");
   const [language, setLanguage] = useState<string>("hinglish");
 
   const transcriptRef = useRef<Turn[]>([]);
   const leadRef = useRef<LeadFields>(emptyLead);
   const languageRef = useRef("hinglish");
+  const choiceRef = useRef<SpokenLanguage>("auto");
   const recorderRef = useRef<RecorderHandle | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const activeRef = useRef(false);
   const scrollRef = useRef<HTMLDivElement | null>(null);
+
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -101,7 +112,9 @@ export function VoiceCall() {
         body: JSON.stringify({
           history: transcriptRef.current,
           userText,
+          language: choiceRef.current,
         }),
+
       });
       if (!res.ok) {
         const body = (await res.json().catch(() => ({}))) as { error?: string };
@@ -162,15 +175,19 @@ export function VoiceCall() {
     setPhase("thinking");
 
     try {
+      const spokenMs = recorder.spokenMs();
       const blob = await recorder.stop();
-      if (blob.size < 4000) {
+      // Too short / silence only: keep listening instead of sending noise to the model.
+      if (blob.size < 8000 || spokenMs < 300) {
         void listenRef.current();
         return;
       }
 
       const form = new FormData();
       form.append("audio", new File([blob], "recording.wav", { type: "audio/wav" }));
+      form.append("language", choiceRef.current);
       const res = await fetch("/api/stt", { method: "POST", body: form });
+
       if (!res.ok) {
         const body = (await res.json().catch(() => ({}))) as { error?: string };
         throw new Error(body.error ?? "Could not understand the audio");
@@ -195,10 +212,14 @@ export function VoiceCall() {
     activeRef.current = true;
     transcriptRef.current = [];
     leadRef.current = emptyLead;
+    choiceRef.current = choice;
     setTranscript([]);
     setLead(emptyLead);
     setSummary(null);
+    setScore(null);
+    if (choice !== "auto") setLanguage(choice);
     setPhase("connecting");
+
 
     try {
       // Ask for the mic up front so the browser prompt appears before the greeting.
@@ -212,7 +233,7 @@ export function VoiceCall() {
         error instanceof Error ? error.message : "Could not start the call. Allow microphone access.",
       );
     }
-  }, [runAgentTurn]);
+  }, [choice, runAgentTurn]);
 
   const endCall = useCallback(async () => {
     if (!activeRef.current) return;
@@ -292,13 +313,35 @@ export function VoiceCall() {
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-2">
+          <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
             {phase === "idle" || phase === "ended" ? (
-              <Button onClick={() => void startCall()} className="gap-2">
-                <PhoneCall className="size-4" />
-                {phase === "ended" ? "Start a fresh call" : "Start call"}
-              </Button>
+              <>
+                <Select
+                  value={choice}
+                  onValueChange={(value) => setChoice(value as SpokenLanguage)}
+                >
+                  <SelectTrigger
+                    aria-label="Language you will speak"
+                    className="h-9 w-full min-w-[10.5rem] gap-2 sm:w-auto"
+                  >
+                    <Languages className="size-4 shrink-0 text-muted-foreground" />
+                    <SelectValue placeholder="Language" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {languageOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button onClick={() => void startCall()} className="w-full gap-2 sm:w-auto">
+                  <PhoneCall className="size-4" />
+                  {phase === "ended" ? "Start a fresh call" : "Start call"}
+                </Button>
+              </>
             ) : (
+
               <>
                 {phase === "speaking" && (
                   <Button variant="secondary" onClick={interrupt} className="gap-2">
@@ -324,11 +367,18 @@ export function VoiceCall() {
 
         <div ref={scrollRef} className="flex-1 space-y-3 overflow-y-auto px-5 py-5">
           {transcript.length === 0 && (
-            <p className="mx-auto max-w-sm pt-16 text-center text-sm text-muted-foreground">
-              Press <span className="font-semibold text-foreground">Start call</span> and speak in
-              Hindi, Hinglish or English. Aarav answers out loud and the transcript appears here.
-            </p>
+            <div className="mx-auto max-w-sm pt-16 text-center text-sm text-muted-foreground">
+              <p>
+                Pick the language you will speak, press{" "}
+                <span className="font-semibold text-foreground">Start call</span>, and Aarav answers
+                out loud while the transcript appears here.
+              </p>
+              <p className="mt-2 text-xs">
+                {languageOptions.find((option) => option.value === choice)?.hint}
+              </p>
+            </div>
           )}
+
           {transcript.map((turn, index) => (
             <div
               key={index}

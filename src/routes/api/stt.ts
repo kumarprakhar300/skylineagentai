@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
+import { normalizeLanguage, sttLanguageCode, sttPrompt } from "@/lib/agent/language";
 import { gatewayErrorResponse, transcribe } from "@/lib/ai.server";
 
 export const Route = createFileRoute("/api/stt")({
@@ -17,7 +18,11 @@ export const Route = createFileRoute("/api/stt")({
             return Response.json({ error: "Recording too large" }, { status: 413 });
           }
 
-          const text = await transcribe(file);
+          const language = normalizeLanguage(form.get("language"));
+          const text = await transcribe(file, {
+            language: sttLanguageCode(language),
+            prompt: sttPrompt(language),
+          });
           return Response.json({ text });
         } catch (error) {
           return gatewayErrorResponse(error);
