@@ -90,7 +90,7 @@ export function LeadDetailPanel({
       >
         {call && (
           <>
-            <SheetHeader className="border-b border-border bg-secondary/30 p-6">
+            <SheetHeader className="border-b border-border bg-secondary/30 p-4 sm:p-6">
               <div className="flex flex-wrap items-center gap-2">
                 <Badge variant="secondary">{call.channel}</Badge>
                 {call.language && <Badge variant="outline">{call.language}</Badge>}
@@ -111,7 +111,7 @@ export function LeadDetailPanel({
                   </Badge>
                 )}
               </div>
-              <SheetTitle className="mt-2 font-serif text-2xl">
+              <SheetTitle className="mt-2 font-serif text-xl sm:text-2xl">
                 {lead?.name?.trim() || "Unnamed caller"}
               </SheetTitle>
               <SheetDescription>
