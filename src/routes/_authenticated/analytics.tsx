@@ -1,10 +1,14 @@
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { BarChart3, MapPin, PhoneCall } from "lucide-react";
 
+import { EmptyState } from "@/components/EmptyState";
 import { PageShell } from "@/components/PageShell";
+import { AnalyticsPageSkeleton } from "@/components/Skeletons";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
+
 
 type Row = {
   score: number | null;
@@ -34,7 +38,10 @@ const analyticsQuery = queryOptions({
       calls: (calls.data ?? []) as { id: string; channel: string; status: string }[],
     };
   },
+  // Charts render from cache on re-entry and refresh quietly behind the scenes.
+  staleTime: 30_000,
 });
+
 
 export const Route = createFileRoute("/_authenticated/analytics")({
   head: () => ({
@@ -56,12 +63,14 @@ export const Route = createFileRoute("/_authenticated/analytics")({
     ],
   }),
   component: Analytics,
+  pendingMs: 150,
+  pendingMinMs: 300,
   pendingComponent: () => (
     <Shell>
-      <Skeleton className="h-32 w-full" />
-      <Skeleton className="h-56 w-full" />
+      <AnalyticsPageSkeleton />
     </Shell>
   ),
+
   errorComponent: ({ error }) => (
     <Shell>
       <Card className="panel-3d p-6 text-sm">
@@ -121,6 +130,23 @@ function Analytics() {
     .sort((a, b) => b[1] - a[1])
     .slice(0, 6);
 
+  if (leads.length === 0 && totalCalls === 0) {
+    return (
+      <Shell>
+        <EmptyState
+          icon={<BarChart3 className="size-5" />}
+          title="No call data to chart yet"
+          description="Analytics fill in automatically once the agent has handled its first call — score mix, qualification rate and pipeline status all come from stored calls."
+          action={
+            <Button asChild size="sm">
+              <Link to="/">Run the first call</Link>
+            </Button>
+          }
+        />
+      </Shell>
+    );
+  }
+
   return (
     <Shell>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -137,18 +163,41 @@ function Analytics() {
       <div className="grid gap-5 lg:grid-cols-2">
         <Card className="tilt-card panel-3d p-6">
           <h2 className="text-lg font-semibold tracking-tight">Lead score mix</h2>
-          <Bars rows={bands} total={leads.length} />
+          {leads.length === 0 ? (
+            <EmptyState
+              bare
+              icon={<PhoneCall className="size-5" />}
+              title="No scored leads yet"
+              description="Every completed call is scored 0–100 and lands in one of these bands."
+            />
+          ) : (
+            <Bars rows={bands} total={leads.length} />
+          )}
         </Card>
         <Card className="tilt-card panel-3d p-6">
           <h2 className="text-lg font-semibold tracking-tight">Pipeline status</h2>
-          <Bars rows={statuses} total={leads.length} />
+          {leads.length === 0 ? (
+            <EmptyState
+              bare
+              icon={<BarChart3 className="size-5" />}
+              title="Pipeline is empty"
+              description="Set a status on a lead in the dashboard and it shows up here."
+            />
+          ) : (
+            <Bars rows={statuses} total={leads.length} />
+          )}
         </Card>
       </div>
 
       <Card className="panel-3d p-6">
         <h2 className="text-lg font-semibold tracking-tight">Most requested locations</h2>
         {locations.length === 0 ? (
-          <p className="mt-2 text-sm text-muted-foreground">No location data yet.</p>
+          <EmptyState
+            bare
+            icon={<MapPin className="size-5" />}
+            title="No location captured yet"
+            description="The agent asks for a preferred location during qualification — answers appear here ranked by demand."
+          />
         ) : (
           <Bars
             rows={locations.map(([label, value]) => ({ label, value }))}
@@ -158,6 +207,7 @@ function Analytics() {
       </Card>
     </Shell>
   );
+
 }
 
 function Stat({ label, value, sub }: { label: string; value: string; sub: string }) {

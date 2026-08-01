@@ -1,10 +1,12 @@
 import { queryOptions, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Download, Loader2, Save, Search, X } from "lucide-react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { Download, Loader2, PhoneCall, Save, Search, SearchX, X } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { EmptyState } from "@/components/EmptyState";
 import { PageShell } from "@/components/PageShell";
+import { LeadsPageSkeleton } from "@/components/Skeletons";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -17,7 +19,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { downloadCsv, stamp, toCsv } from "@/lib/csv";
@@ -31,6 +32,7 @@ import {
 } from "@/lib/leads-search";
 import { cn } from "@/lib/utils";
 import type { Turn } from "@/lib/agent/prompt";
+
 
 type LeadRow = {
   id: string;
@@ -76,7 +78,11 @@ const leadsQuery = queryOptions({
       calls: (calls.data ?? []) as unknown as CallRow[],
     };
   },
+  // Filtering/sorting happens in the URL, so returning to the dashboard should
+  // paint instantly from cache and revalidate in the background.
+  staleTime: 30_000,
 });
+
 
 export const Route = createFileRoute("/_authenticated/leads")({
   validateSearch: validateLeadsSearch,
@@ -100,13 +106,12 @@ export const Route = createFileRoute("/_authenticated/leads")({
     ],
   }),
   component: Leads,
+  // Paint the real dashboard skeleton quickly instead of a blank screen.
+  pendingMs: 150,
+  pendingMinMs: 300,
   pendingComponent: () => (
     <Shell>
-      <Card className="panel-3d space-y-3 p-6">
-        <Skeleton className="h-5 w-48" />
-        <Skeleton className="h-24 w-full" />
-        <Skeleton className="h-24 w-full" />
-      </Card>
+      <LeadsPageSkeleton />
     </Shell>
   ),
   errorComponent: ({ error }) => (
@@ -116,6 +121,7 @@ export const Route = createFileRoute("/_authenticated/leads")({
       </Card>
     </Shell>
   ),
+
 });
 
 function Shell({ children }: { children: React.ReactNode }) {
@@ -459,15 +465,34 @@ function Leads() {
       </Card>
 
       {data.calls.length === 0 ? (
-        <Card className="panel-3d p-6 text-sm text-muted-foreground">
-          No calls recorded yet. Start a call on the demo page and end it — the lead and summary
-          will appear here.
-        </Card>
+        <EmptyState
+          icon={<PhoneCall className="size-5" />}
+          title="No calls recorded yet"
+          description="Run a call on the demo page and hang up — the qualified requirement, lead score and AI summary land here within a couple of seconds."
+          action={
+            <Button asChild size="sm">
+              <Link to="/">Start a demo call</Link>
+            </Button>
+          }
+        />
       ) : filtered.length === 0 ? (
-        <Card className="panel-3d p-6 text-sm text-muted-foreground">
-          No calls match these filters. Try clearing the search or widening the date range.
-        </Card>
+        <EmptyState
+          icon={<SearchX className="size-5" />}
+          title="No calls match these filters"
+          description={
+            <>
+              {data.calls.length} call{data.calls.length === 1 ? "" : "s"} stored, but none match the
+              current search, score band, status or date range.
+            </>
+          }
+          action={
+            <Button variant="outline" size="sm" onClick={() => setSearch(leadsDefaultSearch)}>
+              <X className="size-4" /> Clear all filters
+            </Button>
+          }
+        />
       ) : (
+
         filtered.map((call) => {
           const lead = leadByCall.get(call.id);
           const matchingTurns = q
@@ -610,6 +635,7 @@ function Metric({ label, value }: { label: string; value: string }) {
 
 /** Post-call follow-up: status, callback time and private sales notes. */
 function LeadPipeline({ lead, onSaved }: { lead: LeadRow; onSaved: () => void }) {
+  const queryClient = useQueryClient();
   const [status, setStatus] = useState(lead.status ?? "new");
   const [notes, setNotes] = useState(lead.owner_notes ?? "");
   const [callback, setCallback] = useState(
@@ -624,22 +650,38 @@ function LeadPipeline({ lead, onSaved }: { lead: LeadRow; onSaved: () => void })
 
   async function save() {
     setBusy(true);
+    const patch = {
+      status,
+      owner_notes: notes.trim() || null,
+      callback_at: callback ? new Date(callback).toISOString() : null,
+    };
+
+    // Optimistic: the badge, metrics and status filter update instantly while
+    // the write is still in flight.
+    const previous = queryClient.getQueryData(leadsQuery.queryKey);
+    queryClient.setQueryData(leadsQuery.queryKey, (current) =>
+      current
+        ? {
+            ...current,
+            leads: current.leads.map((row) => (row.id === lead.id ? { ...row, ...patch } : row)),
+          }
+        : current,
+    );
+
     const { error } = await supabase
       .from("leads")
-      .update({
-        status,
-        owner_notes: notes.trim() || null,
-        callback_at: callback ? new Date(callback).toISOString() : null,
-      } as never)
+      .update(patch as never)
       .eq("id", lead.id);
     setBusy(false);
     if (error) {
+      queryClient.setQueryData(leadsQuery.queryKey, previous);
       toast.error(error.message);
       return;
     }
     toast.success("Lead updated");
     onSaved();
   }
+
 
   return (
     <div className="mt-5 rounded-lg border border-border bg-secondary/30 p-4">

@@ -5,12 +5,13 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { PageShell } from "@/components/PageShell";
+import { CatalogFormSkeleton } from "@/components/Skeletons";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
+
 import { defaultProject, type Configuration, type ProjectCatalog } from "@/lib/agent/project";
 import { loadCatalogForEditing, saveProjectCatalog } from "@/lib/catalog.functions";
 
@@ -105,15 +106,11 @@ function Admin() {
   if (state === "loading") {
     return (
       <Shell>
-        <Card className="panel-3d space-y-3 p-6">
-          <Skeleton className="h-5 w-40" />
-          <Skeleton className="h-9 w-full" />
-          <Skeleton className="h-9 w-full" />
-          <Skeleton className="h-9 w-2/3" />
-        </Card>
+        <CatalogFormSkeleton />
       </Shell>
     );
   }
+
 
   if (state === "denied") {
     return (
