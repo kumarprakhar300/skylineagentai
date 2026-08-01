@@ -4,6 +4,8 @@ import { agentTurn } from "@/lib/agent/agent-turn.server";
 import { chat } from "@/lib/ai.server";
 import { summaryPrompt, type LeadFields, type Turn } from "@/lib/agent/prompt";
 import { scoreLead, scoreLine } from "@/lib/agent/score";
+import { twilioSignatureIsValid } from "@/lib/twilio-signature.server";
+
 
 const DEVANAGARI = /[\u0900-\u097F]/;
 
