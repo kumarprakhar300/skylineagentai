@@ -120,19 +120,16 @@ export const Route = createFileRoute("/_authenticated/leads")({
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
-    <main className="min-h-screen bg-background">
-      <AppHeader />
-      <div className="mx-auto max-w-6xl px-5 py-10">
-        <h1 className="text-3xl font-semibold tracking-tight">Leads &amp; call records</h1>
-        <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-          Every completed call is stored with its transcript, detected language, extracted
-          requirement and AI-written summary.
-        </p>
-        <div className="mt-8 space-y-5">{children}</div>
-      </div>
-    </main>
+    <PageShell
+      eyebrow="Pipeline"
+      title={<>Leads &amp; call records</>}
+      description="Every completed call is stored with its transcript, detected language, extracted requirement and AI-written summary."
+    >
+      {children}
+    </PageShell>
   );
 }
+
 
 
 function uniqueSorted(values: (string | null | undefined)[]): string[] {
