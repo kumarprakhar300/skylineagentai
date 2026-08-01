@@ -1,6 +1,6 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft } from "lucide-react";
+import { createFileRoute } from "@tanstack/react-router";
 
+import { PageShell } from "@/components/PageShell";
 import { Card } from "@/components/ui/card";
 import { conversationStages } from "@/lib/agent/prompt";
 
