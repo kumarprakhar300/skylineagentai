@@ -36,7 +36,7 @@ export function PageShell({
       {header && <AppHeader />}
       <div
         className={cn(
-          "relative mx-auto px-5 pb-16 pt-10",
+          "relative mx-auto w-full px-4 pb-14 pt-6 sm:px-5 sm:pb-16 sm:pt-10",
           width === "narrow" ? "max-w-3xl" : "max-w-6xl",
         )}
       >
@@ -54,16 +54,16 @@ export function PageShell({
               {eyebrow}
             </p>
           )}
-          <h1 className="mt-2 text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
+          <h1 className="mt-2 text-[1.6rem] font-semibold leading-tight tracking-tight sm:text-3xl lg:text-4xl">
             {title}
           </h1>
           {description && (
-            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+            <p className="mt-2.5 max-w-2xl text-[0.9rem] leading-relaxed text-muted-foreground sm:text-sm">
               {description}
             </p>
           )}
         </header>
-        <div className="mt-8 space-y-5">{children}</div>
+        <div className="mt-6 space-y-4 sm:mt-8 sm:space-y-5">{children}</div>
       </div>
     </main>
   );

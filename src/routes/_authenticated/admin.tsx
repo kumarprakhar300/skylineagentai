@@ -115,7 +115,7 @@ function Admin() {
   if (state === "denied") {
     return (
       <Shell>
-        <Card className="panel-3d max-w-md p-6">
+        <Card className="panel-3d max-w-md p-4 sm:p-6">
           <div className="flex items-center gap-2">
             <ShieldAlert className="size-4 text-destructive" />
             <p className="font-medium">Admin access required</p>
@@ -131,9 +131,9 @@ function Admin() {
 
   return (
     <Shell>
-      <Card className="panel-3d p-6">
-        <h2 className="text-lg font-semibold tracking-tight">Project basics</h2>
-        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+      <Card className="panel-3d p-4 sm:p-6">
+        <h2 className="text-base font-semibold tracking-tight sm:text-lg">Project basics</h2>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 sm:gap-4">
           <Field label="Project name" value={draft.name} onChange={(v) => set("name", v)} />
           <Field label="Developer" value={draft.developer} onChange={(v) => set("developer", v)} />
           <Field label="Location" value={draft.location} onChange={(v) => set("location", v)} />
@@ -169,9 +169,9 @@ function Admin() {
         </div>
       </Card>
 
-      <Card className="panel-3d p-6">
-        <div className="flex items-center justify-between gap-3">
-          <h2 className="text-lg font-semibold tracking-tight">Configurations &amp; pricing</h2>
+      <Card className="panel-3d p-4 sm:p-6">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-base font-semibold tracking-tight sm:text-lg">Configurations &amp; pricing</h2>
           <Button
             variant="outline"
             size="sm"
@@ -187,20 +187,26 @@ function Admin() {
             <p className="text-sm text-muted-foreground">No configurations yet.</p>
           )}
           {draft.configurations.map((config, index) => (
-            <div key={index} className="grid gap-2 sm:grid-cols-[1fr_1fr_1.4fr_auto]">
+            <div
+              key={index}
+              className="grid grid-cols-[minmax(0,1fr)_auto] gap-2 rounded-lg border border-border/60 p-3 sm:grid-cols-[1fr_1fr_1.4fr_auto] sm:rounded-none sm:border-0 sm:p-0"
+            >
               <Input
+                className="col-span-2 sm:col-span-1"
                 value={config.type}
                 placeholder="3 BHK"
                 aria-label={`Configuration ${index + 1} type`}
                 onChange={(e) => setConfig(index, { type: e.target.value })}
               />
               <Input
+                className="col-span-2 sm:col-span-1"
                 value={config.carpet}
                 placeholder="1,050 sq ft"
                 aria-label={`Configuration ${index + 1} carpet area`}
                 onChange={(e) => setConfig(index, { carpet: e.target.value })}
               />
               <Input
+                className="col-span-2 sm:col-span-1"
                 value={config.price}
                 placeholder="1.15 crore – 1.4 crore"
                 aria-label={`Configuration ${index + 1} price`}
@@ -209,6 +215,7 @@ function Admin() {
               <Button
                 variant="ghost"
                 size="icon"
+                className="col-span-2 justify-self-end sm:col-span-1"
                 aria-label={`Remove configuration ${index + 1}`}
                 onClick={() =>
                   set(
@@ -224,8 +231,8 @@ function Admin() {
         </div>
       </Card>
 
-      <Card className="panel-3d p-6">
-        <h2 className="text-lg font-semibold tracking-tight">Amenities</h2>
+      <Card className="panel-3d p-4 sm:p-6">
+        <h2 className="text-base font-semibold tracking-tight sm:text-lg">Amenities</h2>
         <p className="mt-1 text-xs text-muted-foreground">One amenity per line.</p>
         <Textarea
           className="mt-3"
@@ -236,8 +243,8 @@ function Admin() {
         />
       </Card>
 
-      <Card className="panel-3d p-6">
-        <h2 className="text-lg font-semibold tracking-tight">Location advantages</h2>
+      <Card className="panel-3d p-4 sm:p-6">
+        <h2 className="text-base font-semibold tracking-tight sm:text-lg">Location advantages</h2>
         <p className="mt-1 text-xs text-muted-foreground">One advantage per line.</p>
         <Textarea
           className="mt-3"
@@ -248,12 +255,17 @@ function Admin() {
         />
       </Card>
 
-      <div className="flex flex-wrap items-center gap-3">
-        <Button onClick={handleSave} disabled={busy}>
+      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
+        <Button className="w-full sm:w-auto" onClick={handleSave} disabled={busy}>
           {busy ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
           Save catalog
         </Button>
-        <Button variant="ghost" onClick={() => setDraft(defaultProject)} disabled={busy}>
+        <Button
+          variant="ghost"
+          className="w-full sm:w-auto"
+          onClick={() => setDraft(defaultProject)}
+          disabled={busy}
+        >
           Reset to demo defaults
         </Button>
       </div>

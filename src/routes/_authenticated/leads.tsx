@@ -1,6 +1,15 @@
 import { queryOptions, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Download, PanelRight, PhoneCall, Search, SearchX, X } from "lucide-react";
+import {
+  ChevronDown,
+  Download,
+  PanelRight,
+  PhoneCall,
+  Search,
+  SearchX,
+  SlidersHorizontal,
+  X,
+} from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -128,6 +137,7 @@ function Leads() {
   const leadByCall = new Map(data.leads.filter((l) => l.call_id).map((l) => [l.call_id!, l]));
 
   const [openCallId, setOpenCallId] = useState<string | null>(null);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const openCall: CallRow | undefined = openCallId
     ? data.calls.find((c) => c.id === openCallId)
     : undefined;
@@ -292,6 +302,16 @@ function Leads() {
     downloadCsv(`call-transcripts-${stamp()}.csv`, csv);
   };
 
+  const activeFilterCount = [
+    search.location !== ALL,
+    search.budget !== ALL,
+    search.band !== ALL,
+    search.status !== ALL,
+    search.sort !== "recent",
+    !!search.from,
+    !!search.to,
+  ].filter(Boolean).length;
+
   const hasFilters =
     !!search.q ||
     search.location !== ALL ||
@@ -304,17 +324,17 @@ function Leads() {
 
   return (
     <Shell>
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4">
         <Metric label="Calls handled" value={String(total)} />
         <Metric label="Hot leads" value={String(hot)} />
         <Metric label="Fully qualified" value={String(qualified)} />
         <Metric label="Avg lead score" value={`${avgScore}/100`} />
       </div>
 
-      <Card className="panel-3d p-5">
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-6">
+      <Card className="panel-3d p-4 sm:p-5">
+        <div className="grid gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-6">
 
-          <div className="lg:col-span-2">
+          <div className="sm:col-span-2 lg:col-span-2">
             <Label htmlFor="lead-search" className="text-xs text-muted-foreground">
               Search transcripts &amp; summaries
             </Label>
@@ -329,6 +349,36 @@ function Leads() {
               />
             </div>
           </div>
+
+          <div className="sm:hidden">
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full justify-between"
+              aria-expanded={filtersOpen}
+              onClick={() => setFiltersOpen((v) => !v)}
+            >
+              <span className="flex items-center gap-2">
+                <SlidersHorizontal className="size-4" />
+                Filters &amp; sorting
+                {activeFilterCount > 0 && (
+                  <Badge variant="secondary" className="ml-1">
+                    {activeFilterCount}
+                  </Badge>
+                )}
+              </span>
+              <ChevronDown
+                className={cn("size-4 transition-transform", filtersOpen && "rotate-180")}
+              />
+            </Button>
+          </div>
+
+          <div
+            className={cn(
+              "col-span-full grid gap-3 sm:col-span-2 sm:grid-cols-2 sm:gap-4 lg:col-span-4 lg:grid-cols-4",
+              !filtersOpen && "hidden sm:grid",
+            )}
+          >
 
           <div>
             <Label className="text-xs text-muted-foreground">Location</Label>
@@ -435,24 +485,27 @@ function Leads() {
               />
             </div>
           </div>
+          </div>
         </div>
 
-        <div className="mt-4 flex items-center justify-between gap-3">
+        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-xs text-muted-foreground">
             Showing {filtered.length} of {data.calls.length} calls
           </p>
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center">
             <Button
               variant="outline"
               size="sm"
+              className="w-full sm:w-auto"
               disabled={filtered.length === 0}
               onClick={exportLeads}
             >
-              <Download className="size-4" /> Leads &amp; summaries CSV
+              <Download className="size-4" /> Leads CSV
             </Button>
             <Button
               variant="outline"
               size="sm"
+              className="w-full sm:w-auto"
               disabled={filtered.length === 0}
               onClick={exportTranscripts}
             >
@@ -462,8 +515,8 @@ function Leads() {
             <Button
               variant="ghost"
               size="sm"
+              className="col-span-2 w-full sm:w-auto"
               onClick={() => setSearch(leadsDefaultSearch)}
-
             >
               <X className="size-4" /> Clear filters
             </Button>
@@ -507,8 +560,8 @@ function Leads() {
             ? (call.transcript ?? []).filter((t) => t.content.toLowerCase().includes(q))
             : [];
           return (
-            <Card key={call.id} className="tilt-card panel-3d p-6">
-              <div className="flex flex-wrap items-center gap-2">
+            <Card key={call.id} className="tilt-card panel-3d p-4 sm:p-6">
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                 <Badge variant="secondary">{call.channel}</Badge>
                 {call.language && <Badge variant="outline">{call.language}</Badge>}
                 {lead && typeof lead.score === "number" && <ScoreBadge lead={lead} />}
@@ -519,14 +572,14 @@ function Leads() {
                 <Button
                   size="sm"
                   variant="outline"
-                  className="ml-auto"
+                  className="mt-1 w-full sm:ml-auto sm:mt-0 sm:w-auto"
                   onClick={() => setOpenCallId(call.id)}
                 >
                   <PanelRight className="size-4" /> Open details
                 </Button>
               </div>
 
-              <div className="mt-4 grid gap-6 lg:grid-cols-2">
+              <div className="mt-4 grid gap-5 sm:gap-6 lg:grid-cols-2">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                     Lead captured
@@ -616,18 +669,22 @@ function ScoreBadge({ lead }: { lead: LeadRow }) {
 
 function Row({ label, value }: { label: string; value: string | null | undefined }) {
   return (
-    <div className="flex justify-between gap-3">
-      <dt className="text-muted-foreground">{label}</dt>
-      <dd className={value ? "font-medium" : "text-muted-foreground/50"}>{value ?? "—"}</dd>
+    <div className="flex items-start justify-between gap-3">
+      <dt className="shrink-0 text-muted-foreground">{label}</dt>
+      <dd className={cn("min-w-0 break-words text-right", value ? "font-medium" : "text-muted-foreground/50")}>
+        {value ?? "—"}
+      </dd>
     </div>
   );
 }
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <Card className="tilt-card panel-3d p-4">
-      <p className="text-xs uppercase tracking-wide text-muted-foreground">{label}</p>
-      <p className="mt-1 font-serif text-2xl font-semibold">{value}</p>
+    <Card className="tilt-card panel-3d p-3.5 sm:p-4">
+      <p className="text-[0.68rem] uppercase tracking-wide text-muted-foreground sm:text-xs">
+        {label}
+      </p>
+      <p className="mt-1 font-serif text-xl font-semibold sm:text-2xl">{value}</p>
     </Card>
   );
 }

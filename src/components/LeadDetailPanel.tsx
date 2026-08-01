@@ -90,7 +90,7 @@ export function LeadDetailPanel({
       >
         {call && (
           <>
-            <SheetHeader className="border-b border-border bg-secondary/30 p-6">
+            <SheetHeader className="border-b border-border bg-secondary/30 p-4 sm:p-6">
               <div className="flex flex-wrap items-center gap-2">
                 <Badge variant="secondary">{call.channel}</Badge>
                 {call.language && <Badge variant="outline">{call.language}</Badge>}
@@ -111,7 +111,7 @@ export function LeadDetailPanel({
                   </Badge>
                 )}
               </div>
-              <SheetTitle className="mt-2 font-serif text-2xl">
+              <SheetTitle className="mt-2 font-serif text-xl sm:text-2xl">
                 {lead?.name?.trim() || "Unnamed caller"}
               </SheetTitle>
               <SheetDescription>
@@ -124,8 +124,8 @@ export function LeadDetailPanel({
             </SheetHeader>
 
             <Tabs value={tab} onValueChange={setTab} className="min-h-0 flex-1 gap-0">
-              <div className="border-b border-border px-6 py-3">
-                <TabsList className="w-full">
+              <div className="border-b border-border px-4 py-3 sm:px-6">
+                <TabsList className="w-full justify-start overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                   <TabsTrigger value="summary" className="flex-1">
                     Summary
                   </TabsTrigger>
@@ -141,7 +141,7 @@ export function LeadDetailPanel({
                 </TabsList>
               </div>
 
-              <div className="min-h-0 flex-1 overflow-y-auto p-6">
+              <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-6">
                 <TabsContent value="summary" className="mt-0 space-y-5">
                   <section>
                     <SectionLabel>AI call summary</SectionLabel>

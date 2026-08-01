@@ -149,7 +149,7 @@ function Analytics() {
 
   return (
     <Shell>
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4">
         <Stat label="Calls handled" value={String(totalCalls)} sub={`${completed} completed`} />
         <Stat label="Leads captured" value={String(leads.length)} sub={`${phone} by phone`} />
         <Stat
@@ -160,9 +160,9 @@ function Analytics() {
         <Stat label="Avg lead score" value={`${avgScore}/100`} sub="0–100 scoring engine" />
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-2">
-        <Card className="tilt-card panel-3d p-6">
-          <h2 className="text-lg font-semibold tracking-tight">Lead score mix</h2>
+      <div className="grid gap-4 sm:gap-5 lg:grid-cols-2">
+        <Card className="tilt-card panel-3d p-4 sm:p-6">
+          <h2 className="text-base font-semibold tracking-tight sm:text-lg">Lead score mix</h2>
           {leads.length === 0 ? (
             <EmptyState
               bare
@@ -174,8 +174,8 @@ function Analytics() {
             <Bars rows={bands} total={leads.length} />
           )}
         </Card>
-        <Card className="tilt-card panel-3d p-6">
-          <h2 className="text-lg font-semibold tracking-tight">Pipeline status</h2>
+        <Card className="tilt-card panel-3d p-4 sm:p-6">
+          <h2 className="text-base font-semibold tracking-tight sm:text-lg">Pipeline status</h2>
           {leads.length === 0 ? (
             <EmptyState
               bare
@@ -189,8 +189,8 @@ function Analytics() {
         </Card>
       </div>
 
-      <Card className="panel-3d p-6">
-        <h2 className="text-lg font-semibold tracking-tight">Most requested locations</h2>
+      <Card className="panel-3d p-4 sm:p-6">
+        <h2 className="text-base font-semibold tracking-tight sm:text-lg">Most requested locations</h2>
         {locations.length === 0 ? (
           <EmptyState
             bare
@@ -212,10 +212,12 @@ function Analytics() {
 
 function Stat({ label, value, sub }: { label: string; value: string; sub: string }) {
   return (
-    <Card className="tilt-card panel-3d p-4">
-      <p className="text-xs uppercase tracking-wide text-muted-foreground">{label}</p>
-      <p className="mt-1 font-serif text-3xl font-semibold">{value}</p>
-      <p className="mt-1 text-xs text-muted-foreground">{sub}</p>
+    <Card className="tilt-card panel-3d p-3.5 sm:p-4">
+      <p className="text-[0.68rem] uppercase tracking-wide text-muted-foreground sm:text-xs">
+        {label}
+      </p>
+      <p className="mt-1 font-serif text-2xl font-semibold sm:text-3xl">{value}</p>
+      <p className="mt-1 text-[0.68rem] leading-snug text-muted-foreground sm:text-xs">{sub}</p>
     </Card>
   );
 }
@@ -226,9 +228,9 @@ function Bars({ rows, total }: { rows: { label: string; value: number }[]; total
     <ul className="mt-4 space-y-3">
       {rows.map((row) => (
         <li key={row.label}>
-          <div className="flex items-center justify-between text-sm">
-            <span className="capitalize">{row.label}</span>
-            <span className="text-muted-foreground">{row.value}</span>
+          <div className="flex items-center justify-between gap-3 text-sm">
+            <span className="min-w-0 truncate capitalize">{row.label}</span>
+            <span className="shrink-0 tabular-nums text-muted-foreground">{row.value}</span>
           </div>
           <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-muted">
             <div
