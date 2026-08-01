@@ -2,6 +2,7 @@ import { chat } from "@/lib/ai.server";
 import { readCatalog } from "@/lib/catalog.server";
 import { languageInstruction, type SpokenLanguage } from "@/lib/agent/language";
 import { emptyLead, systemPrompt, type LeadFields, type Turn } from "@/lib/agent/prompt";
+import { cleanSpokenText } from "@/lib/agent/transcript-text";
 
 
 export type AgentTurnResult = {
