@@ -49,46 +49,8 @@ function Index() {
 
   return (
     <main className="min-h-screen bg-background">
-      <header className="border-b bg-secondary/40 grain">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-5 py-4">
-          <div className="flex items-center gap-2.5">
-            <span className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <Building2 className="size-5" />
-            </span>
-            <div>
-              <p className="text-sm font-semibold leading-tight">Skyline Estates</p>
-              <p className="text-xs text-muted-foreground">AI calling agent · demo</p>
-            </div>
-          </div>
-          <nav className="flex items-center gap-1 text-sm">
-            <Link
-              to="/leads"
-              search={leadsDefaultSearch}
-              className="rounded-md px-3 py-1.5 font-medium transition-colors hover:bg-secondary"
-            >
-              Leads &amp; calls
-            </Link>
-            <Link
-              to="/docs"
-              className="rounded-md px-3 py-1.5 font-medium transition-colors hover:bg-secondary"
-            >
-              How it works
-            </Link>
-            <Link
-              to="/admin"
-              className="rounded-md px-3 py-1.5 font-medium transition-colors hover:bg-secondary"
-            >
-              Edit catalog
-            </Link>
-            <Link
-              to="/phone"
-              className="rounded-md px-3 py-1.5 font-medium transition-colors hover:bg-secondary"
-            >
-              Phone call
-            </Link>
-          </nav>
-        </div>
-      </header>
+      <AppHeader />
+
 
       <section className="mx-auto max-w-6xl px-5 pt-12">
         <Badge variant="secondary" className="gap-1.5">
