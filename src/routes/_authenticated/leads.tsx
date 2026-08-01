@@ -633,7 +633,7 @@ function LeadPipeline({ lead, onSaved }: { lead: LeadRow; onSaved: () => void })
         status,
         owner_notes: notes.trim() || null,
         callback_at: callback ? new Date(callback).toISOString() : null,
-      })
+      } as never)
       .eq("id", lead.id);
     setBusy(false);
     if (error) {
