@@ -1,5 +1,6 @@
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { leadsDefaultSearch } from "@/routes/leads";
 import { Building2, Database, FileText, Languages, ShieldCheck, Sparkles } from "lucide-react";
 
 import { VoiceCall } from "@/components/VoiceCall";
@@ -62,6 +63,7 @@ function Index() {
           <nav className="flex items-center gap-1 text-sm">
             <Link
               to="/leads"
+              search={leadsDefaultSearch}
               className="rounded-md px-3 py-1.5 font-medium transition-colors hover:bg-secondary"
             >
               Leads &amp; calls

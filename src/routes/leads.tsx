@@ -1,6 +1,6 @@
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, Search, X } from "lucide-react";
+import { ArrowLeft, Download, Search, X } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
+import { downloadCsv, stamp, toCsv } from "@/lib/csv";
 import { cn } from "@/lib/utils";
 import type { Turn } from "@/lib/agent/prompt";
 
@@ -72,6 +73,16 @@ type LeadsSearch = {
 };
 
 const ALL = "all";
+
+export const leadsDefaultSearch: LeadsSearch = {
+  q: "",
+  location: ALL,
+  budget: ALL,
+  band: ALL,
+  sort: "recent",
+  from: "",
+  to: "",
+};
 
 function str(value: unknown): string {
   return typeof value === "string" ? value : "";
@@ -202,6 +213,74 @@ function Leads() {
     );
   }
 
+  const exportLeads = () => {
+    const csv = toCsv(
+      [
+        "Call date",
+        "Channel",
+        "Language",
+        "Name",
+        "Phone",
+        "Buy / invest",
+        "Location",
+        "Property type",
+        "Configuration",
+        "Budget",
+        "Purpose",
+        "Timeline",
+        "Lead score",
+        "Score band",
+        "Score signals",
+        "Call summary",
+      ],
+      filtered.map((call) => {
+        const lead = leadByCall.get(call.id);
+        return [
+          new Date(call.started_at).toLocaleString("en-IN"),
+          call.channel,
+          call.language,
+          lead?.name,
+          lead?.phone,
+          lead?.intent,
+          lead?.location,
+          lead?.property_type,
+          lead?.configuration,
+          lead?.budget,
+          lead?.purpose,
+          lead?.timeline,
+          lead?.score,
+          lead?.score_band,
+          lead?.score_reasons,
+          call.summary,
+        ];
+      }),
+    );
+    downloadCsv(`leads-${stamp()}.csv`, csv);
+  };
+
+  const exportTranscripts = () => {
+    const rows: unknown[][] = [];
+    filtered.forEach((call) => {
+      const lead = leadByCall.get(call.id);
+      (call.transcript ?? []).forEach((turn, index) => {
+        rows.push([
+          call.id,
+          new Date(call.started_at).toLocaleString("en-IN"),
+          lead?.name,
+          lead?.phone,
+          index + 1,
+          turn.role === "user" ? "Customer" : "Agent",
+          turn.content,
+        ]);
+      });
+    });
+    const csv = toCsv(
+      ["Call ID", "Call date", "Name", "Phone", "Turn", "Speaker", "Message"],
+      rows,
+    );
+    downloadCsv(`call-transcripts-${stamp()}.csv`, csv);
+  };
+
   const hasFilters =
     !!search.q ||
     search.location !== ALL ||
@@ -325,7 +404,24 @@ function Leads() {
           <p className="text-xs text-muted-foreground">
             Showing {filtered.length} of {data.calls.length} calls
           </p>
-          {hasFilters && (
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={filtered.length === 0}
+              onClick={exportLeads}
+            >
+              <Download className="size-4" /> Leads &amp; summaries CSV
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={filtered.length === 0}
+              onClick={exportTranscripts}
+            >
+              <Download className="size-4" /> Transcripts CSV
+            </Button>
+            {hasFilters && (
             <Button
               variant="ghost"
               size="sm"
@@ -343,7 +439,8 @@ function Leads() {
             >
               <X className="size-4" /> Clear filters
             </Button>
-          )}
+            )}
+          </div>
         </div>
       </Card>
 
