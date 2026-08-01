@@ -127,10 +127,46 @@ function Leads() {
 
   const leadByCall = new Map(data.leads.filter((l) => l.call_id).map((l) => [l.call_id!, l]));
 
+  const [openCallId, setOpenCallId] = useState<string | null>(null);
+  const openCall: CallRow | undefined = openCallId
+    ? data.calls.find((c) => c.id === openCallId)
+    : undefined;
+
   const locations = uniqueSorted(data.leads.map((l) => l.location));
   const budgets = uniqueSorted(data.leads.map((l) => l.budget));
 
   const refresh = () => queryClient.invalidateQueries({ queryKey: ["leads"] });
+
+  /**
+   * Optimistic follow-up save: badges, metrics and status filters update
+   * instantly while the write is in flight, and roll back on failure.
+   */
+  async function saveLead(lead: LeadRow, patch: LeadPatch) {
+    const previous = queryClient.getQueryData(leadsQuery.queryKey);
+    queryClient.setQueryData(leadsQuery.queryKey, (current) =>
+      current
+        ? {
+            ...current,
+            leads: current.leads.map((row) => (row.id === lead.id ? { ...row, ...patch } : row)),
+          }
+        : current,
+    );
+
+    const { error } = await supabase
+      .from("leads")
+      .update(patch as never)
+      .eq("id", lead.id);
+
+    if (error) {
+      queryClient.setQueryData(leadsQuery.queryKey, previous);
+      toast.error(error.message);
+      return false;
+    }
+    toast.success("Lead updated");
+    refresh();
+    return true;
+  }
+
 
   const total = data.calls.length;
   const hot = data.leads.filter((l) => l.score_band === "hot").length;
