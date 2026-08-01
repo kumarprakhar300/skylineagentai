@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { chat, gatewayErrorResponse } from "@/lib/ai.server";
 import { summaryPrompt, type LeadFields, type Turn } from "@/lib/agent/prompt";
+import { scoreLead, scoreLine } from "@/lib/agent/score";
 
 type Body = {
   transcript?: Turn[];
@@ -21,6 +22,9 @@ export const Route = createFileRoute("/api/end-call")({
             return Response.json({ error: "Empty transcript" }, { status: 400 });
           }
 
+          const lead = body.lead ?? {};
+          const score = scoreLead(lead, transcript);
+
           let summary = "";
           try {
             summary = (
@@ -30,6 +34,7 @@ export const Route = createFileRoute("/api/end-call")({
             console.error("[end-call] summary failed", error);
             summary = "Summary could not be generated for this call.";
           }
+          summary = `${summary}\n\n${scoreLine(score)}`;
 
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
@@ -51,7 +56,6 @@ export const Route = createFileRoute("/api/end-call")({
             return Response.json({ error: "Could not save the call" }, { status: 500 });
           }
 
-          const lead = body.lead ?? {};
           const { error: leadError } = await supabaseAdmin.from("leads").insert({
             call_id: call.id,
             name: lead.name ?? null,
@@ -63,6 +67,9 @@ export const Route = createFileRoute("/api/end-call")({
             budget: lead.budget ?? null,
             purpose: lead.purpose ?? null,
             timeline: lead.timeline ?? null,
+            score: score.score,
+            score_band: score.band,
+            score_reasons: score.reasons as unknown as never,
           });
 
           if (leadError) {
@@ -73,7 +80,7 @@ export const Route = createFileRoute("/api/end-call")({
             );
           }
 
-          return Response.json({ callId: call.id, summary });
+          return Response.json({ callId: call.id, summary, score });
         } catch (error) {
           return gatewayErrorResponse(error);
         }

@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
+import { cn } from "@/lib/utils";
 import type { Turn } from "@/lib/agent/prompt";
 
 type LeadRow = {
@@ -29,6 +30,9 @@ type LeadRow = {
   budget: string | null;
   purpose: string | null;
   timeline: string | null;
+  score: number | null;
+  score_band: string | null;
+  score_reasons: string[] | null;
   created_at: string;
 };
 
@@ -59,6 +63,8 @@ const leadsQuery = queryOptions({
 
 type LeadsSearch = {
   q: string;
+  band: string;
+  sort: string;
   location: string;
   budget: string;
   from: string;
@@ -74,6 +80,8 @@ function str(value: unknown): string {
 export const Route = createFileRoute("/leads")({
   validateSearch: (search: Record<string, unknown>): LeadsSearch => ({
     q: str(search['q']),
+    band: str(search['band']) || ALL,
+    sort: str(search['sort']) === "score" ? "score" : "recent",
     location: str(search['location']) || ALL,
     budget: str(search['budget']) || ALL,
     from: str(search['from']),
@@ -151,11 +159,12 @@ function Leads() {
   const fromTime = search.from ? new Date(`${search.from}T00:00:00`).getTime() : null;
   const toTime = search.to ? new Date(`${search.to}T23:59:59`).getTime() : null;
 
-  const filtered = data.calls.filter((call) => {
+  const filtered = [...data.calls].filter((call) => {
     const lead = leadByCall.get(call.id);
 
     if (search.location !== ALL && (lead?.location ?? "") !== search.location) return false;
     if (search.budget !== ALL && (lead?.budget ?? "") !== search.budget) return false;
+    if (search.band !== ALL && (lead?.score_band ?? "") !== search.band) return false;
 
     const started = new Date(call.started_at).getTime();
     if (fromTime !== null && started < fromTime) return false;
@@ -186,13 +195,26 @@ function Leads() {
     return true;
   });
 
+  if (search.sort === "score") {
+    filtered.sort(
+      (a, b) =>
+        (leadByCall.get(b.id)?.score ?? -1) - (leadByCall.get(a.id)?.score ?? -1),
+    );
+  }
+
   const hasFilters =
-    !!search.q || search.location !== ALL || search.budget !== ALL || !!search.from || !!search.to;
+    !!search.q ||
+    search.location !== ALL ||
+    search.budget !== ALL ||
+    search.band !== ALL ||
+    search.sort !== "recent" ||
+    !!search.from ||
+    !!search.to;
 
   return (
     <Shell>
       <Card className="p-5">
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-6">
           <div className="lg:col-span-2">
             <Label htmlFor="lead-search" className="text-xs text-muted-foreground">
               Search transcripts &amp; summaries
@@ -243,6 +265,34 @@ function Leads() {
             </Select>
           </div>
 
+          <div>
+            <Label className="text-xs text-muted-foreground">Lead score</Label>
+            <Select value={search.band} onValueChange={(v) => setSearch({ band: v })}>
+              <SelectTrigger className="mt-1.5">
+                <SelectValue placeholder="All scores" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={ALL}>All scores</SelectItem>
+                <SelectItem value="hot">Hot (70+)</SelectItem>
+                <SelectItem value="warm">Warm (40-69)</SelectItem>
+                <SelectItem value="cold">Cold (&lt;40)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <Label className="text-xs text-muted-foreground">Sort by</Label>
+            <Select value={search.sort} onValueChange={(v) => setSearch({ sort: v })}>
+              <SelectTrigger className="mt-1.5">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="recent">Most recent</SelectItem>
+                <SelectItem value="score">Highest lead score</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
           <div className="grid grid-cols-2 gap-2">
             <div>
               <Label htmlFor="from" className="text-xs text-muted-foreground">
@@ -280,7 +330,15 @@ function Leads() {
               variant="ghost"
               size="sm"
               onClick={() =>
-                setSearch({ q: "", location: ALL, budget: ALL, from: "", to: "" })
+                setSearch({
+                  q: "",
+                  location: ALL,
+                  budget: ALL,
+                  band: ALL,
+                  sort: "recent",
+                  from: "",
+                  to: "",
+                })
               }
             >
               <X className="size-4" /> Clear filters
@@ -309,6 +367,7 @@ function Leads() {
               <div className="flex flex-wrap items-center gap-2">
                 <Badge variant="secondary">{call.channel}</Badge>
                 {call.language && <Badge variant="outline">{call.language}</Badge>}
+                {lead && typeof lead.score === "number" && <ScoreBadge lead={lead} />}
                 <span className="text-xs text-muted-foreground">
                   {new Date(call.started_at).toLocaleString("en-IN")}
                 </span>
@@ -329,7 +388,22 @@ function Leads() {
                     <Row label="Budget" value={lead?.budget} />
                     <Row label="Purpose" value={lead?.purpose} />
                     <Row label="Timeline" value={lead?.timeline} />
+                    <Row
+                      label="Lead score"
+                      value={
+                        typeof lead?.score === "number"
+                          ? `${lead.score}/100 (${lead.score_band ?? "—"})`
+                          : null
+                      }
+                    />
                   </dl>
+                  {lead?.score_reasons && lead.score_reasons.length > 0 && (
+                    <ul className="mt-3 space-y-1 text-xs text-muted-foreground">
+                      {lead.score_reasons.map((reason) => (
+                        <li key={reason}>• {reason}</li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
 
                 <div>
@@ -383,6 +457,23 @@ function Leads() {
         })
       )}
     </Shell>
+  );
+}
+
+function ScoreBadge({ lead }: { lead: LeadRow }) {
+  const band = lead.score_band ?? "cold";
+  return (
+    <Badge
+      className={cn(
+        "border",
+        band === "hot" && "border-transparent bg-primary text-primary-foreground",
+        band === "warm" && "border-transparent bg-accent text-accent-foreground",
+        band === "cold" && "bg-muted text-muted-foreground",
+      )}
+    >
+      {band === "hot" ? "🔥 " : ""}
+      {band.charAt(0).toUpperCase() + band.slice(1)} · {lead.score}/100
+    </Badge>
   );
 }
 
