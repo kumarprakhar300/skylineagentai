@@ -56,10 +56,46 @@ export type Database = {
         }
         Relationships: []
       }
+      lead_activity: {
+        Row: {
+          actor_id: string | null
+          created_at: string
+          detail: string
+          id: string
+          kind: string
+          lead_id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          created_at?: string
+          detail?: string
+          id?: string
+          kind: string
+          lead_id: string
+        }
+        Update: {
+          actor_id?: string | null
+          created_at?: string
+          detail?: string
+          id?: string
+          kind?: string
+          lead_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_activity_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leads: {
         Row: {
           budget: string | null
           call_id: string | null
+          callback_at: string | null
           configuration: string | null
           created_at: string
           id: string
@@ -67,18 +103,21 @@ export type Database = {
           location: string | null
           name: string | null
           notes: string | null
+          owner_notes: string
           phone: string | null
           property_type: string | null
           purpose: string | null
           score: number
           score_band: string
           score_reasons: Json
+          status: string
           timeline: string | null
           updated_at: string
         }
         Insert: {
           budget?: string | null
           call_id?: string | null
+          callback_at?: string | null
           configuration?: string | null
           created_at?: string
           id?: string
@@ -86,18 +125,21 @@ export type Database = {
           location?: string | null
           name?: string | null
           notes?: string | null
+          owner_notes?: string
           phone?: string | null
           property_type?: string | null
           purpose?: string | null
           score?: number
           score_band?: string
           score_reasons?: Json
+          status?: string
           timeline?: string | null
           updated_at?: string
         }
         Update: {
           budget?: string | null
           call_id?: string | null
+          callback_at?: string | null
           configuration?: string | null
           created_at?: string
           id?: string
@@ -105,12 +147,14 @@ export type Database = {
           location?: string | null
           name?: string | null
           notes?: string | null
+          owner_notes?: string
           phone?: string | null
           property_type?: string | null
           purpose?: string | null
           score?: number
           score_band?: string
           score_reasons?: Json
+          status?: string
           timeline?: string | null
           updated_at?: string
         }
@@ -181,15 +225,42 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "agent"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -316,6 +387,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "agent"],
+    },
   },
 } as const
