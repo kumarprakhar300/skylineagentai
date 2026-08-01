@@ -115,35 +115,94 @@ function Index() {
         <VoiceCall />
       </section>
 
-      <section className="mx-auto max-w-6xl px-5 pb-16">
-        <div className="scene-3d grid gap-6 lg:grid-cols-[1.1fr_1fr]">
-          <Card className="tilt-card glass-panel p-6">
+      <section className="mx-auto max-w-6xl px-5 pb-4">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-accent-foreground/70">
-              Sample project (fictional)
+              Sample inventory (fictional)
             </p>
-            <h2 className="mt-1 text-2xl font-semibold">{project.name}</h2>
-            <p className="text-sm text-muted-foreground">{project.location}</p>
+            <h2 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">
+              {projects.length} projects across {cityCount} metro cities
+            </h2>
+            <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
+              Aarav matches the customer's city first, then pitches the benefits that matter to
+              them — entry price, possession date, commute and rental potential. Every figure below
+              is demo data and is quoted as indicative on the call.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {projects.map((p) => (
+              <Badge key={p.id ?? p.name} variant="secondary" className="font-medium">
+                {p.city || p.name}
+              </Badge>
+            ))}
+          </div>
+        </div>
 
-            <dl className="mt-5 grid gap-4 sm:grid-cols-2">
-              <Detail label="Configurations">
-                {project.configurations.map((c) => c.type).join(" · ")}
-              </Detail>
-              <Detail label="Indicative price">{project.priceRange}</Detail>
-              <Detail label="Possession">{project.possession}</Detail>
-              <Detail label="Developer">{project.developer}</Detail>
-            </dl>
+        <div className="scene-3d mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          {projects.map((p) => (
+            <Card key={p.id ?? p.name} className="tilt-card glass-panel flex flex-col p-5">
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-primary">
+                    {p.city}
+                  </p>
+                  <h3 className="mt-0.5 text-lg font-semibold leading-tight">{p.name}</h3>
+                  <p className="text-xs text-muted-foreground">{p.location}</p>
+                </div>
+                <Badge variant="outline" className="shrink-0 text-[11px]">
+                  {p.configurations.length} plans
+                </Badge>
+              </div>
 
-            <div className="mt-5 space-y-3 text-sm">
-              <div>
-                <p className="font-medium">Key amenities</p>
-                <p className="text-muted-foreground">{project.amenities.join(", ")}</p>
-              </div>
-              <div>
-                <p className="font-medium">Location advantages</p>
-                <p className="text-muted-foreground">{project.locationAdvantages.join(", ")}</p>
-              </div>
-            </div>
-          </Card>
+              <dl className="mt-4 grid grid-cols-2 gap-3">
+                <Detail label="Price band">{p.priceRange || "—"}</Detail>
+                <Detail label="Possession">{p.possession || "—"}</Detail>
+              </dl>
+
+              <ul className="mt-4 space-y-1.5 text-xs text-muted-foreground">
+                {p.configurations.slice(0, 4).map((c) => (
+                  <li key={c.type} className="flex items-baseline justify-between gap-3">
+                    <span className="font-medium text-foreground">{c.type}</span>
+                    <span className="text-right tabular-nums">
+                      {[c.carpet, c.price].filter(Boolean).join(" · ")}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+
+              {p.benefits.length > 0 && (
+                <div className="mt-4 rounded-lg border border-border/60 bg-secondary/30 p-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-accent-foreground/70">
+                    Why customers pick it
+                  </p>
+                  <ul className="mt-2 space-y-1.5 text-xs leading-relaxed text-muted-foreground">
+                    {p.benefits.slice(0, 3).map((b) => (
+                      <li key={b} className="flex gap-2">
+                        <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-primary" />
+                        <span>{b}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              <p className="mt-4 line-clamp-2 text-xs text-muted-foreground">
+                <span className="font-medium text-foreground">Nearby:</span>{" "}
+                {p.locationAdvantages.slice(0, 3).join(" · ")}
+              </p>
+              <p className="mt-2 line-clamp-2 text-xs text-muted-foreground">
+                <span className="font-medium text-foreground">Amenities:</span>{" "}
+                {p.amenities.slice(0, 4).join(", ")}
+              </p>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-5 pb-16">
+        <div className="scene-3d grid gap-6">
+
 
           <Card className="tilt-card glass-panel p-6">
             <h2 className="text-xl font-semibold">Functional vs simulated</h2>
