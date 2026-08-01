@@ -33,14 +33,22 @@ function parseJson(raw: string): AgentJson {
 }
 
 /** One conversational turn. Shared by the browser demo and the Twilio phone demo. */
-export async function agentTurn(history: Turn[], userText: string): Promise<AgentTurnResult> {
+export async function agentTurn(
+  history: Turn[],
+  userText: string,
+  preferredLanguage: SpokenLanguage = "auto",
+): Promise<AgentTurnResult> {
   const messages = [
-    { role: "system" as const, content: systemPrompt(await readCatalog()) },
+    {
+      role: "system" as const,
+      content: `${systemPrompt(await readCatalog())}\n\n${languageInstruction(preferredLanguage)}`,
+    },
     ...history.slice(-24).map((t) => ({
       role: t.role === "user" ? ("user" as const) : ("assistant" as const),
       content: t.content,
     })),
   ];
+
 
   if (userText.trim()) {
     messages.push({ role: "user", content: userText.trim() });
