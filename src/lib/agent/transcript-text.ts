@@ -20,6 +20,9 @@ function tidyLine(line: string): string {
     .replace(/[^\S\n]+/g, " ")
     // No space before closing punctuation: "Wakad , 3 BHK" -> "Wakad, 3 BHK".
     .replace(new RegExp(`\\s+([${TRAILING_PUNCT}])`, "g"), "$1")
+    // Dot runs: "..." is an intentional pause, ".." is a stutter from the recogniser.
+    .replace(/\.{3,}/g, "…")
+    .replace(/\.{2}/g, ".")
     // Collapse repeated punctuation runs ("?? ." -> "?").
     .replace(/([,;:।॥])\1+/g, "$1")
     .replace(/([!?])[!?]+/g, "$1")
