@@ -192,7 +192,7 @@ function Admin() {
               className="grid grid-cols-[minmax(0,1fr)_auto] gap-2 rounded-lg border border-border/60 p-3 sm:grid-cols-[1fr_1fr_1.4fr_auto] sm:rounded-none sm:border-0 sm:p-0"
             >
               <Input
-                className="col-span-1"
+                className="col-span-2 sm:col-span-1"
                 value={config.type}
                 placeholder="3 BHK"
                 aria-label={`Configuration ${index + 1} type`}
@@ -215,6 +215,7 @@ function Admin() {
               <Button
                 variant="ghost"
                 size="icon"
+                className="col-span-2 justify-self-end sm:col-span-1"
                 aria-label={`Remove configuration ${index + 1}`}
                 onClick={() =>
                   set(
