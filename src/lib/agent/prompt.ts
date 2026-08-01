@@ -1,3 +1,5 @@
+import type { ConfidenceSegment } from "@/lib/agent/confidence";
+
 import { projectBrief, type ProjectCatalog } from "./project";
 
 export type LeadFields = {
