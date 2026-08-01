@@ -63,12 +63,14 @@ export const Route = createFileRoute("/_authenticated/analytics")({
     ],
   }),
   component: Analytics,
+  pendingMs: 150,
+  pendingMinMs: 300,
   pendingComponent: () => (
     <Shell>
-      <Skeleton className="h-32 w-full" />
-      <Skeleton className="h-56 w-full" />
+      <AnalyticsPageSkeleton />
     </Shell>
   ),
+
   errorComponent: ({ error }) => (
     <Shell>
       <Card className="panel-3d p-6 text-sm">
