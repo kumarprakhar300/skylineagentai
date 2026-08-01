@@ -106,13 +106,12 @@ export const Route = createFileRoute("/_authenticated/leads")({
     ],
   }),
   component: Leads,
+  // Paint the real dashboard skeleton quickly instead of a blank screen.
+  pendingMs: 150,
+  pendingMinMs: 300,
   pendingComponent: () => (
     <Shell>
-      <Card className="panel-3d space-y-3 p-6">
-        <Skeleton className="h-5 w-48" />
-        <Skeleton className="h-24 w-full" />
-        <Skeleton className="h-24 w-full" />
-      </Card>
+      <LeadsPageSkeleton />
     </Shell>
   ),
   errorComponent: ({ error }) => (
@@ -122,6 +121,7 @@ export const Route = createFileRoute("/_authenticated/leads")({
       </Card>
     </Shell>
   ),
+
 });
 
 function Shell({ children }: { children: React.ReactNode }) {
