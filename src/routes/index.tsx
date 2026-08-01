@@ -145,7 +145,7 @@ function Index() {
             </div>
           </Card>
 
-          <Card className="p-6">
+          <Card className="tilt-card glass-panel p-6">
             <h2 className="text-xl font-semibold">Functional vs simulated</h2>
             <ul className="mt-4 space-y-3 text-sm">
               <Status ok>
@@ -162,7 +162,8 @@ function Index() {
                 The project itself is fictional: prices, RERA details and possession dates are demo
                 values
               </Status>
-              <Status>No CRM hand-off, no email/SMS follow-up, no authentication in this demo</Status>
+              <Status ok>Staff sign-in, admin roles and row-level security on every lead record</Status>
+              <Status>No CRM hand-off and no email / SMS follow-up yet</Status>
             </ul>
           </Card>
         </div>
