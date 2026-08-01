@@ -200,8 +200,8 @@ export function VoiceCall() {
         return;
       }
 
-      push({ role: "user", content: text.trim() });
-      await runAgentTurn(text.trim());
+      push({ role: "user", content: text });
+      await runAgentTurn(text);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Something went wrong");
       if (activeRef.current) void listenRef.current();
@@ -383,7 +383,7 @@ export function VoiceCall() {
             <div
               key={index}
               className={cn(
-                "max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed",
+                "max-w-[85%] whitespace-pre-line rounded-2xl px-4 py-2.5 text-sm leading-relaxed",
                 turn.role === "assistant"
                   ? "bg-secondary text-secondary-foreground"
                   : "ml-auto bg-primary text-primary-foreground",

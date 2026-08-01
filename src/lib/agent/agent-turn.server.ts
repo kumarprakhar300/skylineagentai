@@ -2,6 +2,7 @@ import { chat } from "@/lib/ai.server";
 import { readCatalog } from "@/lib/catalog.server";
 import { languageInstruction, type SpokenLanguage } from "@/lib/agent/language";
 import { emptyLead, systemPrompt, type LeadFields, type Turn } from "@/lib/agent/prompt";
+import { cleanSpokenText } from "@/lib/agent/transcript-text";
 
 
 export type AgentTurnResult = {
@@ -45,13 +46,14 @@ export async function agentTurn(
     },
     ...history.slice(-24).map((t) => ({
       role: t.role === "user" ? ("user" as const) : ("assistant" as const),
-      content: t.content,
+      content: cleanSpokenText(t.content),
     })),
   ];
 
 
-  if (userText.trim()) {
-    messages.push({ role: "user", content: userText.trim() });
+  const cleanUserText = cleanSpokenText(userText);
+  if (cleanUserText) {
+    messages.push({ role: "user", content: cleanUserText });
   } else if (history.length === 0) {
     messages.push({
       role: "user",
@@ -63,14 +65,14 @@ export async function agentTurn(
   const parsed = parseJson(raw);
 
   const reply =
-    typeof parsed.reply === "string" && parsed.reply.trim()
-      ? parsed.reply.trim()
-      : raw.trim() || "Sorry, mujhe theek se sunai nahi diya. Kya aap dobara bata sakte hain?";
+    (typeof parsed.reply === "string" ? cleanSpokenText(parsed.reply) : "") ||
+    cleanSpokenText(raw) ||
+    "Sorry, mujhe theek se sunai nahi diya. Kya aap dobara bata sakte hain?";
 
   const lead: LeadFields = { ...emptyLead };
   for (const key of Object.keys(lead) as (keyof LeadFields)[]) {
     const value = parsed.lead?.[key];
-    lead[key] = typeof value === "string" && value.trim() ? value.trim() : null;
+    lead[key] = typeof value === "string" ? cleanSpokenText(value) || null : null;
   }
 
   return {
