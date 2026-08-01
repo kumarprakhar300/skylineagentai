@@ -249,16 +249,11 @@ export function LeadDetailPanel({
                               : "border border-border bg-secondary/40",
                           )}
                         >
-                          <p
-                            className={cn(
-                              "text-[11px] font-semibold uppercase tracking-wide",
-                              turn.role === "user"
-                                ? "text-primary-foreground/70"
-                                : "text-muted-foreground",
-                            )}
-                          >
-                            {turn.role === "user" ? "Customer" : "Aarav"}
-                          </p>
+                          <SpeakerLabel
+                            role={turn.role}
+                            turnNumber={turn.turnNumber}
+                            tone={turn.role === "user" ? "onPrimary" : "muted"}
+                          />
                           <p className="mt-1 whitespace-pre-wrap">
                             <Highlighted text={turn.content} term={term} />
                           </p>
