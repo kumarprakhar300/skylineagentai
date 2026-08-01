@@ -369,6 +369,23 @@ function Leads() {
           </div>
 
           <div>
+            <Label className="text-xs text-muted-foreground">Pipeline status</Label>
+            <Select value={search.status} onValueChange={(v) => setSearch({ status: v })}>
+              <SelectTrigger className="mt-1.5">
+                <SelectValue placeholder="All statuses" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={ALL}>All statuses</SelectItem>
+                {LEAD_STATUSES.map((s) => (
+                  <SelectItem key={s.value} value={s.value}>
+                    {s.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
             <Label className="text-xs text-muted-foreground">Sort by</Label>
             <Select value={search.sort} onValueChange={(v) => setSearch({ sort: v })}>
               <SelectTrigger className="mt-1.5">
