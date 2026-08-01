@@ -42,9 +42,9 @@ export type Turn = {
   role: "assistant" | "user";
   content: string;
   /** Segment-level STT confidence (customer turns only, when available). */
-  segments?: ConfidenceSegment[];
+  segments?: ConfidenceSegment[] | undefined;
   /** True once the turn has been re-transcribed with the high-accuracy model. */
-  refined?: boolean;
+  refined?: boolean | undefined;
 };
 
 /**

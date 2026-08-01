@@ -21,10 +21,10 @@ export function ConfidenceText({
   tone = "muted",
 }: {
   text: string;
-  segments?: ConfidenceSegment[];
-  onRetry?: () => void;
-  retrying?: boolean;
-  tone?: "muted" | "onPrimary";
+  segments?: ConfidenceSegment[] | undefined;
+  onRetry?: (() => void) | undefined;
+  retrying?: boolean | undefined;
+  tone?: "muted" | "onPrimary" | undefined;
 }) {
   if (!segments || segments.length === 0) {
     return <span className="whitespace-pre-line">{text}</span>;
@@ -140,9 +140,9 @@ export function ConfidenceChip({
   refined,
   className,
 }: {
-  segments?: ConfidenceSegment[];
-  refined?: boolean;
-  className?: string;
+  segments?: ConfidenceSegment[] | undefined;
+  refined?: boolean | undefined;
+  className?: string | undefined;
 }) {
   const overall = turnConfidence(segments);
   if (overall === undefined) return null;
