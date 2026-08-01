@@ -1,10 +1,11 @@
 import { queryOptions, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Download, Loader2, PhoneCall, Save, Search, SearchX, X } from "lucide-react";
+import { Download, PanelRight, PhoneCall, Search, SearchX, X } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
 import { EmptyState } from "@/components/EmptyState";
+import { LeadDetailPanel } from "@/components/LeadDetailPanel";
 import { PageShell } from "@/components/PageShell";
 import { LeadsPageSkeleton } from "@/components/Skeletons";
 import { Badge } from "@/components/ui/badge";
@@ -19,7 +20,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { downloadCsv, stamp, toCsv } from "@/lib/csv";
 import {
@@ -30,8 +30,9 @@ import {
   validateLeadsSearch,
   type LeadsSearch,
 } from "@/lib/leads-search";
+import type { CallRow, LeadPatch, LeadRow } from "@/lib/leads-types";
 import { cn } from "@/lib/utils";
-import type { Turn } from "@/lib/agent/prompt";
+
 
 
 type LeadRow = {
