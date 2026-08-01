@@ -28,20 +28,15 @@ export const Route = createFileRoute("/docs")({
 
 function Docs() {
   return (
-    <main className="min-h-screen bg-background">
-      <div className="mx-auto max-w-3xl px-5 py-10">
-        <Link
-          to="/"
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="size-4" /> Back to the call demo
-        </Link>
+    <PageShell
+      eyebrow="Architecture"
+      title="How it works"
+      description="A single agent brain drives both the browser call and the Twilio phone call. Everything below is implemented in this app."
+      width="narrow"
+      header={false}
+      backLink
+    >
 
-        <h1 className="mt-4 text-3xl font-semibold tracking-tight">How it works</h1>
-        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-          A single agent brain drives both the browser call and the Twilio phone call. Everything
-          below is implemented in this app.
-        </p>
 
         <Section title="Voice loop (browser)">
           <ol className="space-y-2 text-sm text-muted-foreground">
