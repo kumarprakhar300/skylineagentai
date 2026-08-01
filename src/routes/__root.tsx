@@ -79,14 +79,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
+      { title: "Skyline Estates AI Calling Agent" },
+      { name: "description", content: "Live browser voice demo of a real estate AI sales executive that qualifies buyers in Hindi, Hinglish and English, captures leads and generates a call summary." },
       { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { property: "og:title", content: "Skyline Estates AI Calling Agent" },
+      { property: "og:description", content: "Live browser voice demo of a real estate AI sales executive that qualifies buyers in Hindi, Hinglish and English, captures leads and generates a call summary." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "Skyline Estates AI Calling Agent" },
+      { name: "twitter:description", content: "Live browser voice demo of a real estate AI sales executive that qualifies buyers in Hindi, Hinglish and English, captures leads and generates a call summary." },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/c4ea2ae9-d784-4fcf-b663-26edb13f0dc0" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/c4ea2ae9-d784-4fcf-b663-26edb13f0dc0" },
     ],
     links: [
       {

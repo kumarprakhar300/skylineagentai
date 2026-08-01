@@ -19,7 +19,7 @@ const catalogQuery = queryOptions({
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Skyline Estates AI Calling Agent — Hindi & Hinglish Voice Demo" },
+      { title: "Skyline Estates AI Calling Agent" },
       {
         name: "description",
         content:
@@ -29,7 +29,7 @@ export const Route = createFileRoute("/")({
       {
         property: "og:description",
         content:
-          "An AI real estate sales executive that talks in Hindi, Hinglish and English, qualifies requirements and stores every lead.",
+          "Live browser voice demo of a real estate AI sales executive that qualifies buyers in Hindi, Hinglish and English, captures leads and generates a call summary.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
