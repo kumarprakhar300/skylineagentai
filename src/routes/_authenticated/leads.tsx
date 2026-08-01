@@ -474,7 +474,7 @@ function Leads() {
             ? (call.transcript ?? []).filter((t) => t.content.toLowerCase().includes(q))
             : [];
           return (
-            <Card key={call.id} className="p-6">
+            <Card key={call.id} className="tilt-card panel-3d p-6">
               <div className="flex flex-wrap items-center gap-2">
                 <Badge variant="secondary">{call.channel}</Badge>
                 {call.language && <Badge variant="outline">{call.language}</Badge>}

@@ -136,17 +136,17 @@ function Analytics() {
 
       <div className="grid gap-5 lg:grid-cols-2">
         <Card className="tilt-card panel-3d p-6">
-          <h2 className="text-lg font-semibold">Lead score mix</h2>
+          <h2 className="text-lg font-semibold tracking-tight">Lead score mix</h2>
           <Bars rows={bands} total={leads.length} />
         </Card>
         <Card className="tilt-card panel-3d p-6">
-          <h2 className="text-lg font-semibold">Pipeline status</h2>
+          <h2 className="text-lg font-semibold tracking-tight">Pipeline status</h2>
           <Bars rows={statuses} total={leads.length} />
         </Card>
       </div>
 
       <Card className="panel-3d p-6">
-        <h2 className="text-lg font-semibold">Most requested locations</h2>
+        <h2 className="text-lg font-semibold tracking-tight">Most requested locations</h2>
         {locations.length === 0 ? (
           <p className="mt-2 text-sm text-muted-foreground">No location data yet.</p>
         ) : (

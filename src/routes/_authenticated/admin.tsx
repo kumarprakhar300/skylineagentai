@@ -135,7 +135,7 @@ function Admin() {
   return (
     <Shell>
       <Card className="panel-3d p-6">
-        <h2 className="text-lg font-semibold">Project basics</h2>
+        <h2 className="text-lg font-semibold tracking-tight">Project basics</h2>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <Field label="Project name" value={draft.name} onChange={(v) => set("name", v)} />
           <Field label="Developer" value={draft.developer} onChange={(v) => set("developer", v)} />
@@ -174,7 +174,7 @@ function Admin() {
 
       <Card className="panel-3d p-6">
         <div className="flex items-center justify-between gap-3">
-          <h2 className="text-lg font-semibold">Configurations &amp; pricing</h2>
+          <h2 className="text-lg font-semibold tracking-tight">Configurations &amp; pricing</h2>
           <Button
             variant="outline"
             size="sm"
@@ -228,7 +228,7 @@ function Admin() {
       </Card>
 
       <Card className="panel-3d p-6">
-        <h2 className="text-lg font-semibold">Amenities</h2>
+        <h2 className="text-lg font-semibold tracking-tight">Amenities</h2>
         <p className="mt-1 text-xs text-muted-foreground">One amenity per line.</p>
         <Textarea
           className="mt-3"
@@ -240,7 +240,7 @@ function Admin() {
       </Card>
 
       <Card className="panel-3d p-6">
-        <h2 className="text-lg font-semibold">Location advantages</h2>
+        <h2 className="text-lg font-semibold tracking-tight">Location advantages</h2>
         <p className="mt-1 text-xs text-muted-foreground">One advantage per line.</p>
         <Textarea
           className="mt-3"
