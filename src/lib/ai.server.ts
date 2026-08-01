@@ -40,10 +40,18 @@ export async function chat(
   return data.choices?.[0]?.message?.content ?? "";
 }
 
-export async function transcribe(file: File): Promise<string> {
+export async function transcribe(
+  file: File,
+  options: { language?: string | null; prompt?: string | null } = {},
+): Promise<string> {
   const form = new FormData();
   form.append("model", STT_MODEL);
   form.append("file", file, file.name || "recording.wav");
+  // A bare ISO-639-1 code only; locales like "hi-IN" are rejected with a 400.
+  if (options.language) form.append("language", options.language);
+  // Domain vocabulary biases the decoder towards project names, BHK, lakh/crore etc.
+  if (options.prompt) form.append("prompt", options.prompt);
+  form.append("temperature", "0");
 
   const res = await fetch(`${GATEWAY}/audio/transcriptions`, {
     method: "POST",
@@ -59,6 +67,7 @@ export async function transcribe(file: File): Promise<string> {
   const data = (await res.json()) as { text?: string };
   return (data.text ?? "").trim();
 }
+
 
 export async function speak(text: string): Promise<ArrayBuffer> {
   const res = await fetch(`${GATEWAY}/audio/speech`, {
