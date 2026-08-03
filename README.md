@@ -242,6 +242,83 @@ In the Twilio Console, open **Phone Numbers → your number → Voice & Fax / Me
 
 ---
 
+## Demo walkthrough script (≈3 min)
+
+A ready-to-read script for presenting the live walkthrough in an interview or demo call.
+Each step maps to a screen you can show; keep the app open on the published URL first.
+
+**1. Landing + browser voice call (~75 s)**
+- Open the live app. Point out the language picker (Auto / English / Hindi / Hinglish) and
+  **Start call** button.
+- Pick **Hindi** and click **Start call**. Allow mic access.
+- Speak a realistic lead line, e.g.:
+  > "Mujhe Pune mein 2 BHK chahiye, budget around 80 lakh, possession agle saal chahiye."
+- Let the agent ask follow-ups (location, budget, timeline, contact). Interrupt once to show
+  barge-in. Mention the live transcript with speaker labels and confidence bands.
+- Click **End call**. Note the generated summary and Hot/Warm/Cold score.
+
+**2. Leads dashboard (~45 s)**
+- Open **Leads & calls**. Show the filter bar (location, budget, date, channel, score band).
+- Click a lead row → slide-in detail panel → **Transcript** tab (chat-style, searchable).
+- Click **Export CSV** to show the Hindi-safe export with BOM.
+
+**3. Analytics (~20 s)**
+- Open **Analytics**. Highlight lead volume by score band and channel split.
+
+**4. Admin catalog edit (~20 s)**
+- Open **Admin**. Tweak a project's price or amenity live; explain the agent reads it on the next
+  call without a redeploy.
+
+**5. Phone channel (optional, ~20 s)**
+- If a Twilio number is wired, dial it live; otherwise show the `/phone` setup page and the signed
+  webhook URL, and state that the same agent brain powers both channels.
+
+> Tip: keep a second lead line ready (different city / budget) so you can show a second scored call
+> without dead air.
+
+---
+
+## Troubleshooting checklist
+
+If something does not work during the demo, run through this list first:
+
+**Browser voice call**
+- [ ] Mic permission granted? Check the browser's address-bar icon; retry on `localhost` / HTTPS.
+- [ ] No transcript appearing? Confirm the AI Gateway key is set (`LOVABLE_API_KEY`) — the agent
+      returns a fallback line if STT fails, but a fully blank transcript means the key is missing.
+- [ ] Robot voice silent? System volume / browser autoplay policy — click anywhere on the page once.
+- [ ] Chrome blocked autoplay audio? Interact with the page (click) before **Start call**.
+- [ ] Hinglish words look garbled? Ensure you picked the right language; "Auto" defers to the model.
+
+**Leads / analytics / admin**
+- [ ] No leads showing? You must complete at least one call first; the dashboard reads from the
+      `calls` + `leads` tables.
+- [ ] `/admin` redirects to sign-in? Only the admin role can access it — the first sign-up is admin;
+      promote others from `/admin`.
+- [ ] Admin edits not reflected in calls? The agent reads the catalog live per turn — start a fresh
+      call (edits do not retroactively change saved transcripts).
+- [ ] CSV opens with broken Hindi in Excel? The export already includes a UTF-8 BOM; open via
+      **File → Open** (not double-click) if your Excel locale mangles it.
+
+**Twilio phone demo**
+- [ ] Webhook returns `503 Webhook not configured`? `TWILIO_AUTH_TOKEN` secret is not set — add it.
+- [ ] Call drops / no answer? Confirm the webhook URL is the **published** HTTPS URL
+      (`/api/public/twilio/voice`), method **POST**, and the app is published (not just dev preview).
+- [ ] Agent silent on the phone? Twilio trial accounts need the caller number **verified** first.
+- [ ] Wrong language on phone? The agent mirrors the caller's language; speak Hindi or Hinglish to
+      switch.
+- [ ] Signature errors in logs? Re-copy the Auth Token exactly (no trailing whitespace) into the
+      `TWILIO_AUTH_TOKEN` secret.
+
+**General / build**
+- [ ] `npm run dev` fails? Run `npm install` first; Node 18+ is required.
+- [ ] Database errors? On Lovable Cloud the migrations auto-apply; locally, apply the SQL files in
+      `supabase/migrations/` in order.
+- [ ] Blank page on publish? Check the browser console — a missing `VITE_SUPABASE_*` env var is the
+      usual cause.
+
+---
+
 ## Admin & catalog editing
 
 - `/admin` (admin role only) lets you edit the dummy project catalog — amenities, configurations,
