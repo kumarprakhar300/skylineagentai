@@ -314,6 +314,29 @@ from the language picker next to **Start call**.
 
 ---
 
+## Demo use-cases (5 ready-to-run walkthroughs)
+
+Use these scripts during a demo to show the agent handles different intents, budgets, and cities.
+Each row includes the caller profile, a suggested opening line, the key questions the agent is
+expected to ask, and the lead the call should produce.
+
+| # | Use case | Opening line | Expected agent questions | Expected output |
+|---|---|---|---|---|
+| 1 | **Hot buyer — ready to move** | *"Mujhe Pune mein 2 BHK chahiye, budget around 80 lakh, possession agle saal chahiye."* | Location, budget, configuration, possession timeline, self-use vs investment, contact number for site visit. | Location: Pune · Config: 2 BHK · Budget: 80 lakh · Timeline: < 12 months · Intent: self-use · Score: **Hot** |
+| 2 | **Investor — rental returns** | *"Mumbai mein 3 BHK investment ke liye dekh raha hoon, budget 2 crore tak."* | Preferred micro-market, expected rental yield, holding period, current location, site-visit slot. | Location: Mumbai · Config: 3 BHK · Budget: 2 crore · Intent: investment · Score: **Hot** |
+| 3 | **First-time buyer — tight budget** | *"Bengaluru mein 1 BHK chahiye around 45 lakh, job change ke baad shift karna hai."* | Budget comfort, job area / commute, preferred possession, home-loan assistance, contact for follow-up. | Location: Bengaluru · Config: 1 BHK · Budget: 45 lakh · Timeline: 3–6 months · Intent: self-use · Score: **Warm** |
+| 4 | **NRI buyer — family purchase** | *"Delhi NCR mein 4 BHK chahiye family ke liye, budget 3 crore, possession urgent hai."* | City preference (Noida/Gurugram/Delhi), parking needs, security/gated requirement, WhatsApp/phone for overseas coordination. | Location: Delhi NCR · Config: 4 BHK · Budget: 3 crore · Timeline: immediate · Intent: self-use · Score: **Hot** |
+| 5 | **Window shopper — low intent** | *"Hyderabad mein property ke rates pata karne hain, abhi final nahi karunga."* | Area of interest, rough budget range, when they plan to decide, why they are browsing, contact to share brochures. | Location: Hyderabad · Config: undecided · Budget: unknown · Timeline: > 12 months · Intent: browsing · Score: **Cold** |
+
+**How to present them:**
+
+1. Open the live app and pick the matching language (Hindi/Hinglish works best for use-cases 1–4).
+2. Speak the opening line, then let the agent drive the follow-ups.
+3. End the call and open **Leads & calls** to compare the generated score/summary with the table above.
+4. Use the CSV export to show the transcript row for the call you just completed.
+
+---
+
 ## Troubleshooting checklist
 
 If something does not work during the demo, run through this list first:
