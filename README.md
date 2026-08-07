@@ -128,28 +128,47 @@ cd skyline-agent
 npm install        # or: bun install
 ```
 
-### 2. Environment
+### 2. Environment variables
 
-Lovable Cloud secrets are injected automatically when you run on Lovable. For a fully local run
-you need the following in a `.env` (or via your Lovable project secrets):
+Lovable Cloud auto-injects the managed secrets below when you run the app on Lovable. For a fully
+local run, or to verify the demo works consistently, the following variables must be present.
+
+| Variable | Required? | Where to set | What it powers |
+|---|---|---|---|
+| `VITE_SUPABASE_URL` | **Required** | `.env` or Lovable project secrets | Browser Supabase client; points to your Lovable Cloud / Supabase project URL. |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | **Required** | `.env` or Lovable project secrets | Browser Supabase client; publishable/anon API key for RLS-enabled queries. |
+| `SUPABASE_URL` | **Required** | `.env` or Lovable project secrets | Server Supabase client (SSR + server functions); same value as `VITE_SUPABASE_URL`. |
+| `SUPABASE_PUBLISHABLE_KEY` | **Required** | `.env` or Lovable project secrets | Server Supabase client when acting as anon/authenticated user; same value as `VITE_SUPABASE_PUBLISHABLE_KEY`. |
+| `SUPABASE_SERVICE_ROLE_KEY` | **Required** | `.env` or Lovable project secrets | Privileged server operations (RLS bypass) such as admin catalog edits and role checks. |
+| `LOVABLE_API_KEY` | **Required** | Auto-managed by Lovable | Lovable AI Gateway — chat, STT, TTS. Never expose to the browser. |
+| `TWILIO_AUTH_TOKEN` | Required for **phone demo** | Lovable project secrets | Verifies Twilio webhook signatures in `/api/public/twilio/voice`. |
+| `VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY` | Required for **live map** | Lovable project secrets (Google Maps connector) | Browser Google Maps loader key. |
+| `VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_TRACKING_ID` | Required for **live map** | Lovable project secrets (Google Maps connector) | Google Maps channel / map ID for the property map. |
+| `ADMIN_PASSCODE` | Optional / legacy | Lovable project secrets | Legacy hard-coded admin check; the app now uses role-based auth via `user_roles`. |
 
 ```sh
-# Lovable Cloud backend (auto-managed on Lovable)
-SUPABASE_URL=...
-SUPABASE_PUBLISHABLE_KEY=...
-VITE_SUPABASE_URL=...
-VITE_SUPABASE_PUBLISHABLE_KEY=...
+# Minimum set for local development (browser demo + dashboard)
+VITE_SUPABASE_URL=https://<project>.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
+SUPABASE_URL=https://<project>.supabase.co
+SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
+SUPABASE_SERVICE_ROLE_KEY=<service-role-key>
 
-# Lovable AI Gateway key (auto-managed on Lovable)
-LOVABLE_API_KEY=...
+# AI Gateway is auto-managed on Lovable; include only if running outside Lovable
+LOVABLE_API_KEY=lovable_...
 
-# Google Maps (optional, for the live property map)
-VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY=...
-
-# Twilio (only for the phone demo — see below)
+# Optional: phone channel
 TWILIO_AUTH_TOKEN=...
+
+# Optional: live map on admin and landing pages
+VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY=...
+VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_TRACKING_ID=...
 ```
 
+> **Note:** `LOVABLE_API_KEY` is generated automatically by Lovable and should not be edited or
+> exposed to the frontend. If you see `Missing LOVABLE_API_KEY` at runtime, the project is likely
+> not running on Lovable Cloud or the secret has not been injected.
+>
 > If you connected this project to GitHub from Lovable, the committed code already contains the
 > client-side (`VITE_*`) config. Server-only secrets like `LOVABLE_API_KEY` and `TWILIO_AUTH_TOKEN`
 > are never committed — they live in Lovable's secret store.
