@@ -394,6 +394,12 @@ If something does not work during the demo, run through this list first:
       `supabase/migrations/` in order.
 - [ ] Blank page on publish? Check the browser console — a missing `VITE_SUPABASE_*` env var is the
       usual cause.
+- [ ] Missing `LOVABLE_API_KEY`? The browser demo will show no transcript or no AI replies. This key
+      is auto-managed on Lovable Cloud; verify the project is Cloud-enabled and the secret is present.
+- [ ] Not sure which env vars are missing? Open the Lovable **Secrets** panel and compare against the
+      [Environment variables](#2-environment-variables) table above.
+- [ ] `ADMIN_PASSCODE` not working? The app now uses role-based auth; sign up as the first user to
+      become admin, then promote others on `/admin`.
 
 ---
 
