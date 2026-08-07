@@ -278,6 +278,42 @@ Each step maps to a screen you can show; keep the app open on the published URL 
 
 ---
 
+## Sample Hindi / Hinglish call transcript
+
+Below is a realistic browser-call transcript that shows how the agent qualifies a lead in Hinglish,
+extracts the structured fields, and ends the call politely. The same transcript appears in the
+**Leads & calls** dashboard after the call ends.
+
+| Speaker | Text |
+|---|---|
+| **Agent** | Namaste, main Skyline Estates se bol raha hoon. Aap property dekhna chahte hain? Konsi location prefer karoge? |
+| **Customer** | Haan, mujhe Pune mein 2 BHK chahiye. Budget around 80 lakh hai. |
+| **Agent** | Bahut badhiya. Pune mein humare paas Skyline Greens hai — Wagholi ke pass, NH-48 connectivity achhi hai. Possession agle saal tak hai. Aap investment ya self-use ke liye soch rahe ho? |
+| **Customer** | Self-use, family ke liye. Possession jaldi chahiye. |
+| **Agent** | Samajh gaya. Skyline Greens mein 2 BHK 78 lakh se start hota hai, RERA registered bhi hai. Aapko site visit schedule karoon? |
+| **Customer** | Haan, kar do. Mera naam Rahul Sharma hai, number 98765 43210. |
+| **Agent** | Dhanyawaad Rahul ji. Main aapko tomorrow 11 AM ka site-visit slot WhatsApp kar dunga. Kuch aur sawaal ho toh batayein. |
+| **Customer** | Theek hai, thank you. |
+| **Agent** | Aapka din shubh ho. Bye-bye. |
+
+**Structured fields extracted from this call:**
+
+| Field | Value |
+|---|---|
+| Name | Rahul Sharma |
+| Phone | 98765 43210 |
+| Location | Pune |
+| Configuration | 2 BHK |
+| Budget | ~80 lakh |
+| Intent | Self-use |
+| Timeline | Immediate / within 12 months |
+| Score | **Hot** (high intent, budget+location match, possession urgency) |
+
+You can replay a similar conversation in the browser demo by selecting **Hinglish** or **Hindi**
+from the language picker next to **Start call**.
+
+---
+
 ## Troubleshooting checklist
 
 If something does not work during the demo, run through this list first:
