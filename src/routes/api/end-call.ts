@@ -68,7 +68,7 @@ export const Route = createFileRoute("/api/end-call")({
             console.error("[end-call] summary failed", error);
             summary = "Summary could not be generated for this call.";
           }
-          summary = `${summary}\n\n${scoreLine(score)}`;
+          summary = `${summary}\n${summaryScoreLine(score)}`;
 
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 

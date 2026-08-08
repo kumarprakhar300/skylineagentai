@@ -1,6 +1,8 @@
 import { Loader2, PhoneCall, Save, Search, Sparkle } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
+import { SummarySections } from "@/components/SummarySections";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -146,9 +148,9 @@ export function LeadDetailPanel({
                 <TabsContent value="summary" className="mt-0 space-y-5">
                   <section>
                     <SectionLabel>AI call summary</SectionLabel>
-                    <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed">
-                      {call.summary || "No summary generated for this call."}
-                    </p>
+                    <div className="mt-2">
+                      <SummarySections summary={call.summary} />
+                    </div>
                   </section>
                   <section>
                     <SectionLabel>Requirement captured</SectionLabel>
