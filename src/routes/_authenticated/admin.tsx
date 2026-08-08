@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { Loader2, Plus, Save, ShieldAlert, Trash2 } from "lucide-react";
+import { Download, Loader2, Plus, Save, ShieldAlert, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -12,12 +12,20 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
+import { supabase } from "@/integrations/supabase/client";
 import { defaultProjects, type Configuration, type ProjectCatalog } from "@/lib/agent/project";
 import {
   deleteProjectFromCatalog,
   loadCatalogForEditing,
   saveProjectCatalog,
 } from "@/lib/catalog.functions";
+import {
+  downloadLeadsCsv,
+  downloadTranscriptsCsv,
+  leadByCallMap,
+} from "@/lib/leads-export";
+import type { CallRow, LeadRow } from "@/lib/leads-types";
+
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
@@ -65,6 +73,34 @@ function Admin() {
   const [busy, setBusy] = useState(false);
   const [projects, setProjects] = useState<ProjectCatalog[]>(defaultProjects);
   const [selected, setSelected] = useState(0);
+  const [exporting, setExporting] = useState<"leads" | "transcripts" | null>(null);
+
+  async function handleExport(kind: "leads" | "transcripts") {
+    setExporting(kind);
+    try {
+      const [leads, calls] = await Promise.all([
+        supabase.from("leads").select("*").order("created_at", { ascending: false }).limit(1000),
+        supabase.from("calls").select("*").order("started_at", { ascending: false }).limit(1000),
+      ]);
+      if (leads.error) throw leads.error;
+      if (calls.error) throw calls.error;
+
+      const callRows = (calls.data ?? []) as unknown as CallRow[];
+      const byCall = leadByCallMap((leads.data ?? []) as unknown as LeadRow[]);
+      if (callRows.length === 0) {
+        toast.error("No calls captured yet — run a demo call first");
+        return;
+      }
+      if (kind === "leads") downloadLeadsCsv(callRows, byCall);
+      else downloadTranscriptsCsv(callRows, byCall);
+      toast.success(`${callRows.length} calls exported`);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not export the CSV");
+    } finally {
+      setExporting(null);
+    }
+  }
+
 
   const reload = useCallback(async () => {
     const result = await load({ data: undefined });
@@ -196,6 +232,46 @@ function Admin() {
   return (
     <Shell>
       <Card className="panel-3d p-4 sm:p-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 className="text-base font-semibold tracking-tight sm:text-lg">Captured leads</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Download every captured lead with its call summary, or the full turn-by-turn
+              transcripts, as a spreadsheet-ready CSV.
+            </p>
+          </div>
+          <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={exporting !== null}
+              onClick={() => void handleExport("leads")}
+            >
+              {exporting === "leads" ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <Download className="size-4" />
+              )}{" "}
+              Leads CSV
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={exporting !== null}
+              onClick={() => void handleExport("transcripts")}
+            >
+              {exporting === "transcripts" ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <Download className="size-4" />
+              )}{" "}
+              Transcripts CSV
+            </Button>
+          </div>
+        </div>
+      </Card>
+
+      <Card className="panel-3d p-4 sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-base font-semibold tracking-tight sm:text-lg">
             Projects ({projects.length})
@@ -204,6 +280,7 @@ function Admin() {
             <Plus className="size-4" /> Add project
           </Button>
         </div>
+
         <div className="-mx-1 mt-3 flex gap-2 overflow-x-auto px-1 pb-1">
           {projects.map((p, i) => (
             <Button
