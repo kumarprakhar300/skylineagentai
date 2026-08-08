@@ -36,15 +36,17 @@ export function parseSummary(summary: string): ParsedSummary {
       const label = match[1].trim();
       const value = match[2].trim();
       if (labels.has(label.toLowerCase())) {
-        currentLabel = label as SummarySectionLabel;
-        out[currentLabel] = value;
+        const key = label as SummarySectionLabel;
+        currentLabel = key;
+        out[key] = value;
         continue;
       }
     }
 
     // Append continuation lines to the current section.
     if (currentLabel) {
-      out[currentLabel] = `${out[currentLabel] ?? ""}\n${line}`;
+      const key = currentLabel;
+      out[key] = `${out[key] ?? ""}\n${line}`;
     }
   }
 
