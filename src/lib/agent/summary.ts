@@ -33,9 +33,9 @@ export function parseSummary(summary: string): ParsedSummary {
 
     const match = line.match(/^([A-Za-z][A-Za-z ]+?):\s*(.*)$/);
     if (match) {
-      const label = match[1].trim();
-      const value = match[2].trim();
-      if (labels.has(label.toLowerCase())) {
+      const label = match[1]?.trim();
+      const value = match[2]?.trim();
+      if (label && value && labels.has(label.toLowerCase())) {
         const key = label as SummarySectionLabel;
         currentLabel = key;
         out[key] = value;
