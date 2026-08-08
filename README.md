@@ -66,6 +66,28 @@ redeploy.
 
 ---
 
+## Call summary format
+
+Every completed call is saved to the `calls.summary` field and shown in the lead detail panel as a
+set of clearly labelled sections. The AI is instructed to output exactly these fields, in this
+order, so the dashboard can parse and highlight them consistently.
+
+| Section | Meaning | Example value |
+|---|---|---|
+| **Customer profile** | Who the caller is and what they shared about themselves | Rahul Sharma, family of four, currently renting in Pune |
+| **Requirement** | City, locality, property type, configuration, and purpose | Pune, 2 BHK apartment, self-use |
+| **Budget** | Budget range or "not shared" | ~80 lakh |
+| **Timeline** | Purchase timeline or "not shared" | Within 6 months |
+| **Language** | Detected conversation language | Hindi / Hinglish / English |
+| **Sentiment** | Call sentiment | Positive / Neutral / Hesitant / Negative |
+| **Next action** | Recommended sales follow-up | Schedule site visit tomorrow, share brochure on WhatsApp |
+| **Lead score** | Appended by the server from the deterministic scorer | 82/100 — Hot |
+
+The score is added after the AI summary from the same scoring engine used in the dashboard, so the
+summary and the score signals tab never contradict each other.
+
+---
+
 ## Tech stack
 
 - **Framework:** TanStack Start v1 (React 19, full-stack, SSR) on Vite 7

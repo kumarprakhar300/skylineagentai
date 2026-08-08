@@ -3,7 +3,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { agentTurn } from "@/lib/agent/agent-turn.server";
 import { chat } from "@/lib/ai.server";
 import { summaryPrompt, type LeadFields, type Turn } from "@/lib/agent/prompt";
-import { scoreLead, scoreLine } from "@/lib/agent/score";
+import { scoreLead } from "@/lib/agent/score";
+import { summaryScoreLine } from "@/lib/agent/summary";
 import { twilioSignatureIsValid } from "@/lib/twilio-signature.server";
 
 
@@ -147,7 +148,7 @@ export const Route = createFileRoute("/api/public/twilio/voice")({
           }
 
           const score = scoreLead(lead, nextTranscript);
-          summary = `${summary}\n\n${scoreLine(score)}`;
+          summary = `${summary}\n${summaryScoreLine(score)}`;
 
           await supabaseAdmin
             .from("calls")
