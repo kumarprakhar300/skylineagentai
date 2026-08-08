@@ -261,6 +261,108 @@ In the Twilio Console, open **Phone Numbers → your number → Voice & Fax / Me
 
 ---
 
+## Twilio webhook debug guide
+
+Use this guide when the Twilio phone demo is not behaving. The webhook is at
+`/api/public/twilio/voice` on the **published** HTTPS URL only.
+
+### Where to inspect
+
+1. **Twilio Console** → Monitor → Logs → Call Logs → click a call → **Request Inspector** shows the
+   exact HTTP request, headers, and response TwiML for every turn.
+2. **App logs** → Search for `[twilio]` in the server function logs. The handler logs rejected
+   signatures, missing tokens, and AI errors.
+3. **Local testing** → If you need to replay a payload manually, capture it from the Twilio
+   Request Inspector and POST it with `curl` (signature must be valid or copied from the console).
+
+### Key webhook fields
+
+| Field | Meaning | What we use it for |
+|---|---|---|
+| `CallSid` | Unique call ID (`CA…`) | We store the conversation state keyed by this ID |
+| `From` | Caller phone number (e.g. `+91…`) | Falls back to this as the lead phone if the caller doesn't say one |
+| `To` | Your Twilio number | Not used by the agent, but useful for debugging which number was called |
+| `SpeechResult` | What Twilio heard the caller say | Sent to the AI for the next turn |
+| `Confidence` | Twilio's STT confidence (0–1) | Logged by Twilio; we use the AI STT for our transcript |
+| `CallStatus` | `ringing`, `in-progress`, `completed` | We end the call only when the agent decides to close |
+| `Direction` | `inbound` / `outbound` | Phone demo is inbound only |
+
+### Example payloads
+
+**Initial call — first `POST` when the caller picks up:**
+
+```text
+CallSid=CAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+From=%2B919999999999
+To=%2B918888888888
+CallStatus=ringing
+Direction=inbound
+```
+
+> At this point `SpeechResult` is absent. The agent greets the caller and returns a `<Gather>` to
+> listen for the next answer.
+
+**Mid-call — caller answered a question:**
+
+```text
+CallSid=CAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+From=%2B919999999999
+To=%2B918888888888
+SpeechResult=haan+mujhe+Pune+mein+2+BHK+chahiye
+Confidence=0.91
+CallStatus=in-progress
+Direction=inbound
+```
+
+> The agent runs `agentTurn` on the accumulated transcript, updates the stored call state, and
+> replies with the next TwiML `<Say>` + `<Gather>`.
+
+**No speech / empty result:**
+
+```text
+CallSid=CAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+From=%2B919999999999
+To=%2B918888888888
+SpeechResult=
+Confidence=0.00
+CallStatus=in-progress
+Direction=inbound
+```
+
+> If the caller stays silent, the agent will repeat the last question once and then end the call
+> politely if there is still no answer.
+
+### Common error checks
+
+| Symptom | Likely cause | Fix |
+|---|---|---|
+| Webhook returns `503 Webhook not configured` | `TWILIO_AUTH_TOKEN` secret is missing | Add the secret from Twilio Console → Account SID & Auth Token |
+| Webhook returns `403 Invalid signature` | URL mismatch or wrong token | Use the **published HTTPS** URL (no trailing slash), method **POST**, and re-copy the Auth Token with no whitespace |
+| Twilio debugger shows `11200` (HTTP retrieval failure) | Webhook URL is not public or returned non-XML | Publish the app; the handler must always return valid TwiML XML |
+| Call connects but agent never reacts to voice | `SpeechResult` is empty or `<Gather>` not configured | Confirm the webhook URL is set to **POST** and that the Twilio number supports speech input |
+| Agent repeats the greeting every turn | `CallSid` is missing or state lookup failed | Check the logs for `[twilio] could not create call`; verify the `external_id` column in the `calls` table |
+| Agent replies in wrong language | Polly voice chosen by Devanagari detection | Speak clearly in Hindi/Hinglish for Hindi voices; English for Indian-English voice |
+| Call drops after greeting | Handler threw an exception | Check server logs for `[twilio] handler failed`; usually `LOVABLE_API_KEY` missing or DB policy error |
+| Lead not created after hangup | Finalize path failed or call status was not `completed` | Check the end-of-call logs; ensure the `leads` table has RLS policies for the service role |
+
+### Quick sanity check
+
+If you have a valid Twilio call and want to test the webhook outside Twilio, copy the real request
+body and headers (especially `X-Twilio-Signature`) from the Twilio Request Inspector and replay:
+
+```sh
+# Replace with the actual URL and body from the Request Inspector
+curl -X POST "https://skylineagentai.lovable.app/api/public/twilio/voice" \
+  -H "X-Twilio-Signature: <signature-from-inspector>" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  --data "CallSid=CA...&From=...&SpeechResult=..."
+```
+
+> The signature is calculated from the full URL and form parameters, so this replay only works if
+> the URL and body match the original Twilio request exactly.
+
+---
+
 ## Demo walkthrough script (≈3 min)
 
 A ready-to-read script for presenting the live walkthrough in an interview or demo call.
