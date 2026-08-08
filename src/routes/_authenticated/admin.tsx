@@ -73,6 +73,34 @@ function Admin() {
   const [busy, setBusy] = useState(false);
   const [projects, setProjects] = useState<ProjectCatalog[]>(defaultProjects);
   const [selected, setSelected] = useState(0);
+  const [exporting, setExporting] = useState<"leads" | "transcripts" | null>(null);
+
+  async function handleExport(kind: "leads" | "transcripts") {
+    setExporting(kind);
+    try {
+      const [leads, calls] = await Promise.all([
+        supabase.from("leads").select("*").order("created_at", { ascending: false }).limit(1000),
+        supabase.from("calls").select("*").order("started_at", { ascending: false }).limit(1000),
+      ]);
+      if (leads.error) throw leads.error;
+      if (calls.error) throw calls.error;
+
+      const callRows = (calls.data ?? []) as unknown as CallRow[];
+      const byCall = leadByCallMap((leads.data ?? []) as unknown as LeadRow[]);
+      if (callRows.length === 0) {
+        toast.error("No calls captured yet — run a demo call first");
+        return;
+      }
+      if (kind === "leads") downloadLeadsCsv(callRows, byCall);
+      else downloadTranscriptsCsv(callRows, byCall);
+      toast.success(`${callRows.length} calls exported`);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not export the CSV");
+    } finally {
+      setExporting(null);
+    }
+  }
+
 
   const reload = useCallback(async () => {
     const result = await load({ data: undefined });
