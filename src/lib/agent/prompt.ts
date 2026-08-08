@@ -125,14 +125,3 @@ Keep each section factual and concise. Do not add sections not listed. Do not in
 TRANSCRIPT
 ${transcript.map((t) => `${t.role === "user" ? "Customer" : "Agent"}: ${t.content}`).join("\n")}`;
 }
-
-export const summarySectionLabels = [
-  "Customer profile",
-  "Requirement",
-  "Budget",
-  "Timeline",
-  "Language",
-  "Sentiment",
-  "Next action",
-  "Lead score",
-] as const;
