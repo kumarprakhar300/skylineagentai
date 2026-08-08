@@ -235,73 +235,10 @@ function Leads() {
     );
   }
 
-  const exportLeads = () => {
-    const csv = toCsv(
-      [
-        "Call date",
-        "Channel",
-        "Language",
-        "Name",
-        "Phone",
-        "Buy / invest",
-        "Location",
-        "Property type",
-        "Configuration",
-        "Budget",
-        "Purpose",
-        "Timeline",
-        "Lead score",
-        "Score band",
-        "Score signals",
-        "Call summary",
-      ],
-      filtered.map((call) => {
-        const lead = leadByCall.get(call.id);
-        return [
-          new Date(call.started_at).toLocaleString("en-IN"),
-          call.channel,
-          call.language,
-          lead?.name,
-          lead?.phone,
-          lead?.intent,
-          lead?.location,
-          lead?.property_type,
-          lead?.configuration,
-          lead?.budget,
-          lead?.purpose,
-          lead?.timeline,
-          lead?.score,
-          lead?.score_band,
-          lead?.score_reasons,
-          call.summary,
-        ];
-      }),
-    );
-    downloadCsv(`leads-${stamp()}.csv`, csv);
-  };
+  const exportLeads = () => downloadLeadsCsv(filtered, leadByCall);
 
-  const exportTranscripts = () => {
-    const rows: unknown[][] = [];
-    filtered.forEach((call) => {
-      const lead = leadByCall.get(call.id);
-      (call.transcript ?? []).forEach((turn, index) => {
-        rows.push([
-          call.id,
-          new Date(call.started_at).toLocaleString("en-IN"),
-          lead?.name,
-          lead?.phone,
-          index + 1,
-          turn.role === "user" ? "Customer" : "Agent",
-          turn.content,
-        ]);
-      });
-    });
-    const csv = toCsv(
-      ["Call ID", "Call date", "Name", "Phone", "Turn", "Speaker", "Message"],
-      rows,
-    );
-    downloadCsv(`call-transcripts-${stamp()}.csv`, csv);
-  };
+  const exportTranscripts = () => downloadTranscriptsCsv(filtered, leadByCall);
+
 
   const activeFilterCount = [
     search.location !== ALL,
