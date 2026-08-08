@@ -31,7 +31,7 @@ import {
 } from "@/components/ui/select";
 import { speakerShortName } from "@/components/SpeakerLabel";
 import { supabase } from "@/integrations/supabase/client";
-import { downloadCsv, stamp, toCsv } from "@/lib/csv";
+import { downloadLeadsCsv, downloadTranscriptsCsv } from "@/lib/leads-export";
 import {
   ALL,
   LEAD_STATUSES,
