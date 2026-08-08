@@ -140,6 +140,34 @@ supabase/migrations/         # Schema: leads, calls, lead_activity, project_cata
 
 ---
 
+## Quick start — one command
+
+```sh
+npm install        # or: bun install
+npm run demo       # one-command local demo
+```
+
+`npm run demo` runs `scripts/demo.sh`, which:
+
+1. Picks `bun` if available, otherwise `npm`.
+2. Installs dependencies when `node_modules` is missing.
+3. Loads `.env` and checks required/optional variables, failing early with the exact missing names.
+4. Prints the demo checklist (`/`, `/leads`, `/analytics`, `/admin`) and starts the dev server on
+   `http://localhost:8080`.
+
+For the phone channel, add the tunnel instructions:
+
+```sh
+npm run demo -- --tunnel
+```
+
+This additionally prints the localtunnel/ngrok steps and the exact Twilio webhook URL
+(`https://<public-url>/api/public/twilio/voice`) to paste into the Twilio Console.
+
+Stop the demo with `Ctrl+C`.
+
+---
+
 ## Setup — run the app locally
 
 ### 1. Install dependencies
@@ -149,6 +177,7 @@ git clone <your-repository-url>
 cd skyline-agent
 npm install        # or: bun install
 ```
+
 
 ### 2. Environment variables
 
