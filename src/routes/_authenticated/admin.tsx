@@ -12,12 +12,20 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
+import { supabase } from "@/integrations/supabase/client";
 import { defaultProjects, type Configuration, type ProjectCatalog } from "@/lib/agent/project";
 import {
   deleteProjectFromCatalog,
   loadCatalogForEditing,
   saveProjectCatalog,
 } from "@/lib/catalog.functions";
+import {
+  downloadLeadsCsv,
+  downloadTranscriptsCsv,
+  leadByCallMap,
+} from "@/lib/leads-export";
+import type { CallRow, LeadRow } from "@/lib/leads-types";
+
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
