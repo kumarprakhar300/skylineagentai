@@ -4,7 +4,8 @@ import { z } from "zod";
 import { chat, gatewayErrorResponse } from "@/lib/ai.server";
 import { summaryPrompt, type LeadFields } from "@/lib/agent/prompt";
 import { cleanSpokenText } from "@/lib/agent/transcript-text";
-import { scoreLead, scoreLine } from "@/lib/agent/score";
+import { scoreLead } from "@/lib/agent/score";
+import { summaryScoreLine } from "@/lib/agent/summary";
 
 const leadField = z.string().trim().max(200).nullable().optional();
 
