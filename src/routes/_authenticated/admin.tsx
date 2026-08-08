@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { Loader2, Plus, Save, ShieldAlert, Trash2 } from "lucide-react";
+import { Download, Loader2, Plus, Save, ShieldAlert, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
