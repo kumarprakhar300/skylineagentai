@@ -363,6 +363,8 @@ curl -X POST "https://skylineagentai.lovable.app/api/public/twilio/voice" \
 
 ---
 
+## Demo walkthrough script (≈3 min)
+
 A ready-to-read script for presenting the live walkthrough in an interview or demo call.
 Each step maps to a screen you can show; keep the app open on the published URL first.
 
