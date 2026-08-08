@@ -196,6 +196,46 @@ function Admin() {
   return (
     <Shell>
       <Card className="panel-3d p-4 sm:p-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 className="text-base font-semibold tracking-tight sm:text-lg">Captured leads</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Download every captured lead with its call summary, or the full turn-by-turn
+              transcripts, as a spreadsheet-ready CSV.
+            </p>
+          </div>
+          <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={exporting !== null}
+              onClick={() => void handleExport("leads")}
+            >
+              {exporting === "leads" ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <Download className="size-4" />
+              )}{" "}
+              Leads CSV
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={exporting !== null}
+              onClick={() => void handleExport("transcripts")}
+            >
+              {exporting === "transcripts" ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <Download className="size-4" />
+              )}{" "}
+              Transcripts CSV
+            </Button>
+          </div>
+        </div>
+      </Card>
+
+      <Card className="panel-3d p-4 sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 className="text-base font-semibold tracking-tight sm:text-lg">
             Projects ({projects.length})
@@ -204,6 +244,7 @@ function Admin() {
             <Plus className="size-4" /> Add project
           </Button>
         </div>
+
         <div className="-mx-1 mt-3 flex gap-2 overflow-x-auto px-1 pb-1">
           {projects.map((p, i) => (
             <Button
