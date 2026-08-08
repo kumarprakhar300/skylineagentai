@@ -110,8 +110,29 @@ Reply with a JSON object only:
 }
 
 export function summaryPrompt(transcript: Turn[]): string {
-  return `Below is a transcript of a real estate sales call. Write a short call summary for the sales team in English (4-6 lines max): customer profile, requirement captured, questions they asked, sentiment, and the recommended next action. Be factual, do not invent anything.
+  return `Write a post-call summary for the sales team in English. Use exactly these sections, one per line, in this order and with these exact labels:
+
+Customer profile: <who the caller is and what they shared about themselves>
+Requirement: <city, locality, property type, configuration, purpose>
+Budget: <budget range or "not shared">
+Timeline: <purchase timeline or "not shared">
+Language: <hindi | hinglish | english>
+Sentiment: <positive | neutral | hesitant | negative>
+Next action: <concrete recommended follow-up>
+
+Keep each section factual and concise. Do not add sections not listed. Do not invent anything not in the transcript.
 
 TRANSCRIPT
 ${transcript.map((t) => `${t.role === "user" ? "Customer" : "Agent"}: ${t.content}`).join("\n")}`;
 }
+
+export const summarySectionLabels = [
+  "Customer profile",
+  "Requirement",
+  "Budget",
+  "Timeline",
+  "Language",
+  "Sentiment",
+  "Next action",
+  "Lead score",
+] as const;
