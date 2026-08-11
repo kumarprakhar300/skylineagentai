@@ -157,6 +157,9 @@ npm run demo       # one-command local demo
    anything and prints the exact variables to add plus a copy-paste `.env` block.
 
 4. Prints the demo checklist (`/`, `/leads`, `/analytics`, `/admin`) and starts the dev server on
+   `http://localhost:8080`.
+
+
 
 ### Seed sample data
 
