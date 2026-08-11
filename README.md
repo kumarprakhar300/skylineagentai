@@ -175,6 +175,33 @@ script prints the tunnel log path and the manual command to run.
 
 Stop the demo with `Ctrl+C`.
 
+### Capture demo run logs
+
+```sh
+npm run demo:logs              # same as: npm run demo -- --logs
+npm run demo -- --tunnel --logs   # phone demo + log capture
+```
+
+`--logs` creates a timestamped folder `demo-logs/YYYY-MM-DD_HH-MM-SS/` (git-ignored) and captures
+the whole run while still printing everything to the console:
+
+| File | Contents |
+| --- | --- |
+| `server.log` | Full dev-server / server-function output |
+| `twilio.log` | Twilio webhook hits — `/api/public/twilio/*`, `CallSid`, `Gather`, `SpeechResult` |
+| `agent.log` | Transcript, STT/TTS, `/api/turn`, `/api/end-call` and call-summary output |
+| `tunnel.log` | Tunnel process output (only with `--tunnel`) |
+| `run-info.txt` | Start/stop time, package manager, port, tunnel state, line counts |
+
+Attach the folder when reporting an issue, or `grep` it directly:
+
+```sh
+tail -f demo-logs/*/twilio.log
+grep -i "lead score" demo-logs/*/agent.log
+```
+
+
+
 
 ---
 
