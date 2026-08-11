@@ -7,6 +7,8 @@
     "dev": "vite dev",
     "demo": "bash scripts/demo.sh",
     "demo:logs": "bash scripts/demo.sh --logs",
+    "seed": "node scripts/seed.mjs",
+    "seed:reset": "node scripts/seed.mjs --reset",
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
