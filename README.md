@@ -157,7 +157,23 @@ npm run demo       # one-command local demo
    anything and prints the exact variables to add plus a copy-paste `.env` block.
 
 4. Prints the demo checklist (`/`, `/leads`, `/analytics`, `/admin`) and starts the dev server on
-   `http://localhost:8080`.
+
+### Seed sample data
+
+To test the leads dashboard, lead detail panel and CSV exports without making a live call:
+
+```sh
+npm run seed          # insert 5 demo calls + leads (hot / warm / cold, Hindi, Hinglish, English)
+npm run seed -- --reset   # or: npm run seed:reset — remove the old demo rows and re-insert
+```
+
+The script (`scripts/seed.mjs`) inserts realistic transcripts, sectioned call summaries and
+deterministic lead scores, and tags every seeded row in `notes` with `[demo-seed]` so a reset only
+touches demo data. It needs `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` in `.env`, because
+row-level security intentionally blocks anonymous inserts into `calls` / `leads`. Running it twice
+is safe — it detects existing demo rows and skips.
+
+
 
 For the phone channel, add the tunnel flag:
 
