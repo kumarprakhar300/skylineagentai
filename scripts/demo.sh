@@ -94,16 +94,91 @@ cat <<'EOP'
 
 EOP
 
-if [ "$WANT_TUNNEL" -eq 1 ]; then
-  cat <<'EOP'
-  Phone demo (Twilio):
-    1. In another terminal:  npx localtunnel --port 8080     (or: ngrok http 8080)
-    2. Copy the public https URL.
-    3. Twilio Console → your number → "A call comes in" → Webhook (HTTP POST):
-         https://<public-url>/api/public/twilio/voice
-    4. Make sure TWILIO_AUTH_TOKEN matches that Twilio account.
+PORT="${PORT:-8080}"
+DEV_PID=""
+TUNNEL_PID=""
+TUNNEL_LOG="$(mktemp -t skyline-tunnel.XXXXXX)"
+
+cleanup() {
+  trap - EXIT INT TERM
+  if [ -n "$TUNNEL_PID" ] && kill -0 "$TUNNEL_PID" 2>/dev/null; then
+    printf "\n"; say "Stopping tunnel"
+    kill "$TUNNEL_PID" 2>/dev/null || true
+    wait "$TUNNEL_PID" 2>/dev/null || true
+    ok "tunnel closed"
+  fi
+  if [ -n "$DEV_PID" ] && kill -0 "$DEV_PID" 2>/dev/null; then
+    kill "$DEV_PID" 2>/dev/null || true
+    wait "$DEV_PID" 2>/dev/null || true
+  fi
+  rm -f "$TUNNEL_LOG"
+}
+trap cleanup EXIT INT TERM
+
+if [ "$WANT_TUNNEL" -eq 0 ]; then
+  exec $RUN dev
+fi
+
+# --tunnel: run the dev server in the background, then bring up the public tunnel.
+$RUN dev &
+DEV_PID=$!
+
+printf "  waiting for http://localhost:%s " "$PORT"
+for _ in $(seq 1 60); do
+  if curl -sf -o /dev/null "http://localhost:$PORT/"; then break; fi
+  printf "."
+  sleep 1
+done
+printf "\n"
+if ! curl -sf -o /dev/null "http://localhost:$PORT/"; then
+  fail "dev server did not start on port $PORT"
+  exit 1
+fi
+ok "dev server ready"
+
+say "Starting Twilio tunnel"
+PUBLIC_URL=""
+
+if command -v ngrok >/dev/null 2>&1; then
+  ok "using ngrok"
+  ngrok http "$PORT" --log stdout >"$TUNNEL_LOG" 2>&1 &
+  TUNNEL_PID=$!
+  for _ in $(seq 1 40); do
+    PUBLIC_URL=$(curl -s http://127.0.0.1:4040/api/tunnels 2>/dev/null \
+      | grep -Eo 'https://[a-zA-Z0-9.-]+\.ngrok[a-zA-Z0-9.-]*' | head -n1 || true)
+    [ -n "$PUBLIC_URL" ] && break
+    sleep 1
+  done
+else
+  ok "ngrok not found — using npx localtunnel"
+  npx --yes localtunnel --port "$PORT" >"$TUNNEL_LOG" 2>&1 &
+  TUNNEL_PID=$!
+  for _ in $(seq 1 60); do
+    PUBLIC_URL=$(grep -Eo 'https://[a-zA-Z0-9.-]+\.loca\.lt' "$TUNNEL_LOG" | head -n1 || true)
+    [ -n "$PUBLIC_URL" ] && break
+    sleep 1
+  done
+fi
+
+if [ -z "$PUBLIC_URL" ]; then
+  fail "could not obtain a public tunnel URL — see $TUNNEL_LOG"
+  warn "start one manually:  ngrok http $PORT   (or: npx localtunnel --port $PORT)"
+else
+  echo
+  say "Twilio webhook"
+  ok "public base URL:  $PUBLIC_URL"
+  printf "  ${BOLD}webhook (HTTP POST):${RESET} %s/api/public/twilio/voice\n" "$PUBLIC_URL"
+  echo
+  cat <<EOP
+    1. Twilio Console → Phone Numbers → your number → Voice
+    2. "A call comes in" → Webhook, HTTP POST →
+         $PUBLIC_URL/api/public/twilio/voice
+    3. Make sure TWILIO_AUTH_TOKEN matches that Twilio account.
+
+  Ctrl+C stops both the dev server and the tunnel.
 
 EOP
 fi
 
-exec $RUN dev
+wait "$DEV_PID"
+
