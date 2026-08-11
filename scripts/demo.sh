@@ -36,11 +36,11 @@ else
   PM=npm; RUN="npm run"; INSTALL="npm install"
 fi
 
-say "1/4  Package manager"
+say "1/5  Package manager"
 ok "using $PM"
 
 # 2. Install dependencies if missing -------------------------------------------
-say "2/4  Dependencies"
+say "2/5  Dependencies"
 if [ ! -d node_modules ]; then
   warn "node_modules missing — running $INSTALL"
   $INSTALL
@@ -49,8 +49,12 @@ else
   ok "node_modules present"
 fi
 
-# 3. Environment check ---------------------------------------------------------
-say "3/4  Environment"
+# 3. Environment preflight -----------------------------------------------------
+say "3/5  Environment preflight"
+
+ERRORS=()
+add_error() { ERRORS+=("$1"); fail "$1"; }
+
 if [ -f .env ]; then
   set +u
   # shellcheck disable=SC1091
@@ -58,37 +62,88 @@ if [ -f .env ]; then
   set -u
   ok ".env loaded"
 else
-  warn "no .env file found (fine when running inside Lovable — secrets are injected)"
+  warn "no .env file found (fine inside Lovable — secrets are injected there)"
+  warn "locally: copy the sample block from README → Environment variables into .env"
 fi
 
-REQUIRED=(VITE_SUPABASE_URL VITE_SUPABASE_PUBLISHABLE_KEY)
-OPTIONAL=(LOVABLE_API_KEY TWILIO_AUTH_TOKEN VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY)
+# --- required: backend connection ---------------------------------------------
+if [ -z "${VITE_SUPABASE_URL:-}" ]; then
+  add_error "VITE_SUPABASE_URL is missing — required for database, auth and the leads dashboard"
+elif ! printf '%s' "$VITE_SUPABASE_URL" | grep -qE '^https://[a-z0-9.-]+'; then
+  add_error "VITE_SUPABASE_URL must be a full https:// URL (got: ${VITE_SUPABASE_URL%%:*}...)"
+else
+  ok "VITE_SUPABASE_URL set"
+fi
 
-MISSING=0
-for v in "${REQUIRED[@]}"; do
-  if [ -z "${!v:-}" ]; then fail "$v is missing (required)"; MISSING=1; else ok "$v set"; fi
-done
+if [ -z "${VITE_SUPABASE_PUBLISHABLE_KEY:-}" ]; then
+  add_error "VITE_SUPABASE_PUBLISHABLE_KEY is missing — required for all backend reads/writes"
+elif ! printf '%s' "$VITE_SUPABASE_PUBLISHABLE_KEY" | grep -qE '^(sb_publishable_|eyJ)'; then
+  add_error "VITE_SUPABASE_PUBLISHABLE_KEY looks wrong — expected the publishable/anon key (starts with sb_publishable_)"
+else
+  ok "VITE_SUPABASE_PUBLISHABLE_KEY set"
+fi
 
-for v in "${OPTIONAL[@]}"; do
-  if [ -z "${!v:-}" ]; then
-    case "$v" in
-      LOVABLE_API_KEY) warn "LOVABLE_API_KEY not set locally — voice/AI works only when running on Lovable" ;;
-      TWILIO_AUTH_TOKEN) warn "TWILIO_AUTH_TOKEN not set — phone demo disabled, browser demo unaffected" ;;
-      *) warn "$v not set — live property map will not render" ;;
-    esac
+# --- optional / channel-specific ----------------------------------------------
+if [ -z "${LOVABLE_API_KEY:-}" ]; then
+  warn "LOVABLE_API_KEY not set — no AI replies, transcript or voice locally (auto-injected on Lovable)"
+else
+  ok "LOVABLE_API_KEY set"
+fi
+
+if [ -z "${TWILIO_AUTH_TOKEN:-}" ]; then
+  if [ "$WANT_TUNNEL" -eq 1 ]; then
+    add_error "TWILIO_AUTH_TOKEN is missing but --tunnel was requested — the webhook rejects every call without it"
   else
-    ok "$v set"
+    warn "TWILIO_AUTH_TOKEN not set — phone demo disabled, browser demo unaffected"
   fi
-done
+else
+  ok "TWILIO_AUTH_TOKEN set"
+fi
 
-if [ "$MISSING" -eq 1 ]; then
+if [ -z "${VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY:-}" ]; then
+  warn "VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY not set — the live property map will not render"
+else
+  ok "VITE_LOVABLE_CONNECTOR_GOOGLE_MAPS_BROWSER_KEY set"
+fi
+
+if [ "${#ERRORS[@]}" -gt 0 ]; then
   echo
-  fail "Fill the required variables (see README → Environment variables) and re-run: $RUN demo"
+  fail "Preflight failed — ${#ERRORS[@]} problem(s) must be fixed before the demo can start:"
+  for e in "${ERRORS[@]}"; do printf "     • %s\n" "$e"; done
+  cat <<EOP
+
+  How to fix
+    1. Open (or create) .env in the project root.
+    2. Add the missing values — see README → "Environment variables" for the full table
+       and a copy-paste sample block:
+
+         VITE_SUPABASE_URL=https://<your-project>.supabase.co
+         VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
+         LOVABLE_API_KEY=...            # optional locally, needed for AI voice
+         TWILIO_AUTH_TOKEN=...          # only for the phone demo / --tunnel
+
+    3. Re-run:  $RUN demo$([ "$WANT_TUNNEL" -eq 1 ] && echo " -- --tunnel")
+
+  Running inside Lovable? The backend keys are injected automatically — run the demo there,
+  or skip --tunnel to start the browser-only demo.
+EOP
   exit 1
 fi
+ok "all required variables present"
+
+# 4. Port availability ---------------------------------------------------------
+PORT="${PORT:-8080}"
+say "4/5  Port $PORT"
+if curl -sf -o /dev/null "http://localhost:$PORT/" 2>/dev/null; then
+  warn "something is already serving http://localhost:$PORT"
+  warn "stop it, or start on another port:  PORT=3000 $RUN demo"
+else
+  ok "port $PORT is free"
+fi
+
 
 # 4. Start dev server ---------------------------------------------------------
-say "4/4  Starting dev server"
+say "5/5  Starting dev server"
 cat <<'EOP'
 
   Demo checklist
