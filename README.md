@@ -155,16 +155,26 @@ npm run demo       # one-command local demo
 4. Prints the demo checklist (`/`, `/leads`, `/analytics`, `/admin`) and starts the dev server on
    `http://localhost:8080`.
 
-For the phone channel, add the tunnel instructions:
+For the phone channel, add the tunnel flag:
 
 ```sh
 npm run demo -- --tunnel
 ```
 
-This additionally prints the localtunnel/ngrok steps and the exact Twilio webhook URL
-(`https://<public-url>/api/public/twilio/voice`) to paste into the Twilio Console.
+With `--tunnel` the script additionally:
+
+1. Starts the dev server in the background and waits until `http://localhost:8080` responds.
+2. Starts a public tunnel automatically — `ngrok http 8080` if `ngrok` is installed, otherwise
+   `npx localtunnel --port 8080`.
+3. Detects the public URL and prints the exact Twilio webhook to paste into the Console:
+   `https://<public-url>/api/public/twilio/voice`.
+4. On `Ctrl+C` (or any exit) it stops **both** the tunnel and the dev server.
+
+Override the port with `PORT=3000 npm run demo -- --tunnel`. If no tunnel URL is detected, the
+script prints the tunnel log path and the manual command to run.
 
 Stop the demo with `Ctrl+C`.
+
 
 ---
 
