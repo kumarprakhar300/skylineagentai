@@ -143,7 +143,7 @@ fi
 
 
 # 4. Start dev server ---------------------------------------------------------
-say "4/4  Starting dev server"
+say "5/5  Starting dev server"
 cat <<'EOP'
 
   Demo checklist
