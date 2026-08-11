@@ -102,7 +102,30 @@ EOP
 PORT="${PORT:-8080}"
 DEV_PID=""
 TUNNEL_PID=""
+SPLIT_PIDS=()
+LOG_DIR=""
 TUNNEL_LOG="$(mktemp -t skyline-tunnel.XXXXXX)"
+
+# --logs: timestamped run folder with split log streams -------------------------
+if [ "$WANT_LOGS" -eq 1 ]; then
+  LOG_DIR="demo-logs/$(date +%Y-%m-%d_%H-%M-%S)"
+  mkdir -p "$LOG_DIR"
+  {
+    echo "Skyline Agent demo run"
+    echo "started:        $(date -u '+%Y-%m-%dT%H:%M:%SZ') (UTC)"
+    echo "package manager: $PM"
+    echo "port:           $PORT"
+    echo "tunnel:         $([ "$WANT_TUNNEL" -eq 1 ] && echo enabled || echo disabled)"
+  } >"$LOG_DIR/run-info.txt"
+  say "Log capture"
+  ok "writing logs to $LOG_DIR/"
+  echo "     server.log      all dev-server / server-function output"
+  echo "     twilio.log      Twilio webhook hits (/api/public/twilio/*)"
+  echo "     agent.log       transcript, STT/TTS and call-summary output"
+  echo "     tunnel.log      tunnel process output (with --tunnel)"
+  echo "     run-info.txt    run metadata + exit summary"
+  echo
+fi
 
 cleanup() {
   trap - EXIT INT TERM
@@ -116,17 +139,54 @@ cleanup() {
     kill "$DEV_PID" 2>/dev/null || true
     wait "$DEV_PID" 2>/dev/null || true
   fi
+  if [ -n "$LOG_DIR" ]; then
+    for p in "${SPLIT_PIDS[@]:-}"; do
+      [ -n "$p" ] && kill "$p" 2>/dev/null || true
+    done
+    [ -s "$TUNNEL_LOG" ] && cp "$TUNNEL_LOG" "$LOG_DIR/tunnel.log" 2>/dev/null || true
+    {
+      echo "stopped:        $(date -u '+%Y-%m-%dT%H:%M:%SZ') (UTC)"
+      echo "twilio hits:    $(wc -l <"$LOG_DIR/twilio.log" 2>/dev/null | tr -d ' ' || echo 0) lines"
+      echo "agent lines:    $(wc -l <"$LOG_DIR/agent.log" 2>/dev/null | tr -d ' ' || echo 0) lines"
+    } >>"$LOG_DIR/run-info.txt"
+    printf "\n"; say "Logs saved"
+    ok "$LOG_DIR/"
+  fi
   rm -f "$TUNNEL_LOG"
 }
 trap cleanup EXIT INT TERM
 
+start_dev() {
+  if [ -z "$LOG_DIR" ]; then
+    $RUN dev &
+    DEV_PID=$!
+    return
+  fi
+  : >"$LOG_DIR/server.log"; : >"$LOG_DIR/twilio.log"; : >"$LOG_DIR/agent.log"
+  $RUN dev > >(tee -a "$LOG_DIR/server.log") 2>&1 &
+  DEV_PID=$!
+  tail -n0 -F "$LOG_DIR/server.log" 2>/dev/null \
+    | grep --line-buffered -iE 'twilio|/api/public/twilio|CallSid|Gather|SpeechResult' \
+    >>"$LOG_DIR/twilio.log" &
+  SPLIT_PIDS+=($!)
+  tail -n0 -F "$LOG_DIR/server.log" 2>/dev/null \
+    | grep --line-buffered -iE 'transcript|summary|lead score|/api/(stt|tts|turn|end-call)|agentTurn' \
+    >>"$LOG_DIR/agent.log" &
+  SPLIT_PIDS+=($!)
+}
+
 if [ "$WANT_TUNNEL" -eq 0 ]; then
-  exec $RUN dev
+  if [ -z "$LOG_DIR" ]; then
+    exec $RUN dev
+  fi
+  start_dev
+  wait "$DEV_PID"
+  exit 0
 fi
 
 # --tunnel: run the dev server in the background, then bring up the public tunnel.
-$RUN dev &
-DEV_PID=$!
+start_dev
+
 
 printf "  waiting for http://localhost:%s " "$PORT"
 for _ in $(seq 1 60); do
