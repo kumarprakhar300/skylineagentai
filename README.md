@@ -151,7 +151,11 @@ npm run demo       # one-command local demo
 
 1. Picks `bun` if available, otherwise `npm`.
 2. Installs dependencies when `node_modules` is missing.
-3. Loads `.env` and checks required/optional variables, failing early with the exact missing names.
+3. Runs a **preflight check**: loads `.env`, verifies `VITE_SUPABASE_URL` / `VITE_SUPABASE_PUBLISHABLE_KEY`
+   are present *and* correctly formatted, requires `TWILIO_AUTH_TOKEN` when `--tunnel` is used, warns about
+   optional keys (AI, Google Maps), and checks that port `8080` is free. On failure it stops before starting
+   anything and prints the exact variables to add plus a copy-paste `.env` block.
+
 4. Prints the demo checklist (`/`, `/leads`, `/analytics`, `/admin`) and starts the dev server on
    `http://localhost:8080`.
 
