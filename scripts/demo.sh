@@ -15,14 +15,19 @@ warn() { printf "  ${YELLOW}!${RESET} %s\n" "$1"; }
 fail() { printf "  ${RED}✗${RESET} %s\n" "$1"; }
 
 WANT_TUNNEL=0
+WANT_LOGS=0
 for arg in "$@"; do
   case "$arg" in
     --tunnel) WANT_TUNNEL=1 ;;
+    --logs) WANT_LOGS=1 ;;
     -h|--help)
-      echo "Usage: npm run demo [-- --tunnel]"
+      echo "Usage: npm run demo [-- --tunnel] [-- --logs]"
+      echo "  --tunnel   start/stop a public tunnel and print the Twilio webhook URL"
+      echo "  --logs     capture server, Twilio webhook and transcript/summary logs to a folder"
       exit 0 ;;
   esac
 done
+
 
 # 1. Pick a package manager -----------------------------------------------------
 if command -v bun >/dev/null 2>&1; then
