@@ -10,9 +10,18 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import type { Turn } from "@/lib/agent/prompt";
+import { ALL, LEAD_STATUSES } from "@/lib/leads-search";
 import { cn } from "@/lib/utils";
+
 
 type ViewerCall = {
   id: string;
