@@ -168,6 +168,7 @@ To test the leads dashboard, lead detail panel and CSV exports without making a 
 ```sh
 npm run seed          # insert 5 demo calls + leads (hot / warm / cold, Hindi, Hinglish, English)
 npm run seed -- --reset   # or: npm run seed:reset — remove the old demo rows and re-insert
+npm run seed:verify   # confirm the database is demo-ready before you start testing
 ```
 
 The script (`scripts/seed.mjs`) inserts realistic transcripts, sectioned call summaries and
@@ -175,6 +176,40 @@ deterministic lead scores, and tags every seeded row in `notes` with `[demo-seed
 touches demo data. It needs `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` in `.env`, because
 row-level security intentionally blocks anonymous inserts into `calls` / `leads`. Running it twice
 is safe — it detects existing demo rows and skips.
+
+### Validate the seed before testing
+
+`npm run seed:verify` (`scripts/verify-seed.mjs`) runs three passes and exits non-zero with the exact
+fix command if anything is off:
+
+1. **Schema** — every column the app reads exists and is reachable on `calls`, `leads`,
+   `lead_activity` and `project_catalog` (catches a missing migration or missing grants).
+2. **Row counts** — the expected number of demo leads, their linked calls, and the total transcript
+   turns (catches a partial seed or a double seed).
+3. **Content readiness** — each demo lead links to a call with a non-empty transcript, a sectioned
+   summary, a valid score band, and the demo set covers more than one band.
+
+```sh
+npm run seed:verify                # expects 5 demo leads (the seed default)
+npm run seed:verify -- --expect 5  # override the expected lead count
+npm run seed:verify -- --all       # also report how many real (non-demo) calls exist
+```
+
+Sample passing output:
+
+```text
+1/3  Schema
+  ✓ calls — all 9 expected columns present
+2/3  Row counts
+  ✓ 5 demo leads (expected 5)
+  ✓ 28 transcript turns across 5 calls (avg 6/call)
+3/3  Content readiness
+  ✓ 5/5 leads scored with a valid band
+  ✓ score bands present: cold, hot, warm
+
+✓ Database is demo-ready.
+```
+
 
 
 
