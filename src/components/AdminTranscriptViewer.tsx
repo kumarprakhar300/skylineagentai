@@ -135,7 +135,7 @@ export function AdminTranscriptViewer() {
       {list.length === 0 ? (
         <div className="mt-4">
           <EmptyState
-            icon={MessagesSquare}
+            icon={<MessagesSquare className="size-5" />}
             title="No calls captured yet"
             description="Run a browser or phone demo call — the transcript and its summary will appear here."
           />
