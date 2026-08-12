@@ -4,7 +4,9 @@ import { Loader2, Plus, Save, ShieldAlert, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
+import { AdminTranscriptViewer } from "@/components/AdminTranscriptViewer";
 import { PageShell } from "@/components/PageShell";
+
 import { CatalogFormSkeleton } from "@/components/Skeletons";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -256,7 +258,10 @@ function Admin() {
         </div>
       </Card>
 
+      <AdminTranscriptViewer />
+
       <Card className="panel-3d p-4 sm:p-6">
+
         <h2 className="text-base font-semibold tracking-tight sm:text-lg">Project basics</h2>
         <div className="mt-4 grid gap-3 sm:grid-cols-2 sm:gap-4">
           <Field label="Metro city" value={draft.city} onChange={(v) => set("city", v)} />
