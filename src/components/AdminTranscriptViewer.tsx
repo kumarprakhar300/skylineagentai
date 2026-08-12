@@ -10,9 +10,18 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import type { Turn } from "@/lib/agent/prompt";
+import { ALL, LEAD_STATUSES } from "@/lib/leads-search";
 import { cn } from "@/lib/utils";
+
 
 type ViewerCall = {
   id: string;
@@ -31,7 +40,9 @@ type ViewerLead = {
   location: string | null;
   score: number | null;
   score_band: string | null;
+  status: string | null;
 };
+
 
 /**
  * Turn timestamps are not recorded per turn, so the viewer spreads the call's
@@ -61,6 +72,11 @@ function clockLabel(call: ViewerCall, offsetSeconds: number): string {
 export function AdminTranscriptViewer() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [query, setQuery] = useState("");
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState(ALL);
+  const [band, setBand] = useState(ALL);
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
 
   const calls = useQuery({
     queryKey: ["admin-transcripts"],
@@ -72,7 +88,10 @@ export function AdminTranscriptViewer() {
           .select("id, channel, language, summary, transcript, started_at, ended_at")
           .order("started_at", { ascending: false })
           .limit(100),
-        supabase.from("leads").select("call_id, name, phone, location, score, score_band").limit(500),
+        supabase
+          .from("leads")
+          .select("call_id, name, phone, location, score, score_band, status")
+          .limit(500),
       ]);
       if (callRes.error) throw callRes.error;
       if (leadRes.error) throw leadRes.error;
@@ -87,14 +106,41 @@ export function AdminTranscriptViewer() {
     },
   });
 
-  const list = calls.data?.calls ?? [];
+  const allCalls = calls.data?.calls ?? [];
+  const leadByCall = calls.data?.leadByCall;
+
+  const list = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    const fromTime = from ? new Date(`${from}T00:00:00`).getTime() : null;
+    const toTime = to ? new Date(`${to}T23:59:59`).getTime() : null;
+    return allCalls.filter((call) => {
+      const lead = leadByCall?.get(call.id);
+      if (term) {
+        const haystack = [lead?.name, lead?.phone, lead?.location, call.channel, call.language]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+        if (!haystack.includes(term)) return false;
+      }
+      if (status !== ALL && (lead?.status ?? "new") !== status) return false;
+      if (band !== ALL && (lead?.score_band ?? "cold") !== band) return false;
+      const started = new Date(call.started_at).getTime();
+      if (fromTime !== null && started < fromTime) return false;
+      if (toTime !== null && started > toTime) return false;
+      return true;
+    });
+  }, [allCalls, leadByCall, search, status, band, from, to]);
+
+  const filtersActive = Boolean(search || from || to) || status !== ALL || band !== ALL;
 
   useEffect(() => {
-    if (!selectedId && list.length > 0) setSelectedId(list[0]!.id);
+    if (list.length === 0) return;
+    if (!selectedId || !list.some((c) => c.id === selectedId)) setSelectedId(list[0]!.id);
   }, [list, selectedId]);
 
   const active = list.find((c) => c.id === selectedId) ?? null;
-  const activeLead = active ? calls.data?.leadByCall.get(active.id) ?? null : null;
+  const activeLead = active ? leadByCall?.get(active.id) ?? null : null;
+
 
   const rows = useMemo(() => {
     if (!active) return [];
@@ -132,19 +178,93 @@ export function AdminTranscriptViewer() {
         </Button>
       </div>
 
+      <div className="mt-4 grid gap-2 rounded-xl border border-border/70 bg-secondary/20 p-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.4fr)_repeat(2,minmax(0,0.9fr))_repeat(2,minmax(0,0.8fr))_auto]">
+        <div className="relative">
+          <Search className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search name, phone, location"
+            aria-label="Search calls by name, phone or location"
+            className="h-9 pl-8 text-sm"
+          />
+        </div>
+        <Select value={status} onValueChange={setStatus}>
+          <SelectTrigger className="h-9 text-sm" aria-label="Filter by status">
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={ALL}>All statuses</SelectItem>
+            {LEAD_STATUSES.map((s) => (
+              <SelectItem key={s.value} value={s.value}>
+                {s.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select value={band} onValueChange={setBand}>
+          <SelectTrigger className="h-9 text-sm" aria-label="Filter by score band">
+            <SelectValue placeholder="Score" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={ALL}>All scores</SelectItem>
+            <SelectItem value="hot">Hot</SelectItem>
+            <SelectItem value="warm">Warm</SelectItem>
+            <SelectItem value="cold">Cold</SelectItem>
+          </SelectContent>
+        </Select>
+        <Input
+          type="date"
+          value={from}
+          onChange={(e) => setFrom(e.target.value)}
+          aria-label="Calls from date"
+          className="h-9 text-sm"
+        />
+        <Input
+          type="date"
+          value={to}
+          onChange={(e) => setTo(e.target.value)}
+          aria-label="Calls until date"
+          className="h-9 text-sm"
+        />
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-9"
+          disabled={!filtersActive}
+          onClick={() => {
+            setSearch("");
+            setStatus(ALL);
+            setBand(ALL);
+            setFrom("");
+            setTo("");
+          }}
+        >
+          Reset
+        </Button>
+      </div>
+
       {list.length === 0 ? (
         <div className="mt-4">
           <EmptyState
             icon={<MessagesSquare className="size-5" />}
-            title="No calls captured yet"
-            description="Run a browser or phone demo call — the transcript and its summary will appear here."
+            title={filtersActive ? "No calls match these filters" : "No calls captured yet"}
+            description={
+              filtersActive
+                ? "Try widening the date range or clearing the search to see more calls."
+                : "Run a browser or phone demo call — the transcript and its summary will appear here."
+            }
           />
         </div>
       ) : (
         <>
-          <div className="-mx-1 mt-4 flex gap-2 overflow-x-auto px-1 pb-1">
+          <p className="mt-3 text-xs text-muted-foreground">
+            Showing {list.length} of {allCalls.length} calls
+          </p>
+          <div className="-mx-1 mt-2 flex gap-2 overflow-x-auto px-1 pb-1">
             {list.map((call) => {
-              const lead = calls.data?.leadByCall.get(call.id);
+              const lead = leadByCall?.get(call.id);
+
               return (
                 <Button
                   key={call.id}
