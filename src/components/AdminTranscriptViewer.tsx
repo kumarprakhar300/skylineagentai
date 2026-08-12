@@ -178,19 +178,93 @@ export function AdminTranscriptViewer() {
         </Button>
       </div>
 
+      <div className="mt-4 grid gap-2 rounded-xl border border-border/70 bg-secondary/20 p-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.4fr)_repeat(2,minmax(0,0.9fr))_repeat(2,minmax(0,0.8fr))_auto]">
+        <div className="relative">
+          <Search className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search name, phone, location"
+            aria-label="Search calls by name, phone or location"
+            className="h-9 pl-8 text-sm"
+          />
+        </div>
+        <Select value={status} onValueChange={setStatus}>
+          <SelectTrigger className="h-9 text-sm" aria-label="Filter by status">
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={ALL}>All statuses</SelectItem>
+            {LEAD_STATUSES.map((s) => (
+              <SelectItem key={s.value} value={s.value}>
+                {s.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select value={band} onValueChange={setBand}>
+          <SelectTrigger className="h-9 text-sm" aria-label="Filter by score band">
+            <SelectValue placeholder="Score" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={ALL}>All scores</SelectItem>
+            <SelectItem value="hot">Hot</SelectItem>
+            <SelectItem value="warm">Warm</SelectItem>
+            <SelectItem value="cold">Cold</SelectItem>
+          </SelectContent>
+        </Select>
+        <Input
+          type="date"
+          value={from}
+          onChange={(e) => setFrom(e.target.value)}
+          aria-label="Calls from date"
+          className="h-9 text-sm"
+        />
+        <Input
+          type="date"
+          value={to}
+          onChange={(e) => setTo(e.target.value)}
+          aria-label="Calls until date"
+          className="h-9 text-sm"
+        />
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-9"
+          disabled={!filtersActive}
+          onClick={() => {
+            setSearch("");
+            setStatus(ALL);
+            setBand(ALL);
+            setFrom("");
+            setTo("");
+          }}
+        >
+          Reset
+        </Button>
+      </div>
+
       {list.length === 0 ? (
         <div className="mt-4">
           <EmptyState
             icon={<MessagesSquare className="size-5" />}
-            title="No calls captured yet"
-            description="Run a browser or phone demo call — the transcript and its summary will appear here."
+            title={filtersActive ? "No calls match these filters" : "No calls captured yet"}
+            description={
+              filtersActive
+                ? "Try widening the date range or clearing the search to see more calls."
+                : "Run a browser or phone demo call — the transcript and its summary will appear here."
+            }
           />
         </div>
       ) : (
         <>
-          <div className="-mx-1 mt-4 flex gap-2 overflow-x-auto px-1 pb-1">
+          <p className="mt-3 text-xs text-muted-foreground">
+            Showing {list.length} of {allCalls.length} calls
+          </p>
+          <div className="-mx-1 mt-2 flex gap-2 overflow-x-auto px-1 pb-1">
             {list.map((call) => {
-              const lead = calls.data?.leadByCall.get(call.id);
+              const lead = leadByCall?.get(call.id);
+
               return (
                 <Button
                   key={call.id}
