@@ -2,7 +2,6 @@ import { queryOptions, useQueryClient, useSuspenseQuery } from "@tanstack/react-
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
   ChevronDown,
-  Download,
   PanelRight,
   PhoneCall,
   Search,
@@ -31,7 +30,7 @@ import {
 } from "@/components/ui/select";
 import { speakerShortName } from "@/components/SpeakerLabel";
 import { supabase } from "@/integrations/supabase/client";
-import { downloadLeadsCsv, downloadTranscriptsCsv } from "@/lib/leads-export";
+import { ExportCsvDialog } from "@/components/ExportCsvDialog";
 import {
   ALL,
   LEAD_STATUSES,
@@ -235,10 +234,6 @@ function Leads() {
     );
   }
 
-  const exportLeads = () => downloadLeadsCsv(filtered, leadByCall);
-
-  const exportTranscripts = () => downloadTranscriptsCsv(filtered, leadByCall);
-
 
   const activeFilterCount = [
     search.location !== ALL,
@@ -431,24 +426,14 @@ function Leads() {
             Showing {filtered.length} of {data.calls.length} calls
           </p>
           <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center">
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full sm:w-auto"
-              disabled={filtered.length === 0}
-              onClick={exportLeads}
-            >
-              <Download className="size-4" /> Leads CSV
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full sm:w-auto"
-              disabled={filtered.length === 0}
-              onClick={exportTranscripts}
-            >
-              <Download className="size-4" /> Transcripts CSV
-            </Button>
+            <div className="col-span-2 sm:col-span-1">
+              <ExportCsvDialog
+                count={filtered.length}
+                scopeLabel={hasFilters ? "matching the current filters" : "will be exported"}
+                triggerLabel="Export CSV"
+                source={async () => ({ calls: filtered, leadByCall })}
+              />
+            </div>
             {hasFilters && (
             <Button
               variant="ghost"

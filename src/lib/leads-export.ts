@@ -1,47 +1,89 @@
+import { parseSummary, SUMMARY_SECTION_LABELS } from "@/lib/agent/summary";
 import { downloadCsv, stamp, toCsv } from "@/lib/csv";
 import type { CallRow, LeadRow } from "@/lib/leads-types";
 
-/** Build a call-level CSV: one row per call with its qualified lead fields. */
-export function buildLeadsCsv(calls: CallRow[], leadByCall: Map<string, LeadRow>): string {
+export type ExportColumn = {
+  key: string;
+  label: string;
+  group: "Call" | "Lead" | "Score" | "Summary sections" | "Pipeline";
+  value: (call: CallRow, lead: LeadRow | undefined) => unknown;
+};
+
+const sectionColumns: ExportColumn[] = SUMMARY_SECTION_LABELS.map((label) => ({
+  key: `section:${label}`,
+  label: `Summary — ${label}`,
+  group: "Summary sections" as const,
+  value: (call) => parseSummary(call.summary ?? "")[label],
+}));
+
+/** Every column a user can pick for the leads CSV export. */
+export const LEAD_EXPORT_COLUMNS: ExportColumn[] = [
+  { key: "date", label: "Call date", group: "Call", value: (c) => new Date(c.started_at).toLocaleString("en-IN") },
+  { key: "channel", label: "Channel", group: "Call", value: (c) => c.channel },
+  { key: "language", label: "Language", group: "Call", value: (c) => c.language },
+  { key: "call_id", label: "Call ID", group: "Call", value: (c) => c.id },
+  { key: "turns", label: "Transcript turns", group: "Call", value: (c) => (c.transcript ?? []).length },
+  { key: "summary", label: "Call summary (full)", group: "Call", value: (c) => c.summary },
+
+  { key: "name", label: "Name", group: "Lead", value: (_c, l) => l?.name },
+  { key: "phone", label: "Phone", group: "Lead", value: (_c, l) => l?.phone },
+  { key: "intent", label: "Buy / invest", group: "Lead", value: (_c, l) => l?.intent },
+  { key: "location", label: "Location", group: "Lead", value: (_c, l) => l?.location },
+  { key: "property_type", label: "Property type", group: "Lead", value: (_c, l) => l?.property_type },
+  { key: "configuration", label: "Configuration", group: "Lead", value: (_c, l) => l?.configuration },
+  { key: "budget", label: "Budget", group: "Lead", value: (_c, l) => l?.budget },
+  { key: "purpose", label: "Purpose", group: "Lead", value: (_c, l) => l?.purpose },
+  { key: "timeline", label: "Timeline", group: "Lead", value: (_c, l) => l?.timeline },
+
+  { key: "score", label: "Lead score", group: "Score", value: (_c, l) => l?.score },
+  { key: "score_band", label: "Score band", group: "Score", value: (_c, l) => l?.score_band },
+  { key: "score_reasons", label: "Score signals", group: "Score", value: (_c, l) => l?.score_reasons },
+
+  { key: "status", label: "Pipeline status", group: "Pipeline", value: (_c, l) => l?.status },
+  { key: "owner_notes", label: "Owner notes", group: "Pipeline", value: (_c, l) => l?.owner_notes },
+  {
+    key: "callback_at",
+    label: "Callback at",
+    group: "Pipeline",
+    value: (_c, l) => (l?.callback_at ? new Date(l.callback_at).toLocaleString("en-IN") : ""),
+  },
+
+  ...sectionColumns,
+];
+
+/** Columns selected by default — the classic export shape. */
+export const DEFAULT_EXPORT_COLUMN_KEYS = [
+  "date",
+  "channel",
+  "language",
+  "name",
+  "phone",
+  "intent",
+  "location",
+  "property_type",
+  "configuration",
+  "budget",
+  "purpose",
+  "timeline",
+  "score",
+  "score_band",
+  "score_reasons",
+  "summary",
+];
+
+/** Build a call-level CSV containing only the chosen columns, in registry order. */
+export function buildLeadsCsv(
+  calls: CallRow[],
+  leadByCall: Map<string, LeadRow>,
+  columnKeys: string[] = DEFAULT_EXPORT_COLUMN_KEYS,
+): string {
+  const selected = LEAD_EXPORT_COLUMNS.filter((c) => columnKeys.includes(c.key));
+  const columns = selected.length > 0 ? selected : LEAD_EXPORT_COLUMNS;
   return toCsv(
-    [
-      "Call date",
-      "Channel",
-      "Language",
-      "Name",
-      "Phone",
-      "Buy / invest",
-      "Location",
-      "Property type",
-      "Configuration",
-      "Budget",
-      "Purpose",
-      "Timeline",
-      "Lead score",
-      "Score band",
-      "Score signals",
-      "Call summary",
-    ],
+    columns.map((c) => c.label),
     calls.map((call) => {
       const lead = leadByCall.get(call.id);
-      return [
-        new Date(call.started_at).toLocaleString("en-IN"),
-        call.channel,
-        call.language,
-        lead?.name,
-        lead?.phone,
-        lead?.intent,
-        lead?.location,
-        lead?.property_type,
-        lead?.configuration,
-        lead?.budget,
-        lead?.purpose,
-        lead?.timeline,
-        lead?.score,
-        lead?.score_band,
-        lead?.score_reasons,
-        call.summary,
-      ];
+      return columns.map((c) => c.value(call, lead));
     }),
   );
 }
@@ -77,8 +119,12 @@ export function leadByCallMap(leads: LeadRow[]): Map<string, LeadRow> {
   return map;
 }
 
-export function downloadLeadsCsv(calls: CallRow[], leadByCall: Map<string, LeadRow>) {
-  downloadCsv(`leads-${stamp()}.csv`, buildLeadsCsv(calls, leadByCall));
+export function downloadLeadsCsv(
+  calls: CallRow[],
+  leadByCall: Map<string, LeadRow>,
+  columnKeys: string[] = DEFAULT_EXPORT_COLUMN_KEYS,
+) {
+  downloadCsv(`leads-${stamp()}.csv`, buildLeadsCsv(calls, leadByCall, columnKeys));
 }
 
 export function downloadTranscriptsCsv(calls: CallRow[], leadByCall: Map<string, LeadRow>) {
