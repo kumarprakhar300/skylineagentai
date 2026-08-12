@@ -63,6 +63,11 @@ function clockLabel(call: ViewerCall, offsetSeconds: number): string {
 export function AdminTranscriptViewer() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [query, setQuery] = useState("");
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState(ALL);
+  const [band, setBand] = useState(ALL);
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
 
   const calls = useQuery({
     queryKey: ["admin-transcripts"],
@@ -74,7 +79,10 @@ export function AdminTranscriptViewer() {
           .select("id, channel, language, summary, transcript, started_at, ended_at")
           .order("started_at", { ascending: false })
           .limit(100),
-        supabase.from("leads").select("call_id, name, phone, location, score, score_band").limit(500),
+        supabase
+          .from("leads")
+          .select("call_id, name, phone, location, score, score_band, status")
+          .limit(500),
       ]);
       if (callRes.error) throw callRes.error;
       if (leadRes.error) throw leadRes.error;
@@ -89,14 +97,41 @@ export function AdminTranscriptViewer() {
     },
   });
 
-  const list = calls.data?.calls ?? [];
+  const allCalls = calls.data?.calls ?? [];
+  const leadByCall = calls.data?.leadByCall;
+
+  const list = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    const fromTime = from ? new Date(`${from}T00:00:00`).getTime() : null;
+    const toTime = to ? new Date(`${to}T23:59:59`).getTime() : null;
+    return allCalls.filter((call) => {
+      const lead = leadByCall?.get(call.id);
+      if (term) {
+        const haystack = [lead?.name, lead?.phone, lead?.location, call.channel, call.language]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+        if (!haystack.includes(term)) return false;
+      }
+      if (status !== ALL && (lead?.status ?? "new") !== status) return false;
+      if (band !== ALL && (lead?.score_band ?? "cold") !== band) return false;
+      const started = new Date(call.started_at).getTime();
+      if (fromTime !== null && started < fromTime) return false;
+      if (toTime !== null && started > toTime) return false;
+      return true;
+    });
+  }, [allCalls, leadByCall, search, status, band, from, to]);
+
+  const filtersActive = Boolean(search || from || to) || status !== ALL || band !== ALL;
 
   useEffect(() => {
-    if (!selectedId && list.length > 0) setSelectedId(list[0]!.id);
+    if (list.length === 0) return;
+    if (!selectedId || !list.some((c) => c.id === selectedId)) setSelectedId(list[0]!.id);
   }, [list, selectedId]);
 
   const active = list.find((c) => c.id === selectedId) ?? null;
-  const activeLead = active ? calls.data?.leadByCall.get(active.id) ?? null : null;
+  const activeLead = active ? leadByCall?.get(active.id) ?? null : null;
+
 
   const rows = useMemo(() => {
     if (!active) return [];
