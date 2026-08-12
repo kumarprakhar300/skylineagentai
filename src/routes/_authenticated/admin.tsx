@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { Download, Loader2, Plus, Save, ShieldAlert, Trash2 } from "lucide-react";
+import { Loader2, Plus, Save, ShieldAlert, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -19,11 +19,8 @@ import {
   loadCatalogForEditing,
   saveProjectCatalog,
 } from "@/lib/catalog.functions";
-import {
-  downloadLeadsCsv,
-  downloadTranscriptsCsv,
-  leadByCallMap,
-} from "@/lib/leads-export";
+import { ExportCsvDialog } from "@/components/ExportCsvDialog";
+import { leadByCallMap } from "@/lib/leads-export";
 import type { CallRow, LeadRow } from "@/lib/leads-types";
 
 
@@ -73,34 +70,18 @@ function Admin() {
   const [busy, setBusy] = useState(false);
   const [projects, setProjects] = useState<ProjectCatalog[]>(defaultProjects);
   const [selected, setSelected] = useState(0);
-  const [exporting, setExporting] = useState<"leads" | "transcripts" | null>(null);
-
-  async function handleExport(kind: "leads" | "transcripts") {
-    setExporting(kind);
-    try {
-      const [leads, calls] = await Promise.all([
-        supabase.from("leads").select("*").order("created_at", { ascending: false }).limit(1000),
-        supabase.from("calls").select("*").order("started_at", { ascending: false }).limit(1000),
-      ]);
-      if (leads.error) throw leads.error;
-      if (calls.error) throw calls.error;
-
-      const callRows = (calls.data ?? []) as unknown as CallRow[];
-      const byCall = leadByCallMap((leads.data ?? []) as unknown as LeadRow[]);
-      if (callRows.length === 0) {
-        toast.error("No calls captured yet — run a demo call first");
-        return;
-      }
-      if (kind === "leads") downloadLeadsCsv(callRows, byCall);
-      else downloadTranscriptsCsv(callRows, byCall);
-      toast.success(`${callRows.length} calls exported`);
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not export the CSV");
-    } finally {
-      setExporting(null);
-    }
+  async function fetchExportRows() {
+    const [leads, calls] = await Promise.all([
+      supabase.from("leads").select("*").order("created_at", { ascending: false }).limit(1000),
+      supabase.from("calls").select("*").order("started_at", { ascending: false }).limit(1000),
+    ]);
+    if (leads.error) throw leads.error;
+    if (calls.error) throw calls.error;
+    return {
+      calls: (calls.data ?? []) as unknown as CallRow[],
+      leadByCall: leadByCallMap((leads.data ?? []) as unknown as LeadRow[]),
+    };
   }
-
 
   const reload = useCallback(async () => {
     const result = await load({ data: undefined });
@@ -240,33 +221,12 @@ function Admin() {
               transcripts, as a spreadsheet-ready CSV.
             </p>
           </div>
-          <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto">
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={exporting !== null}
-              onClick={() => void handleExport("leads")}
-            >
-              {exporting === "leads" ? (
-                <Loader2 className="size-4 animate-spin" />
-              ) : (
-                <Download className="size-4" />
-              )}{" "}
-              Leads CSV
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={exporting !== null}
-              onClick={() => void handleExport("transcripts")}
-            >
-              {exporting === "transcripts" ? (
-                <Loader2 className="size-4 animate-spin" />
-              ) : (
-                <Download className="size-4" />
-              )}{" "}
-              Transcripts CSV
-            </Button>
+          <div className="w-full sm:w-auto">
+            <ExportCsvDialog
+              scopeLabel="Every captured call is included."
+              triggerLabel="Export CSV"
+              source={fetchExportRows}
+            />
           </div>
         </div>
       </Card>
