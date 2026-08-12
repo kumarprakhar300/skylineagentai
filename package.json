@@ -9,6 +9,8 @@
     "demo:logs": "bash scripts/demo.sh --logs",
     "seed": "node scripts/seed.mjs",
     "seed:reset": "node scripts/seed.mjs --reset",
+    "seed:verify": "node scripts/verify-seed.mjs",
+
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
