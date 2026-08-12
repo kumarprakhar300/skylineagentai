@@ -31,7 +31,9 @@ type ViewerLead = {
   location: string | null;
   score: number | null;
   score_band: string | null;
+  status: string | null;
 };
+
 
 /**
  * Turn timestamps are not recorded per turn, so the viewer spreads the call's
