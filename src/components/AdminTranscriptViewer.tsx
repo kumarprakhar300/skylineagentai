@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { ArrowDown, ArrowUp, Clock, MessagesSquare, RefreshCw, Search } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+
+const PAGE_SIZE = 20;
 
 import { EmptyState } from "@/components/EmptyState";
 import { SpeakerLabel } from "@/components/SpeakerLabel";
