@@ -341,14 +341,16 @@ export function AdminTranscriptViewer() {
           size="sm"
           className="h-9"
           disabled={!filtersActive}
-          onClick={() => {
-            setSearch("");
-            setStatus(ALL);
-            setBand(ALL);
-            setSort("recent");
-            setFrom("");
-            setTo("");
-          }}
+          onClick={() =>
+            patch({
+              q: undefined,
+              status: undefined,
+              band: undefined,
+              sort: undefined,
+              from: undefined,
+              to: undefined,
+            })
+          }
         >
           Reset
         </Button>
