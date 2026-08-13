@@ -89,15 +89,30 @@ function clockLabel(call: ViewerCall, offsetSeconds: number): string {
 }
 
 export function AdminTranscriptViewer() {
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  // Filters live in the URL so a filtered view can be shared or reloaded.
+  const urlSearch = useSearch({ from: "/_authenticated/admin" });
+  const navigate = useNavigate({ from: "/_authenticated/admin" });
+  const patch = (next: Partial<AdminSearch>) =>
+    void navigate({ search: (prev) => ({ ...prev, ...next }), replace: true });
+
+  const search = urlSearch.q ?? "";
+  const status = urlSearch.status ?? ALL;
+  const band = urlSearch.band ?? ALL;
+  const from = urlSearch.from ?? "";
+  const to = urlSearch.to ?? "";
+  const sort = (urlSearch.sort ?? "recent") as SortValue;
+  const selectedId = urlSearch.call ?? null;
+
+  const setSearch = (value: string) => patch({ q: value || undefined });
+  const setStatus = (value: string) => patch({ status: value === ALL ? undefined : value });
+  const setBand = (value: string) => patch({ band: value === ALL ? undefined : value });
+  const setFrom = (value: string) => patch({ from: value || undefined });
+  const setTo = (value: string) => patch({ to: value || undefined });
+  const setSort = (value: SortValue) => patch({ sort: value === "recent" ? undefined : value });
+  const setSelectedId = (id: string) => patch({ call: id });
+
   const [detailOpen, setDetailOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const [search, setSearch] = useState("");
-  const [status, setStatus] = useState(ALL);
-  const [band, setBand] = useState(ALL);
-  const [from, setFrom] = useState("");
-  const [to, setTo] = useState("");
-  const [sort, setSort] = useState<SortValue>("recent");
 
   const calls = useQuery({
     queryKey: ["admin-transcripts"],
