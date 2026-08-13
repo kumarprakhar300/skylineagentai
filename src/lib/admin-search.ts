@@ -9,14 +9,14 @@ export type AdminSort = (typeof ADMIN_SORTS)[number];
  * empty/default values are stripped from the query string.
  */
 export type AdminSearch = {
-  q?: string;
-  status?: string;
-  band?: string;
-  sort?: AdminSort;
-  from?: string;
-  to?: string;
+  q?: string | undefined;
+  status?: string | undefined;
+  band?: string | undefined;
+  sort?: AdminSort | undefined;
+  from?: string | undefined;
+  to?: string | undefined;
   /** Selected call id, so a shared link reopens the same transcript. */
-  call?: string;
+  call?: string | undefined;
 };
 
 export const adminDefaults = {
