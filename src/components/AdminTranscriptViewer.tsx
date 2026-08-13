@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Clock, MessagesSquare, RefreshCw, Search } from "lucide-react";
+import { ArrowDown, ArrowUp, Clock, MessagesSquare, RefreshCw, Search } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { EmptyState } from "@/components/EmptyState";
@@ -21,6 +21,16 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Turn } from "@/lib/agent/prompt";
 import { ALL, LEAD_STATUSES } from "@/lib/leads-search";
 import { cn } from "@/lib/utils";
+
+const SORT_OPTIONS = [
+  { value: "recent", label: "Date: newest first", icon: ArrowDown },
+  { value: "oldest", label: "Date: oldest first", icon: ArrowUp },
+  { value: "score_desc", label: "Score: high to low", icon: ArrowDown },
+  { value: "score_asc", label: "Score: low to high", icon: ArrowUp },
+  { value: "status_asc", label: "Status: A – Z", icon: ArrowUp },
+] as const;
+
+type SortValue = (typeof SORT_OPTIONS)[number]["value"];
 
 
 type ViewerCall = {
@@ -77,6 +87,7 @@ export function AdminTranscriptViewer() {
   const [band, setBand] = useState(ALL);
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
+  const [sort, setSort] = useState<SortValue>("recent");
 
   const calls = useQuery({
     queryKey: ["admin-transcripts"],
@@ -113,7 +124,7 @@ export function AdminTranscriptViewer() {
     const term = search.trim().toLowerCase();
     const fromTime = from ? new Date(`${from}T00:00:00`).getTime() : null;
     const toTime = to ? new Date(`${to}T23:59:59`).getTime() : null;
-    return allCalls.filter((call) => {
+    const filtered = allCalls.filter((call) => {
       const lead = leadByCall?.get(call.id);
       if (term) {
         const haystack = [lead?.name, lead?.phone, lead?.location, call.channel, call.language]
@@ -129,9 +140,33 @@ export function AdminTranscriptViewer() {
       if (toTime !== null && started > toTime) return false;
       return true;
     });
-  }, [allCalls, leadByCall, search, status, band, from, to]);
 
-  const filtersActive = Boolean(search || from || to) || status !== ALL || band !== ALL;
+    const sorted = [...filtered];
+    sorted.sort((a, b) => {
+      const leadA = leadByCall?.get(a.id);
+      const leadB = leadByCall?.get(b.id);
+      switch (sort) {
+        case "oldest":
+          return new Date(a.started_at).getTime() - new Date(b.started_at).getTime();
+        case "score_desc":
+          return (leadB?.score ?? 0) - (leadA?.score ?? 0);
+        case "score_asc":
+          return (leadA?.score ?? 0) - (leadB?.score ?? 0);
+        case "status_asc": {
+          const statusA = leadA?.status ?? "new";
+          const statusB = leadB?.status ?? "new";
+          return statusA.localeCompare(statusB);
+        }
+        case "recent":
+        default:
+          return new Date(b.started_at).getTime() - new Date(a.started_at).getTime();
+      }
+    });
+    return sorted;
+  }, [allCalls, leadByCall, search, status, band, from, to, sort]);
+
+  const filtersActive =
+    Boolean(search || from || to) || status !== ALL || band !== ALL || sort !== "recent";
 
   useEffect(() => {
     if (list.length === 0) return;
@@ -178,7 +213,7 @@ export function AdminTranscriptViewer() {
         </Button>
       </div>
 
-      <div className="mt-4 grid gap-2 rounded-xl border border-border/70 bg-secondary/20 p-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.4fr)_repeat(2,minmax(0,0.9fr))_repeat(2,minmax(0,0.8fr))_auto]">
+      <div className="mt-4 grid gap-2 rounded-xl border border-border/70 bg-secondary/20 p-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.3fr)_repeat(4,minmax(0,0.85fr))_auto]">
         <div className="relative">
           <Search className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
           <Input
@@ -213,6 +248,24 @@ export function AdminTranscriptViewer() {
             <SelectItem value="cold">Cold</SelectItem>
           </SelectContent>
         </Select>
+        <Select value={sort} onValueChange={(value) => setSort(value as SortValue)}>
+          <SelectTrigger className="h-9 text-sm" aria-label="Sort calls">
+            <SelectValue placeholder="Sort by" />
+          </SelectTrigger>
+          <SelectContent>
+            {SORT_OPTIONS.map((option) => {
+              const Icon = option.icon;
+              return (
+                <SelectItem key={option.value} value={option.value}>
+                  <span className="flex items-center gap-2">
+                    <Icon className="size-3.5 text-muted-foreground" />
+                    {option.label}
+                  </span>
+                </SelectItem>
+              );
+            })}
+          </SelectContent>
+        </Select>
         <Input
           type="date"
           value={from}
@@ -236,6 +289,7 @@ export function AdminTranscriptViewer() {
             setSearch("");
             setStatus(ALL);
             setBand(ALL);
+            setSort("recent");
             setFrom("");
             setTo("");
           }}
