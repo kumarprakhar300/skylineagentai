@@ -87,6 +87,7 @@ export function AdminTranscriptViewer() {
   const [band, setBand] = useState(ALL);
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
+  const [sort, setSort] = useState<SortValue>("recent");
 
   const calls = useQuery({
     queryKey: ["admin-transcripts"],
