@@ -19,6 +19,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
 import type { Turn } from "@/lib/agent/prompt";
 import { ALL, LEAD_STATUSES } from "@/lib/leads-search";
@@ -83,6 +90,7 @@ function clockLabel(call: ViewerCall, offsetSeconds: number): string {
 
 export function AdminTranscriptViewer() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [detailOpen, setDetailOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState(ALL);
@@ -351,7 +359,11 @@ export function AdminTranscriptViewer() {
                   size="sm"
                   variant={call.id === selectedId ? "default" : "outline"}
                   className="h-auto shrink-0 flex-col items-start gap-0.5 py-1.5 text-left"
-                  onClick={() => setSelectedId(call.id)}
+                  onClick={() => {
+                    setSelectedId(call.id);
+                    setQuery("");
+                    setDetailOpen(true);
+                  }}
                 >
                   <span className="text-xs font-semibold">
                     {lead?.name?.trim() || "Unnamed caller"}
@@ -383,109 +395,131 @@ export function AdminTranscriptViewer() {
             )}
           </div>
 
+          <p className="mt-2 text-[11px] text-muted-foreground">
+            Click a call to open its transcript and sectioned summary.
+          </p>
 
-          {active && (
-            <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] lg:items-start">
-              {/* Conversation turns */}
-              <div className="rounded-xl border border-border/70 bg-secondary/20">
-                <div className="flex flex-wrap items-center gap-2 border-b border-border/70 p-3">
-                  <Badge variant="secondary">{active.channel}</Badge>
-                  {active.language && <Badge variant="outline">{active.language}</Badge>}
-                  <Badge variant="outline" className="gap-1">
-                    <Clock className="size-3" />
-                    {(active.transcript ?? []).length} turns
-                  </Badge>
-                  <div className="relative ml-auto w-full sm:w-48">
-                    <Search className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
-                    <Input
-                      value={query}
-                      onChange={(e) => setQuery(e.target.value)}
-                      placeholder="Search this transcript"
-                      aria-label="Search this transcript"
-                      className="h-8 pl-8 text-sm"
-                    />
-                  </div>
-                </div>
+          <Sheet open={detailOpen} onOpenChange={setDetailOpen}>
+            <SheetContent
+              side="right"
+              className="w-full overflow-y-auto sm:max-w-3xl"
+              aria-describedby={undefined}
+            >
+              {active && (
+                <>
+                  <SheetHeader className="text-left">
+                    <SheetTitle className="font-serif text-xl">
+                      {activeLead?.name?.trim() || "Unnamed caller"}
+                    </SheetTitle>
+                    <SheetDescription>
+                      {[activeLead?.phone, activeLead?.location].filter(Boolean).join(" · ") ||
+                        "No contact details captured"}
+                    </SheetDescription>
+                  </SheetHeader>
 
-                <ol className="max-h-[32rem] space-y-2 overflow-y-auto p-3">
-                  {rows.length === 0 && (
-                    <p className="py-6 text-center text-sm text-muted-foreground">
-                      No turns match “{query}”.
-                    </p>
-                  )}
-                  {rows.map(({ turn, index, offset }) => (
-                    <li
-                      key={index}
-                      className="grid grid-cols-[3.5rem_minmax(0,1fr)] gap-3 rounded-lg border border-border/60 bg-card/70 p-2.5"
-                    >
-                      <div className="text-right">
-                        <p className="font-mono text-xs tabular-nums text-muted-foreground">
-                          {elapsedLabel(offset)}
-                        </p>
-                        <p className="mt-0.5 text-[10px] tabular-nums text-muted-foreground/60">
-                          {clockLabel(active, offset)}
-                        </p>
+                  <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] lg:items-start">
+                    {/* Conversation turns */}
+                    <div className="rounded-xl border border-border/70 bg-secondary/20">
+                      <div className="flex flex-wrap items-center gap-2 border-b border-border/70 p-3">
+                        <Badge variant="secondary">{active.channel}</Badge>
+                        {active.language && <Badge variant="outline">{active.language}</Badge>}
+                        <Badge variant="outline" className="gap-1">
+                          <Clock className="size-3" />
+                          {(active.transcript ?? []).length} turns
+                        </Badge>
+                        <div className="relative ml-auto w-full sm:w-48">
+                          <Search className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+                          <Input
+                            value={query}
+                            onChange={(e) => setQuery(e.target.value)}
+                            placeholder="Search this transcript"
+                            aria-label="Search this transcript"
+                            className="h-8 pl-8 text-sm"
+                          />
+                        </div>
                       </div>
+
+                      <ol className="max-h-[32rem] space-y-2 overflow-y-auto p-3">
+                        {rows.length === 0 && (
+                          <p className="py-6 text-center text-sm text-muted-foreground">
+                            No turns match “{query}”.
+                          </p>
+                        )}
+                        {rows.map(({ turn, index, offset }) => (
+                          <li
+                            key={index}
+                            className="grid grid-cols-[3.5rem_minmax(0,1fr)] gap-3 rounded-lg border border-border/60 bg-card/70 p-2.5"
+                          >
+                            <div className="text-right">
+                              <p className="font-mono text-xs tabular-nums text-muted-foreground">
+                                {elapsedLabel(offset)}
+                              </p>
+                              <p className="mt-0.5 text-[10px] tabular-nums text-muted-foreground/60">
+                                {clockLabel(active, offset)}
+                              </p>
+                            </div>
+                            <div>
+                              <SpeakerLabel role={turn.role} turnNumber={index + 1} />
+                              <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed">
+                                {turn.content}
+                              </p>
+                            </div>
+                          </li>
+                        ))}
+                      </ol>
+                      <p className="border-t border-border/70 px-3 py-2 text-[11px] text-muted-foreground">
+                        Timestamps are approximate — spread across the call duration
+                        {active.ended_at
+                          ? ` (${elapsedLabel(
+                              Math.max(
+                                0,
+                                Math.round(
+                                  (new Date(active.ended_at).getTime() -
+                                    new Date(active.started_at).getTime()) /
+                                    1000,
+                                ),
+                              ),
+                            )} total)`
+                          : " (call still open)"}
+                        .
+                      </p>
+                    </div>
+
+                    {/* Sectioned summary side by side */}
+                    <div className="space-y-3 rounded-xl border border-border/70 bg-secondary/20 p-3">
                       <div>
-                        <SpeakerLabel role={turn.role} turnNumber={index + 1} />
-                        <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed">
-                          {turn.content}
+                        <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                          Call started
                         </p>
+                        <p className="mt-0.5 text-sm">
+                          {new Date(active.started_at).toLocaleString("en-IN")}
+                        </p>
+                        {typeof activeLead?.score === "number" && (
+                          <Badge variant="outline" className="mt-2">
+                            {(activeLead.score_band ?? "cold").replace(/^./, (c) =>
+                              c.toUpperCase(),
+                            )}{" "}
+                            · {activeLead.score}/100
+                          </Badge>
+                        )}
                       </div>
-                    </li>
-                  ))}
-                </ol>
-                <p className="border-t border-border/70 px-3 py-2 text-[11px] text-muted-foreground">
-                  Timestamps are approximate — spread across the call duration
-                  {active.ended_at
-                    ? ` (${elapsedLabel(
-                        Math.max(
-                          0,
-                          Math.round(
-                            (new Date(active.ended_at).getTime() -
-                              new Date(active.started_at).getTime()) /
-                              1000,
-                          ),
-                        ),
-                      )} total)`
-                    : " (call still open)"}
-                  .
-                </p>
-              </div>
-
-              {/* Sectioned summary side by side */}
-              <div className="space-y-3 rounded-xl border border-border/70 bg-secondary/20 p-3">
-                <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                    Caller
-                  </p>
-                  <p className="mt-0.5 font-serif text-lg">
-                    {activeLead?.name?.trim() || "Unnamed caller"}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {[activeLead?.phone, activeLead?.location].filter(Boolean).join(" · ") ||
-                      "No contact details captured"}
-                  </p>
-                  {typeof activeLead?.score === "number" && (
-                    <Badge variant="outline" className="mt-2">
-                      {(activeLead.score_band ?? "cold").replace(/^./, (c) => c.toUpperCase())} ·{" "}
-                      {activeLead.score}/100
-                    </Badge>
-                  )}
-                </div>
-                <div className="border-t border-border/70 pt-3">
-                  <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                    Sectioned summary
-                  </p>
-                  <div className="mt-2">
-                    <SummarySections summary={active.summary} />
+                      <div className="border-t border-border/70 pt-3">
+                        <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                          Sectioned summary
+                        </p>
+                        <div className="mt-2">
+                          <SummarySections summary={active.summary} />
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-            </div>
-          )}
+                </>
+              )}
+            </SheetContent>
+          </Sheet>
         </>
       )}
     </Card>
   );
 }
+
