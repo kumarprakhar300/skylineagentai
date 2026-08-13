@@ -27,6 +27,7 @@ import type { CallRow, LeadRow } from "@/lib/leads-types";
 
 
 export const Route = createFileRoute("/_authenticated/admin")({
+  validateSearch: validateAdminSearch,
   head: () => ({
     meta: [
       { title: "Edit Project Catalog — Skyline Estates AI Agent Admin" },
