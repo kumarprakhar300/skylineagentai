@@ -1,4 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
+import { useNavigate, useSearch } from "@tanstack/react-router";
+import type { AdminSearch } from "@/lib/admin-search";
 import { ArrowDown, ArrowUp, Clock, MessagesSquare, RefreshCw, Search } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -89,15 +91,30 @@ function clockLabel(call: ViewerCall, offsetSeconds: number): string {
 }
 
 export function AdminTranscriptViewer() {
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  // Filters live in the URL so a filtered view can be shared or reloaded.
+  const urlSearch = useSearch({ from: "/_authenticated/admin" });
+  const navigate = useNavigate({ from: "/admin" });
+  const patch = (next: Partial<AdminSearch>) =>
+    void navigate({ search: (prev) => ({ ...prev, ...next }), replace: true });
+
+  const search = urlSearch.q ?? "";
+  const status = urlSearch.status ?? ALL;
+  const band = urlSearch.band ?? ALL;
+  const from = urlSearch.from ?? "";
+  const to = urlSearch.to ?? "";
+  const sort = (urlSearch.sort ?? "recent") as SortValue;
+  const selectedId = urlSearch.call ?? null;
+
+  const setSearch = (value: string) => patch({ q: value || undefined });
+  const setStatus = (value: string) => patch({ status: value === ALL ? undefined : value });
+  const setBand = (value: string) => patch({ band: value === ALL ? undefined : value });
+  const setFrom = (value: string) => patch({ from: value || undefined });
+  const setTo = (value: string) => patch({ to: value || undefined });
+  const setSort = (value: SortValue) => patch({ sort: value === "recent" ? undefined : value });
+  const setSelectedId = (id: string) => patch({ call: id });
+
   const [detailOpen, setDetailOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const [search, setSearch] = useState("");
-  const [status, setStatus] = useState(ALL);
-  const [band, setBand] = useState(ALL);
-  const [from, setFrom] = useState("");
-  const [to, setTo] = useState("");
-  const [sort, setSort] = useState<SortValue>("recent");
 
   const calls = useQuery({
     queryKey: ["admin-transcripts"],
@@ -202,13 +219,18 @@ export function AdminTranscriptViewer() {
     return () => observer.disconnect();
   }, [hasMore, list.length]);
 
-  useEffect(() => {
-    if (list.length === 0) return;
-    if (!selectedId || !list.some((c) => c.id === selectedId)) setSelectedId(list[0]!.id);
-  }, [list, selectedId]);
-
-  const active = list.find((c) => c.id === selectedId) ?? null;
+  const active = (selectedId ? list.find((c) => c.id === selectedId) : null) ?? list[0] ?? null;
   const activeLead = active ? leadByCall?.get(active.id) ?? null : null;
+
+  // A shared link that pins a call reopens that transcript automatically.
+  const openedFromUrl = useRef(false);
+  useEffect(() => {
+    if (openedFromUrl.current) return;
+    if (selectedId && list.some((c) => c.id === selectedId)) {
+      openedFromUrl.current = true;
+      setDetailOpen(true);
+    }
+  }, [selectedId, list]);
 
 
   const rows = useMemo(() => {
@@ -319,14 +341,16 @@ export function AdminTranscriptViewer() {
           size="sm"
           className="h-9"
           disabled={!filtersActive}
-          onClick={() => {
-            setSearch("");
-            setStatus(ALL);
-            setBand(ALL);
-            setSort("recent");
-            setFrom("");
-            setTo("");
-          }}
+          onClick={() =>
+            patch({
+              q: undefined,
+              status: undefined,
+              band: undefined,
+              sort: undefined,
+              from: undefined,
+              to: undefined,
+            })
+          }
         >
           Reset
         </Button>
