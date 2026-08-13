@@ -213,7 +213,7 @@ export function AdminTranscriptViewer() {
         </Button>
       </div>
 
-      <div className="mt-4 grid gap-2 rounded-xl border border-border/70 bg-secondary/20 p-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.4fr)_repeat(2,minmax(0,0.9fr))_repeat(2,minmax(0,0.8fr))_auto]">
+      <div className="mt-4 grid gap-2 rounded-xl border border-border/70 bg-secondary/20 p-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.3fr)_repeat(4,minmax(0,0.85fr))_auto]">
         <div className="relative">
           <Search className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
           <Input
@@ -248,6 +248,24 @@ export function AdminTranscriptViewer() {
             <SelectItem value="cold">Cold</SelectItem>
           </SelectContent>
         </Select>
+        <Select value={sort} onValueChange={(value) => setSort(value as SortValue)}>
+          <SelectTrigger className="h-9 text-sm" aria-label="Sort calls">
+            <SelectValue placeholder="Sort by" />
+          </SelectTrigger>
+          <SelectContent>
+            {SORT_OPTIONS.map((option) => {
+              const Icon = option.icon;
+              return (
+                <SelectItem key={option.value} value={option.value}>
+                  <span className="flex items-center gap-2">
+                    <Icon className="size-3.5 text-muted-foreground" />
+                    {option.label}
+                  </span>
+                </SelectItem>
+              );
+            })}
+          </SelectContent>
+        </Select>
         <Input
           type="date"
           value={from}
@@ -271,6 +289,7 @@ export function AdminTranscriptViewer() {
             setSearch("");
             setStatus(ALL);
             setBand(ALL);
+            setSort("recent");
             setFrom("");
             setTo("");
           }}
