@@ -219,13 +219,18 @@ export function AdminTranscriptViewer() {
     return () => observer.disconnect();
   }, [hasMore, list.length]);
 
-  useEffect(() => {
-    if (list.length === 0) return;
-    if (!selectedId || !list.some((c) => c.id === selectedId)) setSelectedId(list[0]!.id);
-  }, [list, selectedId]);
-
-  const active = list.find((c) => c.id === selectedId) ?? null;
+  const active = (selectedId ? list.find((c) => c.id === selectedId) : null) ?? list[0] ?? null;
   const activeLead = active ? leadByCall?.get(active.id) ?? null : null;
+
+  // A shared link that pins a call reopens that transcript automatically.
+  const openedFromUrl = useRef(false);
+  useEffect(() => {
+    if (openedFromUrl.current) return;
+    if (selectedId && list.some((c) => c.id === selectedId)) {
+      openedFromUrl.current = true;
+      setDetailOpen(true);
+    }
+  }, [selectedId, list]);
 
 
   const rows = useMemo(() => {
