@@ -90,6 +90,7 @@ function clockLabel(call: ViewerCall, offsetSeconds: number): string {
 
 export function AdminTranscriptViewer() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [detailOpen, setDetailOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState(ALL);
