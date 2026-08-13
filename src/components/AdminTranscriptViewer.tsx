@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Clock, MessagesSquare, RefreshCw, Search } from "lucide-react";
+import { ArrowDown, ArrowUp, Clock, MessagesSquare, RefreshCw, Search } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { EmptyState } from "@/components/EmptyState";
@@ -21,6 +21,16 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Turn } from "@/lib/agent/prompt";
 import { ALL, LEAD_STATUSES } from "@/lib/leads-search";
 import { cn } from "@/lib/utils";
+
+const SORT_OPTIONS = [
+  { value: "recent", label: "Date: newest first", icon: ArrowDown },
+  { value: "oldest", label: "Date: oldest first", icon: ArrowUp },
+  { value: "score_desc", label: "Score: high to low", icon: ArrowDown },
+  { value: "score_asc", label: "Score: low to high", icon: ArrowUp },
+  { value: "status_asc", label: "Status: A – Z", icon: ArrowUp },
+] as const;
+
+type SortValue = (typeof SORT_OPTIONS)[number]["value"];
 
 
 type ViewerCall = {
