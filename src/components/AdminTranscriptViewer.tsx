@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { ArrowDown, ArrowUp, Clock, MessagesSquare, RefreshCw, Search } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+
+const PAGE_SIZE = 20;
 
 import { EmptyState } from "@/components/EmptyState";
 import { SpeakerLabel } from "@/components/SpeakerLabel";
@@ -168,6 +170,30 @@ export function AdminTranscriptViewer() {
   const filtersActive =
     Boolean(search || from || to) || status !== ALL || band !== ALL || sort !== "recent";
 
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [search, status, band, from, to, sort, allCalls.length]);
+
+  const visibleList = useMemo(() => list.slice(0, visibleCount), [list, visibleCount]);
+  const hasMore = visibleCount < list.length;
+
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const node = sentinelRef.current;
+    if (!node || !hasMore) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          setVisibleCount((count) => Math.min(count + PAGE_SIZE, list.length));
+        }
+      },
+      { root: node.parentElement, rootMargin: "120px" },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [hasMore, list.length]);
+
   useEffect(() => {
     if (list.length === 0) return;
     if (!selectedId || !list.some((c) => c.id === selectedId)) setSelectedId(list[0]!.id);
@@ -313,10 +339,10 @@ export function AdminTranscriptViewer() {
       ) : (
         <>
           <p className="mt-3 text-xs text-muted-foreground">
-            Showing {list.length} of {allCalls.length} calls
+            Showing {visibleList.length} of {list.length} filtered · {allCalls.length} total calls
           </p>
           <div className="-mx-1 mt-2 flex gap-2 overflow-x-auto px-1 pb-1">
-            {list.map((call) => {
+            {visibleList.map((call) => {
               const lead = leadByCall?.get(call.id);
 
               return (
@@ -341,7 +367,22 @@ export function AdminTranscriptViewer() {
                 </Button>
               );
             })}
+            {hasMore && (
+              <div ref={sentinelRef} className="flex shrink-0 items-center">
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-auto py-1.5 text-xs"
+                  onClick={() =>
+                    setVisibleCount((count) => Math.min(count + PAGE_SIZE, list.length))
+                  }
+                >
+                  Load {Math.min(PAGE_SIZE, list.length - visibleCount)} more
+                </Button>
+              </div>
+            )}
           </div>
+
 
           {active && (
             <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] lg:items-start">
