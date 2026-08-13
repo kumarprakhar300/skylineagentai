@@ -92,7 +92,7 @@ function clockLabel(call: ViewerCall, offsetSeconds: number): string {
 
 export function AdminTranscriptViewer() {
   // Filters live in the URL so a filtered view can be shared or reloaded.
-  const urlSearch = useSearch({ from: "/admin" });
+  const urlSearch = useSearch({ from: "/_authenticated/admin" });
   const navigate = useNavigate({ from: "/admin" });
   const patch = (next: Partial<AdminSearch>) =>
     void navigate({ search: (prev) => ({ ...prev, ...next }), replace: true });
