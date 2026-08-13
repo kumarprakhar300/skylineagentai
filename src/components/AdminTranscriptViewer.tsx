@@ -356,6 +356,9 @@ export function AdminTranscriptViewer() {
         </Button>
       </div>
 
+      <FilterPresets current={urlSearch} onApply={(next) => patch(next)} />
+
+
       {list.length === 0 ? (
         <div className="mt-4">
           <EmptyState
