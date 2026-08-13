@@ -168,6 +168,30 @@ export function AdminTranscriptViewer() {
   const filtersActive =
     Boolean(search || from || to) || status !== ALL || band !== ALL || sort !== "recent";
 
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [search, status, band, from, to, sort, allCalls.length]);
+
+  const visibleList = useMemo(() => list.slice(0, visibleCount), [list, visibleCount]);
+  const hasMore = visibleCount < list.length;
+
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const node = sentinelRef.current;
+    if (!node || !hasMore) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          setVisibleCount((count) => Math.min(count + PAGE_SIZE, list.length));
+        }
+      },
+      { root: node.parentElement, rootMargin: "120px" },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [hasMore, list.length]);
+
   useEffect(() => {
     if (list.length === 0) return;
     if (!selectedId || !list.some((c) => c.id === selectedId)) setSelectedId(list[0]!.id);
