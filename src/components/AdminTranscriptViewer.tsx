@@ -359,7 +359,11 @@ export function AdminTranscriptViewer() {
                   size="sm"
                   variant={call.id === selectedId ? "default" : "outline"}
                   className="h-auto shrink-0 flex-col items-start gap-0.5 py-1.5 text-left"
-                  onClick={() => setSelectedId(call.id)}
+                  onClick={() => {
+                    setSelectedId(call.id);
+                    setQuery("");
+                    setDetailOpen(true);
+                  }}
                 >
                   <span className="text-xs font-semibold">
                     {lead?.name?.trim() || "Unnamed caller"}
