@@ -124,7 +124,7 @@ export function AdminTranscriptViewer() {
     const term = search.trim().toLowerCase();
     const fromTime = from ? new Date(`${from}T00:00:00`).getTime() : null;
     const toTime = to ? new Date(`${to}T23:59:59`).getTime() : null;
-    return allCalls.filter((call) => {
+    const filtered = allCalls.filter((call) => {
       const lead = leadByCall?.get(call.id);
       if (term) {
         const haystack = [lead?.name, lead?.phone, lead?.location, call.channel, call.language]
@@ -140,9 +140,33 @@ export function AdminTranscriptViewer() {
       if (toTime !== null && started > toTime) return false;
       return true;
     });
-  }, [allCalls, leadByCall, search, status, band, from, to]);
 
-  const filtersActive = Boolean(search || from || to) || status !== ALL || band !== ALL;
+    const sorted = [...filtered];
+    sorted.sort((a, b) => {
+      const leadA = leadByCall?.get(a.id);
+      const leadB = leadByCall?.get(b.id);
+      switch (sort) {
+        case "oldest":
+          return new Date(a.started_at).getTime() - new Date(b.started_at).getTime();
+        case "score_desc":
+          return (leadB?.score ?? 0) - (leadA?.score ?? 0);
+        case "score_asc":
+          return (leadA?.score ?? 0) - (leadB?.score ?? 0);
+        case "status_asc": {
+          const statusA = leadA?.status ?? "new";
+          const statusB = leadB?.status ?? "new";
+          return statusA.localeCompare(statusB);
+        }
+        case "recent":
+        default:
+          return new Date(b.started_at).getTime() - new Date(a.started_at).getTime();
+      }
+    });
+    return sorted;
+  }, [allCalls, leadByCall, search, status, band, from, to, sort]);
+
+  const filtersActive =
+    Boolean(search || from || to) || status !== ALL || band !== ALL || sort !== "recent";
 
   useEffect(() => {
     if (list.length === 0) return;
