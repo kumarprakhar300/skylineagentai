@@ -7,6 +7,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 const PAGE_SIZE = 20;
 
 import { EmptyState } from "@/components/EmptyState";
+import { FilterPresets } from "@/components/FilterPresets";
+
 import { SpeakerLabel } from "@/components/SpeakerLabel";
 import { SummarySections } from "@/components/SummarySections";
 import { Badge } from "@/components/ui/badge";
@@ -355,6 +357,9 @@ export function AdminTranscriptViewer() {
           Reset
         </Button>
       </div>
+
+      <FilterPresets current={urlSearch} onApply={(next) => patch(next)} />
+
 
       {list.length === 0 ? (
         <div className="mt-4">
