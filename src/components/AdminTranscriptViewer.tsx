@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import type { AdminSearch } from "@/lib/admin-search";
-import { ArrowDown, ArrowUp, Clock, MessagesSquare, RefreshCw, Search } from "lucide-react";
+import { ArrowDown, ArrowUp, Clock, Download, MessagesSquare, RefreshCw, Search } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 const PAGE_SIZE = 20;
