@@ -1,4 +1,4 @@
-import { BookmarkPlus, Check, Link2, X } from "lucide-react";
+import { BookmarkPlus, Check, Link2, Pencil, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -34,6 +34,8 @@ export function FilterPresets({ current, onApply }: Props) {
   const [saved, setSaved] = useState<AdminPreset[]>([]);
   const [name, setName] = useState("");
   const [open, setOpen] = useState(false);
+  const [renamingId, setRenamingId] = useState<string | null>(null);
+  const [renameValue, setRenameValue] = useState("");
   const [hydrated, setHydrated] = useState(false);
   const appliedFromUrl = useRef<string | null>(null);
 
@@ -81,6 +83,33 @@ export function FilterPresets({ current, onApply }: Props) {
     setOpen(false);
   };
 
+  const renamePreset = (id: string) => {
+    const label = renameValue.trim();
+    if (!label) return;
+    persist(
+      saved.map((p) =>
+        p.id === id
+          ? { ...p, name: label }
+          : p,
+      ),
+    );
+    setRenamingId(null);
+    setRenameValue("");
+    toast.success(`Preset renamed to “${label}”`);
+  };
+
+  const deletePreset = (preset: AdminPreset) => {
+    const remaining = saved.filter((p) => p.id !== preset.id);
+    persist(remaining);
+    if (renamingId === preset.id) setRenamingId(null);
+    toast.success(`Preset “${preset.name}” deleted`, {
+      action: {
+        label: "Undo",
+        onClick: () => persist([...remaining, preset]),
+      },
+    });
+  };
+
   const copyLink = async (preset: AdminPreset) => {
     const url = presetShareUrl(preset, window.location.origin, window.location.pathname);
     try {
@@ -100,6 +129,7 @@ export function FilterPresets({ current, onApply }: Props) {
 
       {presets.map((preset) => {
         const isActive = preset.id === activeId;
+        const isRenaming = renamingId === preset.id;
         return (
           <span
             key={preset.id}
@@ -110,39 +140,88 @@ export function FilterPresets({ current, onApply }: Props) {
                 : "border-border/70 bg-secondary/30 text-muted-foreground hover:text-foreground",
             )}
           >
-            <button
-              type="button"
-              onClick={() => onApply(presetPatch(preset.filters))}
-              title={describeFilters(preset.filters)}
-              aria-pressed={isActive}
-              className="inline-flex items-center gap-1 px-2 py-1"
-            >
-              {isActive ? <Check className="size-3" /> : null}
-              {preset.name}
-            </button>
-            <button
-              type="button"
-              aria-label={`Copy share link for preset ${preset.name}`}
-              title="Copy a link that applies this preset"
-              onClick={() => void copyLink(preset)}
-              className="rounded-full p-1 text-muted-foreground hover:text-foreground"
-            >
-              <Link2 className="size-3" />
-            </button>
-            {preset.builtin ? null : (
-
-              <button
-                type="button"
-                aria-label={`Delete preset ${preset.name}`}
-                onClick={() => persist(saved.filter((p) => p.id !== preset.id))}
-                className="rounded-full p-1 text-muted-foreground hover:text-destructive"
-              >
-                <X className="size-3" />
-              </button>
+            {isRenaming ? (
+              <>
+                <Input
+                  autoFocus
+                  value={renameValue}
+                  onChange={(e) => setRenameValue(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") renamePreset(preset.id);
+                    if (e.key === "Escape") setRenamingId(null);
+                  }}
+                  aria-label={`Rename preset ${preset.name}`}
+                  className="h-6 w-28 px-2 text-xs"
+                />
+                <button
+                  type="button"
+                  aria-label="Save preset name"
+                  onClick={() => renamePreset(preset.id)}
+                  className="rounded-full p-1 text-muted-foreground hover:text-foreground"
+                >
+                  <Check className="size-3" />
+                </button>
+                <button
+                  type="button"
+                  aria-label="Cancel rename"
+                  onClick={() => setRenamingId(null)}
+                  className="rounded-full p-1 text-muted-foreground hover:text-foreground"
+                >
+                  <X className="size-3" />
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  onClick={() => onApply(presetPatch(preset.filters))}
+                  title={describeFilters(preset.filters)}
+                  aria-pressed={isActive}
+                  className="inline-flex items-center gap-1 px-2 py-1"
+                >
+                  {isActive ? <Check className="size-3" /> : null}
+                  {preset.name}
+                </button>
+                <button
+                  type="button"
+                  aria-label={`Copy share link for preset ${preset.name}`}
+                  title="Copy a link that applies this preset"
+                  onClick={() => void copyLink(preset)}
+                  className="rounded-full p-1 text-muted-foreground hover:text-foreground"
+                >
+                  <Link2 className="size-3" />
+                </button>
+                {preset.builtin ? null : (
+                  <>
+                    <button
+                      type="button"
+                      aria-label={`Rename preset ${preset.name}`}
+                      title="Rename this preset"
+                      onClick={() => {
+                        setRenamingId(preset.id);
+                        setRenameValue(preset.name);
+                      }}
+                      className="rounded-full p-1 text-muted-foreground hover:text-foreground"
+                    >
+                      <Pencil className="size-3" />
+                    </button>
+                    <button
+                      type="button"
+                      aria-label={`Delete preset ${preset.name}`}
+                      title="Delete this preset"
+                      onClick={() => deletePreset(preset)}
+                      className="rounded-full p-1 text-muted-foreground hover:text-destructive"
+                    >
+                      <X className="size-3" />
+                    </button>
+                  </>
+                )}
+              </>
             )}
           </span>
         );
       })}
+
 
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
