@@ -57,6 +57,31 @@ export function presetPatch(filters: AdminSearch): AdminSearch {
   return out;
 }
 
+/** Loose name match so shared links survive casing/spacing differences. */
+export function normalizeName(name: string): string {
+  return name.trim().toLowerCase().replace(/[\s_-]+/g, " ");
+}
+
+export function findPresetByName(name: string, presets: AdminPreset[]): AdminPreset | undefined {
+  const wanted = normalizeName(name);
+  return presets.find((p) => normalizeName(p.name) === wanted);
+}
+
+/**
+ * Shareable link for a preset: the preset name plus its expanded filters, so
+ * recipients get the same view even without that preset saved locally.
+ */
+export function presetShareUrl(preset: AdminPreset, origin: string, pathname = "/admin"): string {
+  const params = new URLSearchParams();
+  params.set("preset", preset.name);
+  for (const key of KEYS) {
+    const value = preset.filters[key];
+    if (value) params.set(key, String(value));
+  }
+  return `${origin}${pathname}?${params.toString()}`;
+}
+
+
 export function filtersMatch(a: AdminSearch, b: AdminSearch): boolean {
   return KEYS.every((key) => (a[key] || "") === (b[key] || ""));
 }
