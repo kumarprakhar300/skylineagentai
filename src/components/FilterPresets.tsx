@@ -81,6 +81,33 @@ export function FilterPresets({ current, onApply }: Props) {
     setOpen(false);
   };
 
+  const renamePreset = (id: string) => {
+    const label = renameValue.trim();
+    if (!label) return;
+    persist(
+      saved.map((p) =>
+        p.id === id
+          ? { ...p, name: label }
+          : p,
+      ),
+    );
+    setRenamingId(null);
+    setRenameValue("");
+    toast.success(`Preset renamed to “${label}”`);
+  };
+
+  const deletePreset = (preset: AdminPreset) => {
+    const remaining = saved.filter((p) => p.id !== preset.id);
+    persist(remaining);
+    if (renamingId === preset.id) setRenamingId(null);
+    toast.success(`Preset “${preset.name}” deleted`, {
+      action: {
+        label: "Undo",
+        onClick: () => persist([...remaining, preset]),
+      },
+    });
+  };
+
   const copyLink = async (preset: AdminPreset) => {
     const url = presetShareUrl(preset, window.location.origin, window.location.pathname);
     try {
