@@ -34,6 +34,8 @@ export function FilterPresets({ current, onApply }: Props) {
   const [saved, setSaved] = useState<AdminPreset[]>([]);
   const [name, setName] = useState("");
   const [open, setOpen] = useState(false);
+  const [renamingId, setRenamingId] = useState<string | null>(null);
+  const [renameValue, setRenameValue] = useState("");
   const [hydrated, setHydrated] = useState(false);
   const appliedFromUrl = useRef<string | null>(null);
 
