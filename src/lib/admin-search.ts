@@ -17,6 +17,8 @@ export type AdminSearch = {
   to?: string | undefined;
   /** Selected call id, so a shared link reopens the same transcript. */
   call?: string | undefined;
+  /** Saved preset name from a shared link; applied then removed from the URL. */
+  preset?: string | undefined;
 };
 
 export const adminDefaults = {
@@ -27,7 +29,9 @@ export const adminDefaults = {
   from: "",
   to: "",
   call: "",
+  preset: "",
 };
+
 
 function str(value: unknown): string {
   return typeof value === "string" ? value : "";
@@ -47,5 +51,7 @@ export function validateAdminSearch(search: Record<string, unknown>): AdminSearc
     from: keep(str(search["from"]), ""),
     to: keep(str(search["to"]), ""),
     call: keep(str(search["call"]), ""),
+    preset: keep(str(search["preset"]), ""),
   };
 }
+

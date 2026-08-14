@@ -1,5 +1,6 @@
-import { BookmarkPlus, Check, X } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { BookmarkPlus, Check, Link2, X } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -12,9 +13,11 @@ import {
   builtinPresets,
   describeFilters,
   filtersMatch,
+  findPresetByName,
   loadPresets,
   pickFilters,
   presetPatch,
+  presetShareUrl,
   savePresets,
   type AdminPreset,
 } from "@/lib/admin-presets";
@@ -31,14 +34,35 @@ export function FilterPresets({ current, onApply }: Props) {
   const [saved, setSaved] = useState<AdminPreset[]>([]);
   const [name, setName] = useState("");
   const [open, setOpen] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
+  const appliedFromUrl = useRef<string | null>(null);
 
   // localStorage is client-only, so hydrate after mount.
-  useEffect(() => setSaved(loadPresets()), []);
+  useEffect(() => {
+    setSaved(loadPresets());
+    setHydrated(true);
+  }, []);
 
   const presets = useMemo(() => [...builtinPresets(), ...saved], [saved]);
   const activeFilters = pickFilters(current);
   const hasFilters = Object.keys(activeFilters).length > 0;
   const activeId = presets.find((p) => filtersMatch(p.filters, activeFilters))?.id ?? null;
+
+  // A shared ?preset=<name> link applies that preset, then drops the param.
+  const urlPreset = current.preset ?? "";
+  useEffect(() => {
+    if (!hydrated || !urlPreset || appliedFromUrl.current === urlPreset) return;
+    appliedFromUrl.current = urlPreset;
+    const match = findPresetByName(urlPreset, presets);
+    if (match) {
+      onApply({ ...presetPatch(match.filters), preset: undefined });
+      toast.success(`Preset “${match.name}” applied`);
+      return;
+    }
+    // Unknown name — keep whatever filters the link carried, just clear the name.
+    onApply({ preset: undefined });
+    toast.error(`No saved preset named “${urlPreset}”`);
+  }, [hydrated, urlPreset, presets, onApply]);
 
   const persist = (next: AdminPreset[]) => {
     setSaved(next);
@@ -56,6 +80,17 @@ export function FilterPresets({ current, onApply }: Props) {
     setName("");
     setOpen(false);
   };
+
+  const copyLink = async (preset: AdminPreset) => {
+    const url = presetShareUrl(preset, window.location.origin, window.location.pathname);
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success(`Link to “${preset.name}” copied`);
+    } catch {
+      toast.error("Could not copy — copy it from the address bar instead");
+    }
+  };
+
 
   return (
     <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -85,7 +120,17 @@ export function FilterPresets({ current, onApply }: Props) {
               {isActive ? <Check className="size-3" /> : null}
               {preset.name}
             </button>
+            <button
+              type="button"
+              aria-label={`Copy share link for preset ${preset.name}`}
+              title="Copy a link that applies this preset"
+              onClick={() => void copyLink(preset)}
+              className="rounded-full p-1 text-muted-foreground hover:text-foreground"
+            >
+              <Link2 className="size-3" />
+            </button>
             {preset.builtin ? null : (
+
               <button
                 type="button"
                 aria-label={`Delete preset ${preset.name}`}
