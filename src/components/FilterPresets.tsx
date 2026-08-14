@@ -120,7 +120,17 @@ export function FilterPresets({ current, onApply }: Props) {
               {isActive ? <Check className="size-3" /> : null}
               {preset.name}
             </button>
+            <button
+              type="button"
+              aria-label={`Copy share link for preset ${preset.name}`}
+              title="Copy a link that applies this preset"
+              onClick={() => void copyLink(preset)}
+              className="rounded-full p-1 text-muted-foreground hover:text-foreground"
+            >
+              <Link2 className="size-3" />
+            </button>
             {preset.builtin ? null : (
+
               <button
                 type="button"
                 aria-label={`Delete preset ${preset.name}`}
