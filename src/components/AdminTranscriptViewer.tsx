@@ -96,6 +96,38 @@ function clockLabel(call: ViewerCall, offsetSeconds: number): string {
   return t.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
 }
 
+const FILTERED_EXPORT_HEADERS = [
+  "Call date",
+  "Channel",
+  "Language",
+  "Name",
+  "Phone",
+  "Location",
+  "Status",
+  "Score",
+  "Score band",
+  "Summary",
+];
+
+function exportFilteredLeads(calls: ViewerCall[], leadByCall: Map<string, ViewerLead> | undefined) {
+  const rows = calls.map((call) => {
+    const lead = leadByCall?.get(call.id);
+    return [
+      new Date(call.started_at).toLocaleString("en-IN"),
+      call.channel,
+      call.language ?? "",
+      lead?.name ?? "",
+      lead?.phone ?? "",
+      lead?.location ?? "",
+      lead?.status ?? "new",
+      lead?.score ?? "",
+      lead?.score_band ?? "",
+      call.summary ?? "",
+    ];
+  });
+  downloadCsv(`filtered-leads-${stamp()}.csv`, toCsv(FILTERED_EXPORT_HEADERS, rows));
+}
+
 export function AdminTranscriptViewer() {
   // Filters live in the URL so a filtered view can be shared or reloaded.
   const urlSearch = useSearch({ from: "/_authenticated/admin" });
