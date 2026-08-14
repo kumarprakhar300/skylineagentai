@@ -399,33 +399,47 @@ export function AdminTranscriptViewer() {
           <div className="-mx-1 mt-2 flex gap-2 overflow-x-auto px-1 pb-1">
             {visibleList.map((call) => {
               const lead = leadByCall?.get(call.id);
+              const checked = selectedIds.has(call.id);
 
               return (
-                <Button
+                <div
                   key={call.id}
-                  size="sm"
-                  variant={call.id === selectedId ? "default" : "outline"}
-                  className="h-auto shrink-0 flex-col items-start gap-0.5 py-1.5 text-left"
-                  onClick={() => {
-                    setSelectedId(call.id);
-                    setQuery("");
-                    setDetailOpen(true);
-                  }}
+                  className={cn(
+                    "flex shrink-0 items-center gap-2 rounded-md border px-2 py-1.5",
+                    checked ? "border-primary/60 bg-primary/10" : "border-border/70 bg-secondary/20",
+                  )}
                 >
-                  <span className="text-xs font-semibold">
-                    {lead?.name?.trim() || "Unnamed caller"}
-                  </span>
-                  <span className="text-[11px] font-normal opacity-70">
-                    {new Date(call.started_at).toLocaleString("en-IN", {
-                      day: "2-digit",
-                      month: "short",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </span>
-                </Button>
+                  <Checkbox
+                    checked={checked}
+                    onCheckedChange={() => toggleSelected(call.id)}
+                    aria-label={`Select call with ${lead?.name?.trim() || "unnamed caller"} for bulk actions`}
+                  />
+                  <Button
+                    size="sm"
+                    variant={call.id === selectedId ? "default" : "ghost"}
+                    className="h-auto flex-col items-start gap-0.5 py-1 text-left"
+                    onClick={() => {
+                      setSelectedId(call.id);
+                      setQuery("");
+                      setDetailOpen(true);
+                    }}
+                  >
+                    <span className="text-xs font-semibold">
+                      {lead?.name?.trim() || "Unnamed caller"}
+                    </span>
+                    <span className="text-[11px] font-normal opacity-70">
+                      {new Date(call.started_at).toLocaleString("en-IN", {
+                        day: "2-digit",
+                        month: "short",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </span>
+                  </Button>
+                </div>
               );
             })}
+
             {hasMore && (
               <div ref={sentinelRef} className="flex shrink-0 items-center">
                 <Button
