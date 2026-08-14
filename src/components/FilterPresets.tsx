@@ -1,4 +1,4 @@
-import { BookmarkPlus, Check, Link2, X } from "lucide-react";
+import { BookmarkPlus, Check, Link2, Pencil, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
