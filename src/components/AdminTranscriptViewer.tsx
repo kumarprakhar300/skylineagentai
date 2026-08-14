@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import type { AdminSearch } from "@/lib/admin-search";
-import { ArrowDown, ArrowUp, Clock, MessagesSquare, RefreshCw, Search } from "lucide-react";
+import { ArrowDown, ArrowUp, Clock, Download, MessagesSquare, RefreshCw, Search } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 const PAGE_SIZE = 20;
@@ -36,6 +36,8 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Turn } from "@/lib/agent/prompt";
 import { ALL, LEAD_STATUSES } from "@/lib/leads-search";
 import { cn } from "@/lib/utils";
+import { downloadCsv, stamp, toCsv } from "@/lib/csv";
+import { toast } from "sonner";
 
 const SORT_OPTIONS = [
   { value: "recent", label: "Date: newest first", icon: ArrowDown },
@@ -92,6 +94,38 @@ function elapsedLabel(seconds: number): string {
 function clockLabel(call: ViewerCall, offsetSeconds: number): string {
   const t = new Date(new Date(call.started_at).getTime() + offsetSeconds * 1000);
   return t.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+}
+
+const FILTERED_EXPORT_HEADERS = [
+  "Call date",
+  "Channel",
+  "Language",
+  "Name",
+  "Phone",
+  "Location",
+  "Status",
+  "Score",
+  "Score band",
+  "Summary",
+];
+
+function exportFilteredLeads(calls: ViewerCall[], leadByCall: Map<string, ViewerLead> | undefined) {
+  const rows = calls.map((call) => {
+    const lead = leadByCall?.get(call.id);
+    return [
+      new Date(call.started_at).toLocaleString("en-IN"),
+      call.channel,
+      call.language ?? "",
+      lead?.name ?? "",
+      lead?.phone ?? "",
+      lead?.location ?? "",
+      lead?.status ?? "new",
+      lead?.score ?? "",
+      lead?.score_band ?? "",
+      call.summary ?? "",
+    ];
+  });
+  downloadCsv(`filtered-leads-${stamp()}.csv`, toCsv(FILTERED_EXPORT_HEADERS, rows));
 }
 
 export function AdminTranscriptViewer() {
@@ -276,9 +310,23 @@ export function AdminTranscriptViewer() {
             AI summary for the same call.
           </p>
         </div>
-        <Button variant="outline" size="sm" onClick={() => void calls.refetch()}>
-          <RefreshCw className={cn("size-4", calls.isFetching && "animate-spin")} /> Refresh
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={list.length === 0}
+            onClick={() => {
+              if (list.length === 0) return;
+              exportFilteredLeads(list, leadByCall);
+              toast.success(`${list.length} lead${list.length === 1 ? "" : "s"} exported`);
+            }}
+          >
+            <Download className="size-4" /> Export CSV
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => void calls.refetch()}>
+            <RefreshCw className={cn("size-4", calls.isFetching && "animate-spin")} /> Refresh
+          </Button>
+        </div>
       </div>
 
       <div className="mt-4 grid gap-2 rounded-xl border border-border/70 bg-secondary/20 p-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.3fr)_repeat(4,minmax(0,0.85fr))_auto]">
