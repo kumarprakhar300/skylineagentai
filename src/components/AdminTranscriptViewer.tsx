@@ -310,9 +310,23 @@ export function AdminTranscriptViewer() {
             AI summary for the same call.
           </p>
         </div>
-        <Button variant="outline" size="sm" onClick={() => void calls.refetch()}>
-          <RefreshCw className={cn("size-4", calls.isFetching && "animate-spin")} /> Refresh
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={list.length === 0}
+            onClick={() => {
+              if (list.length === 0) return;
+              exportFilteredLeads(list, leadByCall);
+              toast.success(`${list.length} lead${list.length === 1 ? "" : "s"} exported`);
+            }}
+          >
+            <Download className="size-4" /> Export CSV
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => void calls.refetch()}>
+            <RefreshCw className={cn("size-4", calls.isFetching && "animate-spin")} /> Refresh
+          </Button>
+        </div>
       </div>
 
       <div className="mt-4 grid gap-2 rounded-xl border border-border/70 bg-secondary/20 p-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.3fr)_repeat(4,minmax(0,0.85fr))_auto]">
