@@ -51,5 +51,7 @@ export function validateAdminSearch(search: Record<string, unknown>): AdminSearc
     from: keep(str(search["from"]), ""),
     to: keep(str(search["to"]), ""),
     call: keep(str(search["call"]), ""),
+    preset: keep(str(search["preset"]), ""),
   };
 }
+
