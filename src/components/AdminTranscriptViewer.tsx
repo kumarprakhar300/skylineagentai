@@ -360,6 +360,14 @@ export function AdminTranscriptViewer() {
 
       <FilterPresets current={urlSearch} onApply={(next) => patch(next)} />
 
+      <BulkLeadActions
+        callIds={[...selectedIds]}
+        visibleCount={visibleList.length}
+        onSelectAllVisible={() => setSelectedIds(new Set(visibleList.map((c) => c.id)))}
+        onClear={() => setSelectedIds(new Set())}
+      />
+
+
 
       {list.length === 0 ? (
         <div className="mt-4">
