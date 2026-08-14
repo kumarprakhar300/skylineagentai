@@ -119,6 +119,14 @@ export function AdminTranscriptViewer() {
 
   const [detailOpen, setDetailOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const toggleSelected = (id: string) =>
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
 
   const calls = useQuery({
     queryKey: ["admin-transcripts"],
