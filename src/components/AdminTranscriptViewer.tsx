@@ -6,8 +6,10 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 const PAGE_SIZE = 20;
 
+import { BulkLeadActions } from "@/components/BulkLeadActions";
 import { EmptyState } from "@/components/EmptyState";
 import { FilterPresets } from "@/components/FilterPresets";
+import { Checkbox } from "@/components/ui/checkbox";
 
 import { SpeakerLabel } from "@/components/SpeakerLabel";
 import { SummarySections } from "@/components/SummarySections";
