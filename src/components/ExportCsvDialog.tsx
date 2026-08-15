@@ -82,7 +82,7 @@ export function ExportCsvDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="w-full sm:w-auto">
+        <Button variant="outline" size="sm" className="w-full sm:w-auto" disabled={disabled}>
           <Download className="size-4" /> {triggerLabel}
         </Button>
       </DialogTrigger>
