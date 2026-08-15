@@ -158,14 +158,29 @@ export function ExportCsvDialog({
             )}{" "}
             Transcripts CSV
           </Button>
-          <Button size="sm" disabled={busy !== null} onClick={() => void run("leads")}>
-            {busy === "leads" ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : (
-              <Download className="size-4" />
-            )}{" "}
-            Download leads CSV
-          </Button>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={busy !== null}
+              onClick={() => void run("xlsx")}
+            >
+              {busy === "xlsx" ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <FileSpreadsheet className="size-4" />
+              )}{" "}
+              Download XLSX
+            </Button>
+            <Button size="sm" disabled={busy !== null} onClick={() => void run("leads")}>
+              {busy === "leads" ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <Download className="size-4" />
+              )}{" "}
+              Download leads CSV
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>
