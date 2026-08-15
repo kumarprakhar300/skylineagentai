@@ -2,12 +2,13 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import type { AdminSearch } from "@/lib/admin-search";
 import { ArrowDown, ArrowUp, Clock, Download, MessagesSquare, RefreshCw, Search } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const PAGE_SIZE = 20;
 
 import { BulkLeadActions } from "@/components/BulkLeadActions";
 import { EmptyState } from "@/components/EmptyState";
+import { ExportCsvDialog } from "@/components/ExportCsvDialog";
 import { FilterPresets } from "@/components/FilterPresets";
 import { Checkbox } from "@/components/ui/checkbox";
 
@@ -35,8 +36,8 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import type { Turn } from "@/lib/agent/prompt";
 import { ALL, LEAD_STATUSES } from "@/lib/leads-search";
+import type { CallRow, LeadRow } from "@/lib/leads-types";
 import { cn } from "@/lib/utils";
-import { downloadCsv, stamp, toCsv } from "@/lib/csv";
 import { toast } from "sonner";
 
 const SORT_OPTIONS = [
