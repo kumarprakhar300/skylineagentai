@@ -109,8 +109,13 @@ const FILTERED_EXPORT_HEADERS = [
   "Summary",
 ];
 
-function exportFilteredLeads(calls: ViewerCall[], leadByCall: Map<string, ViewerLead> | undefined) {
-  const rows = calls.map((call) => {
+function exportSelectedLeads(
+  selectedIds: Set<string>,
+  calls: ViewerCall[],
+  leadByCall: Map<string, ViewerLead> | undefined,
+) {
+  const selectedCalls = calls.filter((call) => selectedIds.has(call.id));
+  const rows = selectedCalls.map((call) => {
     const lead = leadByCall?.get(call.id);
     return [
       new Date(call.started_at).toLocaleString("en-IN"),
@@ -125,7 +130,7 @@ function exportFilteredLeads(calls: ViewerCall[], leadByCall: Map<string, Viewer
       call.summary ?? "",
     ];
   });
-  downloadCsv(`filtered-leads-${stamp()}.csv`, toCsv(FILTERED_EXPORT_HEADERS, rows));
+  downloadCsv(`selected-leads-${stamp()}.csv`, toCsv(FILTERED_EXPORT_HEADERS, rows));
 }
 
 export function AdminTranscriptViewer() {
@@ -314,14 +319,16 @@ export function AdminTranscriptViewer() {
           <Button
             variant="outline"
             size="sm"
-            disabled={list.length === 0}
+            disabled={selectedIds.size === 0}
             onClick={() => {
-              if (list.length === 0) return;
-              exportFilteredLeads(list, leadByCall);
-              toast.success(`${list.length} lead${list.length === 1 ? "" : "s"} exported`);
+              if (selectedIds.size === 0) return;
+              exportSelectedLeads(selectedIds, list, leadByCall);
+              toast.success(
+                `${selectedIds.size} lead${selectedIds.size === 1 ? "" : "s"} exported`,
+              );
             }}
           >
-            <Download className="size-4" /> Export CSV
+            <Download className="size-4" /> Export selected ({selectedIds.size})
           </Button>
           <Button variant="outline" size="sm" onClick={() => void calls.refetch()}>
             <RefreshCw className={cn("size-4", calls.isFetching && "animate-spin")} /> Refresh
