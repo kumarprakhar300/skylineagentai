@@ -1,4 +1,4 @@
-import { Download, Loader2 } from "lucide-react";
+import { Download, FileSpreadsheet, Loader2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -23,6 +23,7 @@ import {
   downloadTranscriptsCsv,
 } from "@/lib/leads-export";
 import type { CallRow, LeadRow } from "@/lib/leads-types";
+import { downloadLeadsXlsx } from "@/lib/xlsx-export";
 
 type Source = () => Promise<{ calls: CallRow[]; leadByCall: Map<string, LeadRow> }>;
 
@@ -46,7 +47,7 @@ export function ExportCsvDialog({
 }) {
   const [open, setOpen] = useState(false);
   const [keys, setKeys] = useState<string[]>(DEFAULT_EXPORT_COLUMN_KEYS);
-  const [busy, setBusy] = useState<"leads" | "transcripts" | null>(null);
+  const [busy, setBusy] = useState<"leads" | "transcripts" | "xlsx" | null>(null);
 
   const grouped = useMemo(
     () => GROUPS.map((group) => ({ group, columns: LEAD_EXPORT_COLUMNS.filter((c) => c.group === group) })),
@@ -56,8 +57,8 @@ export function ExportCsvDialog({
   const toggle = (key: string, on: boolean) =>
     setKeys((prev) => (on ? [...prev, key] : prev.filter((k) => k !== key)));
 
-  async function run(kind: "leads" | "transcripts") {
-    if (kind === "leads" && keys.length === 0) {
+  async function run(kind: "leads" | "transcripts" | "xlsx") {
+    if (kind !== "transcripts" && keys.length === 0) {
       toast.error("Pick at least one column to export");
       return;
     }
@@ -69,11 +70,12 @@ export function ExportCsvDialog({
         return;
       }
       if (kind === "leads") downloadLeadsCsv(calls, leadByCall, keys);
+      else if (kind === "xlsx") downloadLeadsXlsx(calls, leadByCall, keys);
       else downloadTranscriptsCsv(calls, leadByCall);
       toast.success(`${calls.length} call${calls.length === 1 ? "" : "s"} exported`);
       setOpen(false);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not export the CSV");
+      toast.error(error instanceof Error ? error.message : "Could not export the file");
     } finally {
       setBusy(null);
     }
@@ -88,7 +90,7 @@ export function ExportCsvDialog({
       </DialogTrigger>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Export CSV</DialogTitle>
+          <DialogTitle>Export leads (CSV or XLSX)</DialogTitle>
           <DialogDescription>
             {typeof count === "number"
               ? `${count} call${count === 1 ? "" : "s"} ${scopeLabel ?? "will be exported"}.`
@@ -156,14 +158,29 @@ export function ExportCsvDialog({
             )}{" "}
             Transcripts CSV
           </Button>
-          <Button size="sm" disabled={busy !== null} onClick={() => void run("leads")}>
-            {busy === "leads" ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : (
-              <Download className="size-4" />
-            )}{" "}
-            Download leads CSV
-          </Button>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={busy !== null}
+              onClick={() => void run("xlsx")}
+            >
+              {busy === "xlsx" ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <FileSpreadsheet className="size-4" />
+              )}{" "}
+              Download XLSX
+            </Button>
+            <Button size="sm" disabled={busy !== null} onClick={() => void run("leads")}>
+              {busy === "leads" ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <Download className="size-4" />
+              )}{" "}
+              Download leads CSV
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>
