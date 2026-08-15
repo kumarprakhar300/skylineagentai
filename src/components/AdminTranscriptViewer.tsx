@@ -109,8 +109,13 @@ const FILTERED_EXPORT_HEADERS = [
   "Summary",
 ];
 
-function exportFilteredLeads(calls: ViewerCall[], leadByCall: Map<string, ViewerLead> | undefined) {
-  const rows = calls.map((call) => {
+function exportSelectedLeads(
+  selectedIds: Set<string>,
+  calls: ViewerCall[],
+  leadByCall: Map<string, ViewerLead> | undefined,
+) {
+  const selectedCalls = calls.filter((call) => selectedIds.has(call.id));
+  const rows = selectedCalls.map((call) => {
     const lead = leadByCall?.get(call.id);
     return [
       new Date(call.started_at).toLocaleString("en-IN"),
@@ -125,7 +130,7 @@ function exportFilteredLeads(calls: ViewerCall[], leadByCall: Map<string, Viewer
       call.summary ?? "",
     ];
   });
-  downloadCsv(`filtered-leads-${stamp()}.csv`, toCsv(FILTERED_EXPORT_HEADERS, rows));
+  downloadCsv(`selected-leads-${stamp()}.csv`, toCsv(FILTERED_EXPORT_HEADERS, rows));
 }
 
 export function AdminTranscriptViewer() {
