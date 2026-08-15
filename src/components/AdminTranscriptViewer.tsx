@@ -285,20 +285,13 @@ export function AdminTranscriptViewer() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button
-            variant="outline"
-            size="sm"
+          <ExportCsvDialog
+            source={exportSource}
+            count={selectedIds.size}
+            scopeLabel="selected leads"
+            triggerLabel={`Export selected (${selectedIds.size})`}
             disabled={selectedIds.size === 0}
-            onClick={() => {
-              if (selectedIds.size === 0) return;
-              exportSelectedLeads(selectedIds, list, leadByCall);
-              toast.success(
-                `${selectedIds.size} lead${selectedIds.size === 1 ? "" : "s"} exported`,
-              );
-            }}
-          >
-            <Download className="size-4" /> Export selected ({selectedIds.size})
-          </Button>
+          />
           <Button variant="outline" size="sm" onClick={() => void calls.refetch()}>
             <RefreshCw className={cn("size-4", calls.isFetching && "animate-spin")} /> Refresh
           </Button>
