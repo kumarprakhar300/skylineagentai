@@ -61,16 +61,6 @@ type ViewerCall = {
   ended_at: string | null;
 };
 
-type ViewerLead = {
-  call_id: string | null;
-  name: string | null;
-  phone: string | null;
-  location: string | null;
-  score: number | null;
-  score_band: string | null;
-  status: string | null;
-};
-
 
 /**
  * Turn timestamps are not recorded per turn, so the viewer spreads the call's
