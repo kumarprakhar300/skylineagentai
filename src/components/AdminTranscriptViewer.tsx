@@ -131,15 +131,12 @@ export function AdminTranscriptViewer() {
           .select("id, channel, language, summary, transcript, started_at, ended_at")
           .order("started_at", { ascending: false })
           .limit(100),
-        supabase
-          .from("leads")
-          .select("call_id, name, phone, location, score, score_band, status")
-          .limit(500),
+        supabase.from("leads").select("*").limit(500),
       ]);
       if (callRes.error) throw callRes.error;
       if (leadRes.error) throw leadRes.error;
-      const leadByCall = new Map<string, ViewerLead>();
-      ((leadRes.data ?? []) as unknown as ViewerLead[]).forEach((lead) => {
+      const leadByCall = new Map<string, LeadRow>();
+      ((leadRes.data ?? []) as unknown as LeadRow[]).forEach((lead) => {
         if (lead.call_id) leadByCall.set(lead.call_id, lead);
       });
       return {
