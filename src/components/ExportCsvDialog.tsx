@@ -57,8 +57,8 @@ export function ExportCsvDialog({
   const toggle = (key: string, on: boolean) =>
     setKeys((prev) => (on ? [...prev, key] : prev.filter((k) => k !== key)));
 
-  async function run(kind: "leads" | "transcripts") {
-    if (kind === "leads" && keys.length === 0) {
+  async function run(kind: "leads" | "transcripts" | "xlsx") {
+    if (kind !== "transcripts" && keys.length === 0) {
       toast.error("Pick at least one column to export");
       return;
     }
@@ -70,11 +70,12 @@ export function ExportCsvDialog({
         return;
       }
       if (kind === "leads") downloadLeadsCsv(calls, leadByCall, keys);
+      else if (kind === "xlsx") downloadLeadsXlsx(calls, leadByCall, keys);
       else downloadTranscriptsCsv(calls, leadByCall);
       toast.success(`${calls.length} call${calls.length === 1 ? "" : "s"} exported`);
       setOpen(false);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not export the CSV");
+      toast.error(error instanceof Error ? error.message : "Could not export the file");
     } finally {
       setBusy(null);
     }
