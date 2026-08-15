@@ -97,43 +97,6 @@ function clockLabel(call: ViewerCall, offsetSeconds: number): string {
   return t.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
 }
 
-const FILTERED_EXPORT_HEADERS = [
-  "Call date",
-  "Channel",
-  "Language",
-  "Name",
-  "Phone",
-  "Location",
-  "Status",
-  "Score",
-  "Score band",
-  "Summary",
-];
-
-function exportSelectedLeads(
-  selectedIds: Set<string>,
-  calls: ViewerCall[],
-  leadByCall: Map<string, ViewerLead> | undefined,
-) {
-  const selectedCalls = calls.filter((call) => selectedIds.has(call.id));
-  const rows = selectedCalls.map((call) => {
-    const lead = leadByCall?.get(call.id);
-    return [
-      new Date(call.started_at).toLocaleString("en-IN"),
-      call.channel,
-      call.language ?? "",
-      lead?.name ?? "",
-      lead?.phone ?? "",
-      lead?.location ?? "",
-      lead?.status ?? "new",
-      lead?.score ?? "",
-      lead?.score_band ?? "",
-      call.summary ?? "",
-    ];
-  });
-  downloadCsv(`selected-leads-${stamp()}.csv`, toCsv(FILTERED_EXPORT_HEADERS, rows));
-}
-
 export function AdminTranscriptViewer() {
   // Filters live in the URL so a filtered view can be shared or reloaded.
   const urlSearch = useSearch({ from: "/_authenticated/admin" });
