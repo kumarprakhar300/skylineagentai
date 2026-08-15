@@ -90,7 +90,7 @@ export function ExportCsvDialog({
       </DialogTrigger>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Export CSV</DialogTitle>
+          <DialogTitle>Export leads (CSV or XLSX)</DialogTitle>
           <DialogDescription>
             {typeof count === "number"
               ? `${count} call${count === 1 ? "" : "s"} ${scopeLabel ?? "will be exported"}.`
