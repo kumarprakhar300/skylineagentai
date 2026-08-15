@@ -33,6 +33,7 @@ export function ExportCsvDialog({
   count,
   scopeLabel,
   triggerLabel = "Export CSV",
+  disabled = false,
 }: {
   /** Resolves the rows to export — already narrowed to the active filters. */
   source: Source;
@@ -41,6 +42,7 @@ export function ExportCsvDialog({
   /** e.g. "matching the current filters". */
   scopeLabel?: string;
   triggerLabel?: string;
+  disabled?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [keys, setKeys] = useState<string[]>(DEFAULT_EXPORT_COLUMN_KEYS);
@@ -80,7 +82,7 @@ export function ExportCsvDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="w-full sm:w-auto">
+        <Button variant="outline" size="sm" className="w-full sm:w-auto" disabled={disabled}>
           <Download className="size-4" /> {triggerLabel}
         </Button>
       </DialogTrigger>

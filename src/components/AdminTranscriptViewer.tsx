@@ -1,13 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import type { AdminSearch } from "@/lib/admin-search";
-import { ArrowDown, ArrowUp, Clock, Download, MessagesSquare, RefreshCw, Search } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { ArrowDown, ArrowUp, Clock, MessagesSquare, RefreshCw, Search } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const PAGE_SIZE = 20;
 
 import { BulkLeadActions } from "@/components/BulkLeadActions";
 import { EmptyState } from "@/components/EmptyState";
+import { ExportCsvDialog } from "@/components/ExportCsvDialog";
 import { FilterPresets } from "@/components/FilterPresets";
 import { Checkbox } from "@/components/ui/checkbox";
 
@@ -35,8 +36,8 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import type { Turn } from "@/lib/agent/prompt";
 import { ALL, LEAD_STATUSES } from "@/lib/leads-search";
+import type { CallRow, LeadRow } from "@/lib/leads-types";
 import { cn } from "@/lib/utils";
-import { downloadCsv, stamp, toCsv } from "@/lib/csv";
 import { toast } from "sonner";
 
 const SORT_OPTIONS = [
@@ -58,16 +59,6 @@ type ViewerCall = {
   transcript: Turn[] | null;
   started_at: string;
   ended_at: string | null;
-};
-
-type ViewerLead = {
-  call_id: string | null;
-  name: string | null;
-  phone: string | null;
-  location: string | null;
-  score: number | null;
-  score_band: string | null;
-  status: string | null;
 };
 
 
@@ -94,43 +85,6 @@ function elapsedLabel(seconds: number): string {
 function clockLabel(call: ViewerCall, offsetSeconds: number): string {
   const t = new Date(new Date(call.started_at).getTime() + offsetSeconds * 1000);
   return t.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
-}
-
-const FILTERED_EXPORT_HEADERS = [
-  "Call date",
-  "Channel",
-  "Language",
-  "Name",
-  "Phone",
-  "Location",
-  "Status",
-  "Score",
-  "Score band",
-  "Summary",
-];
-
-function exportSelectedLeads(
-  selectedIds: Set<string>,
-  calls: ViewerCall[],
-  leadByCall: Map<string, ViewerLead> | undefined,
-) {
-  const selectedCalls = calls.filter((call) => selectedIds.has(call.id));
-  const rows = selectedCalls.map((call) => {
-    const lead = leadByCall?.get(call.id);
-    return [
-      new Date(call.started_at).toLocaleString("en-IN"),
-      call.channel,
-      call.language ?? "",
-      lead?.name ?? "",
-      lead?.phone ?? "",
-      lead?.location ?? "",
-      lead?.status ?? "new",
-      lead?.score ?? "",
-      lead?.score_band ?? "",
-      call.summary ?? "",
-    ];
-  });
-  downloadCsv(`selected-leads-${stamp()}.csv`, toCsv(FILTERED_EXPORT_HEADERS, rows));
 }
 
 export function AdminTranscriptViewer() {
@@ -177,15 +131,12 @@ export function AdminTranscriptViewer() {
           .select("id, channel, language, summary, transcript, started_at, ended_at")
           .order("started_at", { ascending: false })
           .limit(100),
-        supabase
-          .from("leads")
-          .select("call_id, name, phone, location, score, score_band, status")
-          .limit(500),
+        supabase.from("leads").select("*").limit(500),
       ]);
       if (callRes.error) throw callRes.error;
       if (leadRes.error) throw leadRes.error;
-      const leadByCall = new Map<string, ViewerLead>();
-      ((leadRes.data ?? []) as unknown as ViewerLead[]).forEach((lead) => {
+      const leadByCall = new Map<string, LeadRow>();
+      ((leadRes.data ?? []) as unknown as LeadRow[]).forEach((lead) => {
         if (lead.call_id) leadByCall.set(lead.call_id, lead);
       });
       return {
@@ -293,6 +244,24 @@ export function AdminTranscriptViewer() {
       .filter(({ turn }) => (term ? turn.content.toLowerCase().includes(term) : true));
   }, [active, query]);
 
+  const exportSource = useCallback(async () => {
+    const selectedCalls = list.filter((call) => selectedIds.has(call.id));
+    const callsOut: CallRow[] = selectedCalls.map((call) => ({
+      id: call.id,
+      channel: call.channel,
+      language: call.language,
+      summary: call.summary,
+      transcript: call.transcript,
+      started_at: call.started_at,
+    }));
+    const leadById = new Map<string, LeadRow>();
+    selectedCalls.forEach((call) => {
+      const lead = leadByCall?.get(call.id);
+      if (lead) leadById.set(call.id, lead);
+    });
+    return { calls: callsOut, leadByCall: leadById };
+  }, [list, leadByCall, selectedIds]);
+
   if (calls.isLoading) {
     return (
       <Card className="panel-3d p-4 sm:p-6">
@@ -316,20 +285,13 @@ export function AdminTranscriptViewer() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button
-            variant="outline"
-            size="sm"
+          <ExportCsvDialog
+            source={exportSource}
+            count={selectedIds.size}
+            scopeLabel="selected leads"
+            triggerLabel={`Export selected (${selectedIds.size})`}
             disabled={selectedIds.size === 0}
-            onClick={() => {
-              if (selectedIds.size === 0) return;
-              exportSelectedLeads(selectedIds, list, leadByCall);
-              toast.success(
-                `${selectedIds.size} lead${selectedIds.size === 1 ? "" : "s"} exported`,
-              );
-            }}
-          >
-            <Download className="size-4" /> Export selected ({selectedIds.size})
-          </Button>
+          />
           <Button variant="outline" size="sm" onClick={() => void calls.refetch()}>
             <RefreshCw className={cn("size-4", calls.isFetching && "animate-spin")} /> Refresh
           </Button>
