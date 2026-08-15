@@ -23,6 +23,7 @@ import {
   downloadTranscriptsCsv,
 } from "@/lib/leads-export";
 import type { CallRow, LeadRow } from "@/lib/leads-types";
+import { downloadLeadsXlsx } from "@/lib/xlsx-export";
 
 type Source = () => Promise<{ calls: CallRow[]; leadByCall: Map<string, LeadRow> }>;
 
