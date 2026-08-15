@@ -244,6 +244,24 @@ export function AdminTranscriptViewer() {
       .filter(({ turn }) => (term ? turn.content.toLowerCase().includes(term) : true));
   }, [active, query]);
 
+  const exportSource = useCallback(async () => {
+    const selectedCalls = list.filter((call) => selectedIds.has(call.id));
+    const callsOut: CallRow[] = selectedCalls.map((call) => ({
+      id: call.id,
+      channel: call.channel,
+      language: call.language,
+      summary: call.summary,
+      transcript: call.transcript,
+      started_at: call.started_at,
+    }));
+    const leadById = new Map<string, LeadRow>();
+    selectedCalls.forEach((call) => {
+      const lead = leadByCall?.get(call.id);
+      if (lead) leadById.set(call.id, lead);
+    });
+    return { calls: callsOut, leadByCall: leadById };
+  }, [list, leadByCall, selectedIds]);
+
   if (calls.isLoading) {
     return (
       <Card className="panel-3d p-4 sm:p-6">
