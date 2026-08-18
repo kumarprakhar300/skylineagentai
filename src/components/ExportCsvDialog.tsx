@@ -49,14 +49,48 @@ export function ExportCsvDialog({
   const [keys, setKeys] = useState<string[]>(DEFAULT_EXPORT_COLUMN_KEYS);
   const [busy, setBusy] = useState<"leads" | "transcripts" | "xlsx" | null>(null);
   const [includeTranscripts, setIncludeTranscripts] = useState(true);
+  const [preview, setPreview] = useState<{
+    calls: CallRow[];
+    leadByCall: Map<string, LeadRow>;
+  } | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [previewError, setPreviewError] = useState<string | null>(null);
 
   const grouped = useMemo(
     () => GROUPS.map((group) => ({ group, columns: LEAD_EXPORT_COLUMNS.filter((c) => c.group === group) })),
     [],
   );
 
+  const selectedColumns = useMemo(
+    () => LEAD_EXPORT_COLUMNS.filter((c) => keys.includes(c.key)),
+    [keys],
+  );
+
+  async function loadPreview() {
+    setPreviewLoading(true);
+    setPreviewError(null);
+    try {
+      setPreview(await source());
+    } catch (error) {
+      setPreview(null);
+      setPreviewError(error instanceof Error ? error.message : "Could not load the preview");
+    } finally {
+      setPreviewLoading(false);
+    }
+  }
+
+  function onOpenChange(next: boolean) {
+    setOpen(next);
+    if (next) void loadPreview();
+    else {
+      setPreview(null);
+      setPreviewError(null);
+    }
+  }
+
   const toggle = (key: string, on: boolean) =>
     setKeys((prev) => (on ? [...prev, key] : prev.filter((k) => k !== key)));
+
 
   async function run(kind: "leads" | "transcripts" | "xlsx") {
     if (kind !== "transcripts" && keys.length === 0) {
