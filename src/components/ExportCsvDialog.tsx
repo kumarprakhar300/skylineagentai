@@ -117,13 +117,14 @@ export function ExportCsvDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" className="w-full sm:w-auto" disabled={disabled}>
           <Download className="size-4" /> {triggerLabel}
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-3xl">
+
         <DialogHeader>
           <DialogTitle>Export leads (CSV or XLSX)</DialogTitle>
           <DialogDescription>
