@@ -48,6 +48,7 @@ export function ExportCsvDialog({
   const [open, setOpen] = useState(false);
   const [keys, setKeys] = useState<string[]>(DEFAULT_EXPORT_COLUMN_KEYS);
   const [busy, setBusy] = useState<"leads" | "transcripts" | "xlsx" | null>(null);
+  const [includeTranscripts, setIncludeTranscripts] = useState(true);
 
   const grouped = useMemo(
     () => GROUPS.map((group) => ({ group, columns: LEAD_EXPORT_COLUMNS.filter((c) => c.group === group) })),
