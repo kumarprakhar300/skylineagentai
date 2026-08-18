@@ -71,7 +71,7 @@ export function ExportCsvDialog({
         return;
       }
       if (kind === "leads") downloadLeadsCsv(calls, leadByCall, keys);
-      else if (kind === "xlsx") downloadLeadsXlsx(calls, leadByCall, keys);
+      else if (kind === "xlsx") downloadLeadsXlsx(calls, leadByCall, keys, undefined, includeTranscripts);
       else downloadTranscriptsCsv(calls, leadByCall);
       toast.success(`${calls.length} call${calls.length === 1 ? "" : "s"} exported`);
       setOpen(false);
