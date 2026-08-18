@@ -48,6 +48,7 @@ export function ExportCsvDialog({
   const [open, setOpen] = useState(false);
   const [keys, setKeys] = useState<string[]>(DEFAULT_EXPORT_COLUMN_KEYS);
   const [busy, setBusy] = useState<"leads" | "transcripts" | "xlsx" | null>(null);
+  const [includeTranscripts, setIncludeTranscripts] = useState(true);
 
   const grouped = useMemo(
     () => GROUPS.map((group) => ({ group, columns: LEAD_EXPORT_COLUMNS.filter((c) => c.group === group) })),
@@ -70,7 +71,7 @@ export function ExportCsvDialog({
         return;
       }
       if (kind === "leads") downloadLeadsCsv(calls, leadByCall, keys);
-      else if (kind === "xlsx") downloadLeadsXlsx(calls, leadByCall, keys);
+      else if (kind === "xlsx") downloadLeadsXlsx(calls, leadByCall, keys, undefined, includeTranscripts);
       else downloadTranscriptsCsv(calls, leadByCall);
       toast.success(`${calls.length} call${calls.length === 1 ? "" : "s"} exported`);
       setOpen(false);
@@ -158,7 +159,17 @@ export function ExportCsvDialog({
             )}{" "}
             Transcripts CSV
           </Button>
-          <div className="flex flex-col gap-2 sm:flex-row">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="include-transcripts"
+                checked={includeTranscripts}
+                onCheckedChange={(v) => setIncludeTranscripts(v === true)}
+              />
+              <Label htmlFor="include-transcripts" className="text-sm font-normal whitespace-nowrap">
+                Include Transcripts sheet
+              </Label>
+            </div>
             <Button
               variant="outline"
               size="sm"
