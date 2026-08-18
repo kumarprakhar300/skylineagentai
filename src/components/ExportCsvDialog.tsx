@@ -159,7 +159,17 @@ export function ExportCsvDialog({
             )}{" "}
             Transcripts CSV
           </Button>
-          <div className="flex flex-col gap-2 sm:flex-row">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="include-transcripts"
+                checked={includeTranscripts}
+                onCheckedChange={(v) => setIncludeTranscripts(v === true)}
+              />
+              <Label htmlFor="include-transcripts" className="text-sm font-normal whitespace-nowrap">
+                Include Transcripts sheet
+              </Label>
+            </div>
             <Button
               variant="outline"
               size="sm"
