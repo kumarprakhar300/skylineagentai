@@ -49,14 +49,48 @@ export function ExportCsvDialog({
   const [keys, setKeys] = useState<string[]>(DEFAULT_EXPORT_COLUMN_KEYS);
   const [busy, setBusy] = useState<"leads" | "transcripts" | "xlsx" | null>(null);
   const [includeTranscripts, setIncludeTranscripts] = useState(true);
+  const [preview, setPreview] = useState<{
+    calls: CallRow[];
+    leadByCall: Map<string, LeadRow>;
+  } | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [previewError, setPreviewError] = useState<string | null>(null);
 
   const grouped = useMemo(
     () => GROUPS.map((group) => ({ group, columns: LEAD_EXPORT_COLUMNS.filter((c) => c.group === group) })),
     [],
   );
 
+  const selectedColumns = useMemo(
+    () => LEAD_EXPORT_COLUMNS.filter((c) => keys.includes(c.key)),
+    [keys],
+  );
+
+  async function loadPreview() {
+    setPreviewLoading(true);
+    setPreviewError(null);
+    try {
+      setPreview(await source());
+    } catch (error) {
+      setPreview(null);
+      setPreviewError(error instanceof Error ? error.message : "Could not load the preview");
+    } finally {
+      setPreviewLoading(false);
+    }
+  }
+
+  function onOpenChange(next: boolean) {
+    setOpen(next);
+    if (next) void loadPreview();
+    else {
+      setPreview(null);
+      setPreviewError(null);
+    }
+  }
+
   const toggle = (key: string, on: boolean) =>
     setKeys((prev) => (on ? [...prev, key] : prev.filter((k) => k !== key)));
+
 
   async function run(kind: "leads" | "transcripts" | "xlsx") {
     if (kind !== "transcripts" && keys.length === 0) {
@@ -83,13 +117,14 @@ export function ExportCsvDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" className="w-full sm:w-auto" disabled={disabled}>
           <Download className="size-4" /> {triggerLabel}
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-3xl">
+
         <DialogHeader>
           <DialogTitle>Export leads (CSV or XLSX)</DialogTitle>
           <DialogDescription>
@@ -144,6 +179,83 @@ export function ExportCsvDialog({
             ))}
           </div>
         </ScrollArea>
+
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Preview
+            </p>
+            <span className="text-xs text-muted-foreground">
+              {previewLoading
+                ? "Loading…"
+                : preview
+                  ? `First ${Math.min(5, preview.calls.length)} of ${preview.calls.length} row${preview.calls.length === 1 ? "" : "s"}`
+                  : ""}
+            </span>
+          </div>
+          <div className="rounded-lg border border-border/60">
+            {previewLoading ? (
+              <div className="flex items-center gap-2 p-4 text-sm text-muted-foreground">
+                <Loader2 className="size-4 animate-spin" /> Building preview…
+              </div>
+            ) : previewError ? (
+              <p className="p-4 text-sm text-destructive">{previewError}</p>
+            ) : !preview || preview.calls.length === 0 ? (
+              <p className="p-4 text-sm text-muted-foreground">No rows to preview yet.</p>
+            ) : selectedColumns.length === 0 ? (
+              <p className="p-4 text-sm text-muted-foreground">
+                Select at least one column to see the preview.
+              </p>
+            ) : (
+              <ScrollArea className="max-h-52 w-full">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-muted/50">
+                    <tr>
+                      {selectedColumns.map((column) => (
+                        <th
+                          key={column.key}
+                          className="whitespace-nowrap px-3 py-2 font-semibold text-muted-foreground"
+                        >
+                          {column.label}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {preview.calls.slice(0, 5).map((call) => {
+                      const lead = preview.leadByCall.get(call.id);
+                      return (
+                        <tr key={call.id} className="border-t border-border/50">
+                          {selectedColumns.map((column) => {
+                            const value = column.value(call, lead);
+                            const text =
+                              value === null || value === undefined
+                                ? ""
+                                : Array.isArray(value)
+                                  ? value.join("; ")
+                                  : typeof value === "object"
+                                    ? JSON.stringify(value)
+                                    : String(value);
+                            return (
+                              <td
+                                key={column.key}
+                                className="max-w-[16rem] truncate px-3 py-2"
+                                title={text}
+                              >
+                                {text || "—"}
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </ScrollArea>
+            )}
+          </div>
+        </div>
+
 
         <DialogFooter className="gap-2 sm:justify-between">
           <Button
