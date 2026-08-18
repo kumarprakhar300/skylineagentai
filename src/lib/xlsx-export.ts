@@ -36,12 +36,13 @@ function sheetFrom(headers: string[], rows: unknown[][]) {
   return sheet;
 }
 
-/** Download the filtered leads (plus their transcripts) as a two-sheet workbook. */
+/** Download the filtered leads as a workbook. Optionally include a Transcripts sheet. */
 export function downloadLeadsXlsx(
   calls: CallRow[],
   leadByCall: Map<string, LeadRow>,
   columnKeys: string[] = DEFAULT_EXPORT_COLUMN_KEYS,
   filename = `leads-${stamp()}.xlsx`,
+  includeTranscripts = true,
 ) {
   const selected = LEAD_EXPORT_COLUMNS.filter((c) => columnKeys.includes(c.key));
   const columns = selected.length > 0 ? selected : LEAD_EXPORT_COLUMNS;
@@ -54,28 +55,32 @@ export function downloadLeadsXlsx(
     }),
   );
 
-  const turnRows: unknown[][] = [];
-  calls.forEach((call) => {
-    const lead = leadByCall.get(call.id);
-    (call.transcript ?? []).forEach((turn, index) => {
-      turnRows.push([
-        call.id,
-        new Date(call.started_at).toLocaleString("en-IN"),
-        lead?.name,
-        lead?.phone,
-        index + 1,
-        turn.role === "user" ? "Customer" : "Agent",
-        turn.content,
-      ]);
-    });
-  });
-
   const book = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(book, leadsSheet, "Leads");
-  XLSX.utils.book_append_sheet(
-    book,
-    sheetFrom(["Call ID", "Call date", "Name", "Phone", "Turn", "Speaker", "Message"], turnRows),
-    "Transcripts",
-  );
+
+  if (includeTranscripts) {
+    const turnRows: unknown[][] = [];
+    calls.forEach((call) => {
+      const lead = leadByCall.get(call.id);
+      (call.transcript ?? []).forEach((turn, index) => {
+        turnRows.push([
+          call.id,
+          new Date(call.started_at).toLocaleString("en-IN"),
+          lead?.name,
+          lead?.phone,
+          index + 1,
+          turn.role === "user" ? "Customer" : "Agent",
+          turn.content,
+        ]);
+      });
+    });
+
+    XLSX.utils.book_append_sheet(
+      book,
+      sheetFrom(["Call ID", "Call date", "Name", "Phone", "Turn", "Speaker", "Message"], turnRows),
+      "Transcripts",
+    );
+  }
+
   XLSX.writeFile(book, filename);
 }
