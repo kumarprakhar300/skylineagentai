@@ -202,50 +202,72 @@ export function ExportCsvDialog({
               <p className="p-4 text-sm text-destructive">{previewError}</p>
             ) : !preview || preview.calls.length === 0 ? (
               <p className="p-4 text-sm text-muted-foreground">No rows to preview yet.</p>
-            ) : selectedColumns.length === 0 ? (
-              <p className="p-4 text-sm text-muted-foreground">
-                Select at least one column to see the preview.
-              </p>
             ) : (
               <ScrollArea className="max-h-52 w-full">
                 <table className="w-full text-left text-xs">
                   <thead className="bg-muted/50">
                     <tr>
-                      {selectedColumns.map((column) => (
-                        <th
-                          key={column.key}
-                          className="whitespace-nowrap px-3 py-2 font-semibold text-muted-foreground"
-                        >
-                          {column.label}
-                        </th>
-                      ))}
+                      <th className="whitespace-nowrap px-3 py-2 font-semibold text-muted-foreground">
+                        Score band
+                      </th>
+                      {selectedColumns
+                        .filter((column) => column.key !== "score_band")
+                        .map((column) => (
+                          <th
+                            key={column.key}
+                            className="whitespace-nowrap px-3 py-2 font-semibold text-muted-foreground"
+                          >
+                            {column.label}
+                          </th>
+                        ))}
                     </tr>
                   </thead>
                   <tbody>
                     {preview.calls.slice(0, 5).map((call) => {
                       const lead = preview.leadByCall.get(call.id);
+                      const band = lead?.score_band;
                       return (
                         <tr key={call.id} className="border-t border-border/50">
-                          {selectedColumns.map((column) => {
-                            const value = column.value(call, lead);
-                            const text =
-                              value === null || value === undefined
-                                ? ""
-                                : Array.isArray(value)
-                                  ? value.join("; ")
-                                  : typeof value === "object"
-                                    ? JSON.stringify(value)
-                                    : String(value);
-                            return (
-                              <td
-                                key={column.key}
-                                className="max-w-[16rem] truncate px-3 py-2"
-                                title={text}
+                          <td className="px-3 py-2">
+                            {band ? (
+                              <Badge
+                                variant={
+                                  band === "hot"
+                                    ? "destructive"
+                                    : band === "warm"
+                                      ? "default"
+                                      : "secondary"
+                                }
+                                className="capitalize"
                               >
-                                {text || "—"}
-                              </td>
-                            );
-                          })}
+                                {band}
+                              </Badge>
+                            ) : (
+                              "—"
+                            )}
+                          </td>
+                          {selectedColumns
+                            .filter((column) => column.key !== "score_band")
+                            .map((column) => {
+                              const value = column.value(call, lead);
+                              const text =
+                                value === null || value === undefined
+                                  ? ""
+                                  : Array.isArray(value)
+                                    ? value.join("; ")
+                                    : typeof value === "object"
+                                      ? JSON.stringify(value)
+                                      : String(value);
+                              return (
+                                <td
+                                  key={column.key}
+                                  className="max-w-[16rem] truncate px-3 py-2"
+                                  title={text}
+                                >
+                                  {text || "—"}
+                                </td>
+                              );
+                            })}
                         </tr>
                       );
                     })}
