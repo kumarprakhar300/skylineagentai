@@ -1,11 +1,12 @@
 import { parseSummary, SUMMARY_SECTION_LABELS } from "@/lib/agent/summary";
 import { downloadCsv, stamp, toCsv } from "@/lib/csv";
 import type { CallRow, LeadRow } from "@/lib/leads-types";
+import { formatScoreBreakdown, SCORE_SIGNALS, signalDetail, signalPoints } from "@/lib/score-breakdown";
 
 export type ExportColumn = {
   key: string;
   label: string;
-  group: "Call" | "Lead" | "Score" | "Summary sections" | "Pipeline";
+  group: "Call" | "Lead" | "Score" | "Score breakdown" | "Summary sections" | "Pipeline";
   value: (call: CallRow, lead: LeadRow | undefined) => unknown;
 };
 
@@ -15,6 +16,21 @@ const sectionColumns: ExportColumn[] = SUMMARY_SECTION_LABELS.map((label) => ({
   group: "Summary sections" as const,
   value: (call) => parseSummary(call.summary ?? "")[label],
 }));
+
+const breakdownColumns: ExportColumn[] = SCORE_SIGNALS.flatMap((signal) => [
+  {
+    key: `signal:${signal}:points`,
+    label: `${signal} points`,
+    group: "Score breakdown" as const,
+    value: (_c: CallRow, l: LeadRow | undefined) => signalPoints(l?.score_reasons, signal),
+  },
+  {
+    key: `signal:${signal}:detail`,
+    label: `${signal} signal`,
+    group: "Score breakdown" as const,
+    value: (_c: CallRow, l: LeadRow | undefined) => signalDetail(l?.score_reasons, signal),
+  },
+]);
 
 /** Every column a user can pick for the leads CSV export. */
 export const LEAD_EXPORT_COLUMNS: ExportColumn[] = [
@@ -38,6 +54,12 @@ export const LEAD_EXPORT_COLUMNS: ExportColumn[] = [
   { key: "score", label: "Lead score", group: "Score", value: (_c, l) => l?.score },
   { key: "score_band", label: "Score band", group: "Score", value: (_c, l) => l?.score_band },
   { key: "score_reasons", label: "Score signals", group: "Score", value: (_c, l) => l?.score_reasons },
+  {
+    key: "score_breakdown",
+    label: "Score breakdown",
+    group: "Score",
+    value: (_c, l) => formatScoreBreakdown(l?.score_reasons),
+  },
 
   { key: "status", label: "Pipeline status", group: "Pipeline", value: (_c, l) => l?.status },
   { key: "owner_notes", label: "Owner notes", group: "Pipeline", value: (_c, l) => l?.owner_notes },
@@ -48,6 +70,7 @@ export const LEAD_EXPORT_COLUMNS: ExportColumn[] = [
     value: (_c, l) => (l?.callback_at ? new Date(l.callback_at).toLocaleString("en-IN") : ""),
   },
 
+  ...breakdownColumns,
   ...sectionColumns,
 ];
 
@@ -68,6 +91,7 @@ export const DEFAULT_EXPORT_COLUMN_KEYS = [
   "score",
   "score_band",
   "score_reasons",
+  "score_breakdown",
   "summary",
 ];
 
