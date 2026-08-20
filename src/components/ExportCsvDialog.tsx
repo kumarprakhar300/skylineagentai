@@ -66,6 +66,33 @@ export function ExportCsvDialog({
     [keys],
   );
 
+  const validation = useMemo(() => {
+    if (!preview) return null;
+    const checks = [
+      { key: "name", label: "Name" },
+      { key: "phone", label: "Phone" },
+      { key: "budget", label: "Budget" },
+    ] as const;
+    const fields = checks
+      .filter((check) => keys.includes(check.key))
+      .map((check) => {
+        const rows = preview.calls.filter((call) => {
+          const lead = preview.leadByCall.get(call.id);
+          const value = lead?.[check.key];
+          return value === null || value === undefined || String(value).trim() === "";
+        });
+        return {
+          ...check,
+          rows: rows.map((call) => {
+            const lead = preview.leadByCall.get(call.id);
+            return lead?.name?.trim() || lead?.phone?.trim() || `Call ${call.id.slice(0, 8)}`;
+          }),
+        };
+      })
+      .filter((field) => field.rows.length > 0);
+    return { total: preview.calls.length, fields };
+  }, [preview, keys]);
+
   async function loadPreview() {
     setPreviewLoading(true);
     setPreviewError(null);
@@ -278,6 +305,32 @@ export function ExportCsvDialog({
           </div>
         </div>
 
+        {validation ? (
+          <div className="rounded-lg border border-border/60 p-3 text-xs">
+            {validation.fields.length === 0 ? (
+              <p className="text-muted-foreground">
+                All {validation.total} row{validation.total === 1 ? "" : "s"} have name, phone and
+                budget filled — no blanks expected.
+              </p>
+            ) : (
+              <div className="space-y-1.5">
+                <p className="font-semibold uppercase tracking-wide text-muted-foreground">
+                  Validation — missing fields
+                </p>
+                {validation.fields.map((field) => (
+                  <p key={field.key} className="text-muted-foreground">
+                    <span className="font-medium text-foreground">{field.label}</span> blank in{" "}
+                    {field.rows.length} of {validation.total}:{" "}
+                    <span className="text-foreground/80">
+                      {field.rows.slice(0, 4).join(", ")}
+                      {field.rows.length > 4 ? ` +${field.rows.length - 4} more` : ""}
+                    </span>
+                  </p>
+                ))}
+              </div>
+            )}
+          </div>
+        ) : null}
 
         <DialogFooter className="gap-2 sm:justify-between">
           <Button
