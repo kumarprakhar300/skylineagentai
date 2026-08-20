@@ -222,13 +222,27 @@ export function ExportCsvDialog({
             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Preview
             </p>
-            <span className="text-xs text-muted-foreground">
-              {previewLoading
-                ? "Loading…"
-                : preview
-                  ? `First ${Math.min(5, preview.calls.length)} of ${preview.calls.length} row${preview.calls.length === 1 ? "" : "s"}`
-                  : ""}
-            </span>
+            <div className="flex items-center gap-2">
+              <Label htmlFor="preview-limit" className="text-xs font-normal text-muted-foreground">
+                Show rows:
+              </Label>
+              <Select
+                value={String(previewLimit)}
+                onValueChange={(v) => setPreviewLimit(Number(v))}
+                disabled={previewLoading || !preview}
+              >
+                <SelectTrigger id="preview-limit" className="h-7 w-16 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {PREVIEW_LIMIT_OPTIONS.map((n) => (
+                    <SelectItem key={n} value={String(n)} className="text-xs">
+                      {n}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
           <div className="rounded-lg border border-border/60">
             {previewLoading ? (
