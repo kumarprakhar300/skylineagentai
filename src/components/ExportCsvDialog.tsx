@@ -17,6 +17,13 @@ import {
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   DEFAULT_EXPORT_COLUMN_KEYS,
   LEAD_EXPORT_COLUMNS,
   downloadLeadsCsv,
@@ -24,6 +31,8 @@ import {
 } from "@/lib/leads-export";
 import type { CallRow, LeadRow } from "@/lib/leads-types";
 import { downloadLeadsXlsx } from "@/lib/xlsx-export";
+
+const PREVIEW_LIMIT_OPTIONS = [5, 10, 25] as const;
 
 type Source = () => Promise<{ calls: CallRow[]; leadByCall: Map<string, LeadRow> }>;
 
@@ -55,6 +64,7 @@ export function ExportCsvDialog({
   } | null>(null);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [previewError, setPreviewError] = useState<string | null>(null);
+  const [previewLimit, setPreviewLimit] = useState<number>(5);
 
   const grouped = useMemo(
     () => GROUPS.map((group) => ({ group, columns: LEAD_EXPORT_COLUMNS.filter((c) => c.group === group) })),
@@ -212,13 +222,27 @@ export function ExportCsvDialog({
             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Preview
             </p>
-            <span className="text-xs text-muted-foreground">
-              {previewLoading
-                ? "Loading…"
-                : preview
-                  ? `First ${Math.min(5, preview.calls.length)} of ${preview.calls.length} row${preview.calls.length === 1 ? "" : "s"}`
-                  : ""}
-            </span>
+            <div className="flex items-center gap-2">
+              <Label htmlFor="preview-limit" className="text-xs font-normal text-muted-foreground">
+                Show rows:
+              </Label>
+              <Select
+                value={String(previewLimit)}
+                onValueChange={(v) => setPreviewLimit(Number(v))}
+                disabled={previewLoading || !preview}
+              >
+                <SelectTrigger id="preview-limit" className="h-7 w-16 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {PREVIEW_LIMIT_OPTIONS.map((n) => (
+                    <SelectItem key={n} value={String(n)} className="text-xs">
+                      {n}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
           <div className="rounded-lg border border-border/60">
             {previewLoading ? (
@@ -250,7 +274,7 @@ export function ExportCsvDialog({
                     </tr>
                   </thead>
                   <tbody>
-                    {preview.calls.slice(0, 5).map((call) => {
+                    {preview.calls.slice(0, previewLimit).map((call) => {
                       const lead = preview.leadByCall.get(call.id);
                       const band = lead?.score_band;
                       return (
