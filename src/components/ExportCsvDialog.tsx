@@ -66,6 +66,33 @@ export function ExportCsvDialog({
     [keys],
   );
 
+  const validation = useMemo(() => {
+    if (!preview) return null;
+    const checks = [
+      { key: "name", label: "Name" },
+      { key: "phone", label: "Phone" },
+      { key: "budget", label: "Budget" },
+    ] as const;
+    const fields = checks
+      .filter((check) => keys.includes(check.key))
+      .map((check) => {
+        const rows = preview.calls.filter((call) => {
+          const lead = preview.leadByCall.get(call.id);
+          const value = lead?.[check.key];
+          return value === null || value === undefined || String(value).trim() === "";
+        });
+        return {
+          ...check,
+          rows: rows.map((call) => {
+            const lead = preview.leadByCall.get(call.id);
+            return lead?.name?.trim() || lead?.phone?.trim() || `Call ${call.id.slice(0, 8)}`;
+          }),
+        };
+      })
+      .filter((field) => field.rows.length > 0);
+    return { total: preview.calls.length, fields };
+  }, [preview, keys]);
+
   async function loadPreview() {
     setPreviewLoading(true);
     setPreviewError(null);
