@@ -17,6 +17,13 @@ import {
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   DEFAULT_EXPORT_COLUMN_KEYS,
   LEAD_EXPORT_COLUMNS,
   downloadLeadsCsv,
@@ -24,6 +31,8 @@ import {
 } from "@/lib/leads-export";
 import type { CallRow, LeadRow } from "@/lib/leads-types";
 import { downloadLeadsXlsx } from "@/lib/xlsx-export";
+
+const PREVIEW_LIMIT_OPTIONS = [5, 10, 25] as const;
 
 type Source = () => Promise<{ calls: CallRow[]; leadByCall: Map<string, LeadRow> }>;
 
