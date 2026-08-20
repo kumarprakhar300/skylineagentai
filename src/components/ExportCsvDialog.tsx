@@ -36,7 +36,7 @@ const PREVIEW_LIMIT_OPTIONS = [5, 10, 25] as const;
 
 type Source = () => Promise<{ calls: CallRow[]; leadByCall: Map<string, LeadRow> }>;
 
-const GROUPS = ["Call", "Lead", "Score", "Pipeline", "Summary sections"] as const;
+const GROUPS = ["Call", "Lead", "Score", "Score breakdown", "Pipeline", "Summary sections"] as const;
 
 export function ExportCsvDialog({
   source,
