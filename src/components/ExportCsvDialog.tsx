@@ -274,7 +274,7 @@ export function ExportCsvDialog({
                     </tr>
                   </thead>
                   <tbody>
-                    {preview.calls.slice(0, 5).map((call) => {
+                    {preview.calls.slice(0, previewLimit).map((call) => {
                       const lead = preview.leadByCall.get(call.id);
                       const band = lead?.score_band;
                       return (
