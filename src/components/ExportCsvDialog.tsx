@@ -305,6 +305,32 @@ export function ExportCsvDialog({
           </div>
         </div>
 
+        {validation ? (
+          <div className="rounded-lg border border-border/60 p-3 text-xs">
+            {validation.fields.length === 0 ? (
+              <p className="text-muted-foreground">
+                All {validation.total} row{validation.total === 1 ? "" : "s"} have name, phone and
+                budget filled — no blanks expected.
+              </p>
+            ) : (
+              <div className="space-y-1.5">
+                <p className="font-semibold uppercase tracking-wide text-muted-foreground">
+                  Validation — missing fields
+                </p>
+                {validation.fields.map((field) => (
+                  <p key={field.key} className="text-muted-foreground">
+                    <span className="font-medium text-foreground">{field.label}</span> blank in{" "}
+                    {field.rows.length} of {validation.total}:{" "}
+                    <span className="text-foreground/80">
+                      {field.rows.slice(0, 4).join(", ")}
+                      {field.rows.length > 4 ? ` +${field.rows.length - 4} more` : ""}
+                    </span>
+                  </p>
+                ))}
+              </div>
+            )}
+          </div>
+        ) : null}
 
         <DialogFooter className="gap-2 sm:justify-between">
           <Button
