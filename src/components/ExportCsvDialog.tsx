@@ -65,6 +65,8 @@ export function ExportCsvDialog({
   const [previewLoading, setPreviewLoading] = useState(false);
   const [previewError, setPreviewError] = useState<string | null>(null);
   const [previewLimit, setPreviewLimit] = useState<number>(5);
+  const [explainSignals, setExplainSignals] = useState(false);
+
 
   const grouped = useMemo(
     () => GROUPS.map((group) => ({ group, columns: LEAD_EXPORT_COLUMNS.filter((c) => c.group === group) })),
