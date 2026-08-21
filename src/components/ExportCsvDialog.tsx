@@ -30,6 +30,8 @@ import {
   downloadTranscriptsCsv,
 } from "@/lib/leads-export";
 import type { CallRow, LeadRow } from "@/lib/leads-types";
+import { explainScoreReasons } from "@/lib/score-breakdown";
+
 import { downloadLeadsXlsx } from "@/lib/xlsx-export";
 
 const PREVIEW_LIMIT_OPTIONS = [5, 10, 25] as const;
@@ -65,6 +67,8 @@ export function ExportCsvDialog({
   const [previewLoading, setPreviewLoading] = useState(false);
   const [previewError, setPreviewError] = useState<string | null>(null);
   const [previewLimit, setPreviewLimit] = useState<number>(5);
+  const [explainSignals, setExplainSignals] = useState(false);
+
 
   const grouped = useMemo(
     () => GROUPS.map((group) => ({ group, columns: LEAD_EXPORT_COLUMNS.filter((c) => c.group === group) })),
@@ -327,7 +331,63 @@ export function ExportCsvDialog({
               </ScrollArea>
             )}
           </div>
+
+          <div className="flex items-center gap-2">
+            <Checkbox
+              id="explain-signals"
+              checked={explainSignals}
+              onCheckedChange={(v) => setExplainSignals(v === true)}
+            />
+            <Label htmlFor="explain-signals" className="text-xs font-normal">
+              Explain why each signal added or removed points
+            </Label>
+          </div>
+
+          {explainSignals && preview && preview.calls.length > 0 ? (
+            <ScrollArea className="max-h-60 rounded-lg border border-border/60">
+              <div className="divide-y divide-border/50">
+                {preview.calls.slice(0, previewLimit).map((call) => {
+                  const lead = preview.leadByCall.get(call.id);
+                  const entries = explainScoreReasons(lead?.score_reasons);
+                  return (
+                    <div key={call.id} className="space-y-1.5 p-3 text-xs">
+                      <p className="font-semibold text-foreground">
+                        {lead?.name?.trim() || lead?.phone?.trim() || `Call ${call.id.slice(0, 8)}`}
+                        {lead?.score !== null && lead?.score !== undefined ? (
+                          <span className="ml-2 font-normal text-muted-foreground">
+                            {lead.score}/100 · {lead.score_band ?? "—"}
+                          </span>
+                        ) : null}
+                      </p>
+                      {entries.length === 0 ? (
+                        <p className="text-muted-foreground">No scoring signals recorded.</p>
+                      ) : (
+                        entries.map((entry) => (
+                          <p key={entry.signal} className="text-muted-foreground">
+                            <span
+                              className={
+                                entry.points > 0
+                                  ? "font-medium text-emerald-500"
+                                  : entry.points < 0
+                                    ? "font-medium text-destructive"
+                                    : "font-medium text-foreground"
+                              }
+                            >
+                              {entry.signal} {entry.points >= 0 ? "+" : ""}
+                              {entry.points}
+                            </span>{" "}
+                            — {entry.explanation}
+                          </p>
+                        ))
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </ScrollArea>
+          ) : null}
         </div>
+
 
         {validation ? (
           <div className="rounded-lg border border-border/60 p-3 text-xs">
