@@ -1,7 +1,13 @@
 import { parseSummary, SUMMARY_SECTION_LABELS } from "@/lib/agent/summary";
 import { downloadCsv, stamp, toCsv } from "@/lib/csv";
 import type { CallRow, LeadRow } from "@/lib/leads-types";
-import { formatScoreBreakdown, SCORE_SIGNALS, signalDetail, signalPoints } from "@/lib/score-breakdown";
+import {
+  explainScoreReasons,
+  formatScoreBreakdown,
+  SCORE_SIGNALS,
+  signalDetail,
+  signalPoints,
+} from "@/lib/score-breakdown";
 
 export type ExportColumn = {
   key: string;
