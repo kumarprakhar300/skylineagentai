@@ -1,7 +1,13 @@
 import { parseSummary, SUMMARY_SECTION_LABELS } from "@/lib/agent/summary";
 import { downloadCsv, stamp, toCsv } from "@/lib/csv";
 import type { CallRow, LeadRow } from "@/lib/leads-types";
-import { formatScoreBreakdown, SCORE_SIGNALS, signalDetail, signalPoints } from "@/lib/score-breakdown";
+import {
+  explainScoreReasons,
+  formatScoreBreakdown,
+  SCORE_SIGNALS,
+  signalDetail,
+  signalPoints,
+} from "@/lib/score-breakdown";
 
 export type ExportColumn = {
   key: string;
@@ -59,6 +65,15 @@ export const LEAD_EXPORT_COLUMNS: ExportColumn[] = [
     label: "Score breakdown",
     group: "Score",
     value: (_c, l) => formatScoreBreakdown(l?.score_reasons),
+  },
+  {
+    key: "score_explanation",
+    label: "Score explanation",
+    group: "Score",
+    value: (_c, l) =>
+      explainScoreReasons(l?.score_reasons)
+        .map((e) => `${e.signal} ${e.points >= 0 ? "+" : ""}${e.points}: ${e.explanation}`)
+        .join(" | "),
   },
 
   { key: "status", label: "Pipeline status", group: "Pipeline", value: (_c, l) => l?.status },
