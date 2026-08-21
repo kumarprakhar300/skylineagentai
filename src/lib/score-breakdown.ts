@@ -93,3 +93,37 @@ export function signalDetail(reasons: string[] | null | undefined, signal: Score
   const entry = breakdownScoreReasons(reasons).find((e) => e.signal === signal)!;
   return entry.reasons.join("; ");
 }
+
+/** Plain-English meaning of each signal, used in the export dialog explanation. */
+const SIGNAL_MEANING: Record<ScoreSignal, string> = {
+  Requirements: "how much of the qualification checklist the agent captured (up to +35)",
+  Contact: "sharing a phone number (+15) and a name (+5)",
+  Timeline: "how soon they want to buy — immediate +20, a few months +12, a year away +0",
+  Budget: "whether the stated budget fits the project range — crores +12, matching +10, vague +5",
+  Purpose: "self-use (+5) or investment (+4) intent",
+  Engagement: "how much the customer actually talked — long +8, moderate +4, very short +0",
+  "Buying signals": "asking for a site visit, price list or booking (+12); disinterest or 'call later' (-20)",
+};
+
+export type SignalExplanation = SignalBreakdown & { explanation: string };
+
+/**
+ * Human-readable "why" for every signal that fired, e.g.
+ * "Timeline +20 — Timeline is immediate. Counts how soon they want to buy…".
+ */
+export function explainScoreReasons(reasons: string[] | null | undefined): SignalExplanation[] {
+  return breakdownScoreReasons(reasons)
+    .filter((entry) => entry.reasons.length > 0)
+    .map((entry) => {
+      const direction =
+        entry.points > 0 ? "increased the score" : entry.points < 0 ? "lowered the score" : "did not change the score";
+      return {
+        ...entry,
+        explanation: `${entry.reasons.join("; ")} — this ${direction} because it scores ${SIGNAL_MEANING[entry.signal]}.`,
+      };
+    });
+}
+
+export function signalMeaning(signal: ScoreSignal): string {
+  return SIGNAL_MEANING[signal];
+}
