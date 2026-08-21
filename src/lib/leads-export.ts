@@ -66,6 +66,15 @@ export const LEAD_EXPORT_COLUMNS: ExportColumn[] = [
     group: "Score",
     value: (_c, l) => formatScoreBreakdown(l?.score_reasons),
   },
+  {
+    key: "score_explanation",
+    label: "Score explanation",
+    group: "Score",
+    value: (_c, l) =>
+      explainScoreReasons(l?.score_reasons)
+        .map((e) => `${e.signal} ${e.points >= 0 ? "+" : ""}${e.points}: ${e.explanation}`)
+        .join(" | "),
+  },
 
   { key: "status", label: "Pipeline status", group: "Pipeline", value: (_c, l) => l?.status },
   { key: "owner_notes", label: "Owner notes", group: "Pipeline", value: (_c, l) => l?.owner_notes },
