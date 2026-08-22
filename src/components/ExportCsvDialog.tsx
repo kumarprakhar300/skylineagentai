@@ -353,8 +353,9 @@ export function ExportCsvDialog({
                     </tr>
                   </thead>
                   <tbody>
-                    {preview.calls.slice(0, previewLimit).map((call) => {
+                    {filteredCalls.slice(0, previewLimit).map((call) => {
                       const lead = preview.leadByCall.get(call.id);
+
                       const band = lead?.score_band;
                       return (
                         <tr key={call.id} className="border-t border-border/50">
