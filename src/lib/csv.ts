@@ -9,7 +9,9 @@ function cell(value: unknown): string {
         ? value.join(" | ")
         : String(value);
 
-  text = text.replace(/"/g, '""').replace(/\r?\n/g, " ");
+  // Keep real line breaks: quoted CRLF inside a cell is valid CSV and renders
+  // as a multi-line cell in Excel / Sheets. Normalise to CRLF for compatibility.
+  text = text.replace(/"/g, '""').replace(/\r\n|\r|\n/g, "\r\n");
 
   // Neutralise CSV formula injection so exported leads can't run code in a spreadsheet.
   if (FORMULA_PREFIX.test(text)) {

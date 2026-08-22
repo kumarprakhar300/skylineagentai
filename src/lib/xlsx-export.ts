@@ -11,12 +11,18 @@ function cell(value: unknown) {
   return value as string | number | boolean;
 }
 
+/** Longest single line of a cell — multi-line cells shouldn't blow the column width out. */
+function longestLine(value: unknown) {
+  return String(value ?? "")
+    .split("\n")
+    .reduce((max, line) => Math.max(max, line.length), 0);
+}
+
 function autoWidth(rows: (string | number | boolean)[][]) {
   const widths: number[] = [];
   rows.forEach((row) =>
     row.forEach((value, i) => {
-      const length = String(value ?? "").length;
-      widths[i] = Math.min(60, Math.max(widths[i] ?? 10, length + 2));
+      widths[i] = Math.min(60, Math.max(widths[i] ?? 10, longestLine(value) + 2));
     }),
   );
   return widths.map((wch) => ({ wch }));
@@ -33,8 +39,30 @@ function sheetFrom(headers: string[], rows: unknown[][]) {
     }),
   };
   sheet["!freeze"] = "A2";
+
+  // Wrap text on any cell containing line breaks (Score explanation, breakdowns,
+  // summaries) and grow the row height so every line is visible.
+  const rowHeights: { hpt: number }[] = [];
+  table.forEach((row, r) => {
+    let lines = 1;
+    row.forEach((value, c) => {
+      const text = String(value ?? "");
+      const cellLines = text.split("\n").length;
+      const address = XLSX.utils.encode_cell({ r, c });
+      const target = sheet[address];
+      if (!target) return;
+      if (cellLines > 1 || text.length > 60) {
+        target.s = { ...(target.s ?? {}), alignment: { wrapText: true, vertical: "top" } };
+      }
+      lines = Math.max(lines, Math.min(12, cellLines));
+    });
+    rowHeights[r] = { hpt: Math.round(15 * lines) };
+  });
+  sheet["!rows"] = rowHeights;
+
   return sheet;
 }
+
 
 /** Download the filtered leads as a workbook. Optionally include a Transcripts sheet. */
 export function downloadLeadsXlsx(
