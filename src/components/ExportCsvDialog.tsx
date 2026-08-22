@@ -68,6 +68,21 @@ export function ExportCsvDialog({
   const [previewError, setPreviewError] = useState<string | null>(null);
   const [previewLimit, setPreviewLimit] = useState<number>(5);
   const [explainSignals, setExplainSignals] = useState(false);
+  const [bands, setBands] = useState<Record<"hot" | "warm" | "cold", boolean>>({
+    hot: true,
+    warm: true,
+    cold: true,
+  });
+
+  const filteredCalls = useMemo(() => {
+    if (!preview) return [];
+    return preview.calls.filter((call) => {
+      const band = preview.leadByCall.get(call.id)?.score_band;
+      if (!band) return false;
+      return bands[band as "hot" | "warm" | "cold"] ?? false;
+    });
+  }, [preview, bands]);
+
 
 
   const grouped = useMemo(
