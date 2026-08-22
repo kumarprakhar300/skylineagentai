@@ -105,7 +105,7 @@ export function ExportCsvDialog({
     const fields = checks
       .filter((check) => keys.includes(check.key))
       .map((check) => {
-        const rows = preview.calls.filter((call) => {
+        const rows = filteredCalls.filter((call) => {
           const lead = preview.leadByCall.get(call.id);
           const value = lead?.[check.key];
           return value === null || value === undefined || String(value).trim() === "";
@@ -119,8 +119,9 @@ export function ExportCsvDialog({
         };
       })
       .filter((field) => field.rows.length > 0);
-    return { total: preview.calls.length, fields };
-  }, [preview, keys]);
+    return { total: filteredCalls.length, fields };
+  }, [preview, keys, filteredCalls]);
+
 
   async function loadPreview() {
     setPreviewLoading(true);
