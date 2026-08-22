@@ -243,7 +243,54 @@ export function ExportCsvDialog({
           </div>
         </ScrollArea>
 
+        <div className="rounded-lg border border-border/60 p-3">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Score band filter
+            </p>
+            <div className="flex gap-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setBands({ hot: true, warm: true, cold: true })}
+              >
+                All
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setBands({ hot: true, warm: false, cold: false })}
+              >
+                Hot only
+              </Button>
+            </div>
+          </div>
+          <div className="mt-2 flex flex-wrap gap-4">
+            {(["hot", "warm", "cold"] as const).map((band) => (
+              <div key={band} className="flex items-center gap-2">
+                <Checkbox
+                  id={`band-${band}`}
+                  checked={bands[band]}
+                  onCheckedChange={(v) =>
+                    setBands((prev) => ({ ...prev, [band]: v === true }))
+                  }
+                />
+                <Label htmlFor={`band-${band}`} className="text-sm font-normal capitalize">
+                  {band}
+                </Label>
+              </div>
+            ))}
+          </div>
+          {preview && (
+            <p className="mt-2 text-xs text-muted-foreground">
+              {filteredCalls.length} of {preview.calls.length} selected leads match the score-band
+              filter.
+            </p>
+          )}
+        </div>
+
         <div className="space-y-2">
+
           <div className="flex items-center justify-between">
             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Preview
