@@ -68,6 +68,21 @@ export function ExportCsvDialog({
   const [previewError, setPreviewError] = useState<string | null>(null);
   const [previewLimit, setPreviewLimit] = useState<number>(5);
   const [explainSignals, setExplainSignals] = useState(false);
+  const [bands, setBands] = useState<Record<"hot" | "warm" | "cold", boolean>>({
+    hot: true,
+    warm: true,
+    cold: true,
+  });
+
+  const filteredCalls = useMemo(() => {
+    if (!preview) return [];
+    return preview.calls.filter((call) => {
+      const band = preview.leadByCall.get(call.id)?.score_band;
+      if (!band) return false;
+      return bands[band as "hot" | "warm" | "cold"] ?? false;
+    });
+  }, [preview, bands]);
+
 
 
   const grouped = useMemo(
@@ -90,7 +105,7 @@ export function ExportCsvDialog({
     const fields = checks
       .filter((check) => keys.includes(check.key))
       .map((check) => {
-        const rows = preview.calls.filter((call) => {
+        const rows = filteredCalls.filter((call) => {
           const lead = preview.leadByCall.get(call.id);
           const value = lead?.[check.key];
           return value === null || value === undefined || String(value).trim() === "";
@@ -104,8 +119,9 @@ export function ExportCsvDialog({
         };
       })
       .filter((field) => field.rows.length > 0);
-    return { total: preview.calls.length, fields };
-  }, [preview, keys]);
+    return { total: filteredCalls.length, fields };
+  }, [preview, keys, filteredCalls]);
+
 
   async function loadPreview() {
     setPreviewLoading(true);
@@ -141,14 +157,19 @@ export function ExportCsvDialog({
     setBusy(kind);
     try {
       const { calls, leadByCall } = await source();
-      if (calls.length === 0) {
-        toast.error("No calls to export yet");
+      const selected = calls.filter((call) => {
+        const band = leadByCall.get(call.id)?.score_band;
+        if (!band) return false;
+        return bands[band as "hot" | "warm" | "cold"] ?? false;
+      });
+      if (selected.length === 0) {
+        toast.error("No leads match the selected score bands");
         return;
       }
-      if (kind === "leads") downloadLeadsCsv(calls, leadByCall, keys);
-      else if (kind === "xlsx") downloadLeadsXlsx(calls, leadByCall, keys, undefined, includeTranscripts);
-      else downloadTranscriptsCsv(calls, leadByCall);
-      toast.success(`${calls.length} call${calls.length === 1 ? "" : "s"} exported`);
+      if (kind === "leads") downloadLeadsCsv(selected, leadByCall, keys);
+      else if (kind === "xlsx") downloadLeadsXlsx(selected, leadByCall, keys, undefined, includeTranscripts);
+      else downloadTranscriptsCsv(selected, leadByCall);
+      toast.success(`${selected.length} call${selected.length === 1 ? "" : "s"} exported`);
       setOpen(false);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Could not export the file");
@@ -156,6 +177,7 @@ export function ExportCsvDialog({
       setBusy(null);
     }
   }
+
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -221,7 +243,54 @@ export function ExportCsvDialog({
           </div>
         </ScrollArea>
 
+        <div className="rounded-lg border border-border/60 p-3">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Score band filter
+            </p>
+            <div className="flex gap-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setBands({ hot: true, warm: true, cold: true })}
+              >
+                All
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setBands({ hot: true, warm: false, cold: false })}
+              >
+                Hot only
+              </Button>
+            </div>
+          </div>
+          <div className="mt-2 flex flex-wrap gap-4">
+            {(["hot", "warm", "cold"] as const).map((band) => (
+              <div key={band} className="flex items-center gap-2">
+                <Checkbox
+                  id={`band-${band}`}
+                  checked={bands[band]}
+                  onCheckedChange={(v) =>
+                    setBands((prev) => ({ ...prev, [band]: v === true }))
+                  }
+                />
+                <Label htmlFor={`band-${band}`} className="text-sm font-normal capitalize">
+                  {band}
+                </Label>
+              </div>
+            ))}
+          </div>
+          {preview && (
+            <p className="mt-2 text-xs text-muted-foreground">
+              {filteredCalls.length} of {preview.calls.length} selected leads match the score-band
+              filter.
+            </p>
+          )}
+        </div>
+
         <div className="space-y-2">
+
           <div className="flex items-center justify-between">
             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Preview
@@ -255,10 +324,16 @@ export function ExportCsvDialog({
               </div>
             ) : previewError ? (
               <p className="p-4 text-sm text-destructive">{previewError}</p>
-            ) : !preview || preview.calls.length === 0 ? (
-              <p className="p-4 text-sm text-muted-foreground">No rows to preview yet.</p>
+            ) : !preview || filteredCalls.length === 0 ? (
+              <p className="p-4 text-sm text-muted-foreground">
+                {preview?.calls.length === 0
+                  ? "No rows to preview yet."
+                  : "No leads match the selected score bands."}
+              </p>
             ) : (
+
               <ScrollArea className="max-h-52 w-full">
+
                 <table className="w-full text-left text-xs">
                   <thead className="bg-muted/50">
                     <tr>
@@ -278,8 +353,9 @@ export function ExportCsvDialog({
                     </tr>
                   </thead>
                   <tbody>
-                    {preview.calls.slice(0, previewLimit).map((call) => {
+                    {filteredCalls.slice(0, previewLimit).map((call) => {
                       const lead = preview.leadByCall.get(call.id);
+
                       const band = lead?.score_band;
                       return (
                         <tr key={call.id} className="border-t border-border/50">
@@ -343,10 +419,11 @@ export function ExportCsvDialog({
             </Label>
           </div>
 
-          {explainSignals && preview && preview.calls.length > 0 ? (
+          {explainSignals && preview && filteredCalls.length > 0 ? (
             <ScrollArea className="max-h-60 rounded-lg border border-border/60">
               <div className="divide-y divide-border/50">
-                {preview.calls.slice(0, previewLimit).map((call) => {
+                {filteredCalls.slice(0, previewLimit).map((call) => {
+
                   const lead = preview.leadByCall.get(call.id);
                   const entries = explainScoreReasons(lead?.score_reasons);
                   return (
