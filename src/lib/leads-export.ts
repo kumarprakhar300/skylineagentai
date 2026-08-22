@@ -46,6 +46,24 @@ export const LEAD_EXPORT_COLUMNS: ExportColumn[] = [
   { key: "call_id", label: "Call ID", group: "Call", value: (c) => c.id },
   { key: "turns", label: "Transcript turns", group: "Call", value: (c) => (c.transcript ?? []).length },
   { key: "summary", label: "Call summary (full)", group: "Call", value: (c) => c.summary },
+  {
+    key: "summary_recap",
+    label: "Call summary recap",
+    group: "Call",
+    // Sectioned recap, one "Label: value" per line so it reads cleanly in a wrapped cell.
+    value: (c) => {
+      const parsed = parseSummary(c.summary ?? "");
+      return SUMMARY_SECTION_LABELS.filter((label) => parsed[label])
+        .map((label) => `${label}: ${(parsed[label] ?? "").replace(/\n+/g, " ").trim()}`)
+        .join("\n");
+    },
+  },
+  {
+    key: "summary_oneline",
+    label: "Call summary (one line)",
+    group: "Call",
+    value: (c) => (c.summary ?? "").replace(/\s*\n+\s*/g, " · ").trim(),
+  },
 
   { key: "name", label: "Name", group: "Lead", value: (_c, l) => l?.name },
   { key: "phone", label: "Phone", group: "Lead", value: (_c, l) => l?.phone },
@@ -109,6 +127,7 @@ export const DEFAULT_EXPORT_COLUMN_KEYS = [
   "score_band",
   "score_reasons",
   "score_breakdown",
+  "summary_recap",
   "summary",
 ];
 
