@@ -157,14 +157,19 @@ export function ExportCsvDialog({
     setBusy(kind);
     try {
       const { calls, leadByCall } = await source();
-      if (calls.length === 0) {
-        toast.error("No calls to export yet");
+      const selected = calls.filter((call) => {
+        const band = leadByCall.get(call.id)?.score_band;
+        if (!band) return false;
+        return bands[band as "hot" | "warm" | "cold"] ?? false;
+      });
+      if (selected.length === 0) {
+        toast.error("No leads match the selected score bands");
         return;
       }
-      if (kind === "leads") downloadLeadsCsv(calls, leadByCall, keys);
-      else if (kind === "xlsx") downloadLeadsXlsx(calls, leadByCall, keys, undefined, includeTranscripts);
-      else downloadTranscriptsCsv(calls, leadByCall);
-      toast.success(`${calls.length} call${calls.length === 1 ? "" : "s"} exported`);
+      if (kind === "leads") downloadLeadsCsv(selected, leadByCall, keys);
+      else if (kind === "xlsx") downloadLeadsXlsx(selected, leadByCall, keys, undefined, includeTranscripts);
+      else downloadTranscriptsCsv(selected, leadByCall);
+      toast.success(`${selected.length} call${selected.length === 1 ? "" : "s"} exported`);
       setOpen(false);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Could not export the file");
@@ -172,6 +177,7 @@ export function ExportCsvDialog({
       setBusy(null);
     }
   }
+
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
