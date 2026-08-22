@@ -419,10 +419,11 @@ export function ExportCsvDialog({
             </Label>
           </div>
 
-          {explainSignals && preview && preview.calls.length > 0 ? (
+          {explainSignals && preview && filteredCalls.length > 0 ? (
             <ScrollArea className="max-h-60 rounded-lg border border-border/60">
               <div className="divide-y divide-border/50">
-                {preview.calls.slice(0, previewLimit).map((call) => {
+                {filteredCalls.slice(0, previewLimit).map((call) => {
+
                   const lead = preview.leadByCall.get(call.id);
                   const entries = explainScoreReasons(lead?.score_reasons);
                   return (
