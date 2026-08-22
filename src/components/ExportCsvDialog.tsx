@@ -324,10 +324,15 @@ export function ExportCsvDialog({
               </div>
             ) : previewError ? (
               <p className="p-4 text-sm text-destructive">{previewError}</p>
-            ) : !preview || preview.calls.length === 0 ? (
-              <p className="p-4 text-sm text-muted-foreground">No rows to preview yet.</p>
+            ) : !preview || filteredCalls.length === 0 ? (
+              <p className="p-4 text-sm text-muted-foreground">
+                {preview.calls.length === 0
+                  ? "No rows to preview yet."
+                  : "No leads match the selected score bands."}
+              </p>
             ) : (
               <ScrollArea className="max-h-52 w-full">
+
                 <table className="w-full text-left text-xs">
                   <thead className="bg-muted/50">
                     <tr>
