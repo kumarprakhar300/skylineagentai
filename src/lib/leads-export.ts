@@ -127,6 +127,7 @@ export const DEFAULT_EXPORT_COLUMN_KEYS = [
   "score_band",
   "score_reasons",
   "score_breakdown",
+  "summary_recap",
   "summary",
 ];
 
