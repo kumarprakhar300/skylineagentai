@@ -70,11 +70,13 @@ export const LEAD_EXPORT_COLUMNS: ExportColumn[] = [
     key: "score_explanation",
     label: "Score explanation",
     group: "Score",
+    // One signal per line so the cell reads like a list in Excel / Sheets.
     value: (_c, l) =>
       explainScoreReasons(l?.score_reasons)
         .map((e) => `${e.signal} ${e.points >= 0 ? "+" : ""}${e.points}: ${e.explanation}`)
-        .join(" | "),
+        .join("\n"),
   },
+
 
   { key: "status", label: "Pipeline status", group: "Pipeline", value: (_c, l) => l?.status },
   { key: "owner_notes", label: "Owner notes", group: "Pipeline", value: (_c, l) => l?.owner_notes },
