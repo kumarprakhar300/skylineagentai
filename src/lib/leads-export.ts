@@ -12,7 +12,7 @@ import {
 export type ExportColumn = {
   key: string;
   label: string;
-  group: "Call" | "Lead" | "Score" | "Score breakdown" | "Summary sections" | "Pipeline";
+  group: "Call" | "Lead" | "Requirements" | "Score" | "Score breakdown" | "Summary sections" | "Pipeline";
   value: (call: CallRow, lead: LeadRow | undefined) => unknown;
 };
 
