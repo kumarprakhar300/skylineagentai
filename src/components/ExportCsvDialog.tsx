@@ -38,7 +38,32 @@ const PREVIEW_LIMIT_OPTIONS = [5, 10, 25] as const;
 
 type Source = () => Promise<{ calls: CallRow[]; leadByCall: Map<string, LeadRow> }>;
 
-const GROUPS = ["Call", "Lead", "Score", "Score breakdown", "Pipeline", "Summary sections"] as const;
+const GROUPS = [
+  "Call",
+  "Lead",
+  "Requirements",
+  "Score",
+  "Score breakdown",
+  "Pipeline",
+  "Summary sections",
+] as const;
+
+const REQUIREMENT_FIELDS = [
+  "location",
+  "property_type",
+  "configuration",
+  "budget",
+  "purpose",
+  "timeline",
+] as const;
+
+function hasCompleteRequirements(lead: LeadRow | undefined) {
+  if (!lead) return false;
+  return REQUIREMENT_FIELDS.every((field) => {
+    const value = lead[field];
+    return value !== null && value !== undefined && String(value).trim() !== "";
+  });
+}
 
 export function ExportCsvDialog({
   source,
@@ -74,14 +99,19 @@ export function ExportCsvDialog({
     cold: true,
   });
 
+  const [completeOnly, setCompleteOnly] = useState(false);
+
   const filteredCalls = useMemo(() => {
     if (!preview) return [];
     return preview.calls.filter((call) => {
-      const band = preview.leadByCall.get(call.id)?.score_band;
+      const lead = preview.leadByCall.get(call.id);
+      const band = lead?.score_band;
       if (!band) return false;
-      return bands[band as "hot" | "warm" | "cold"] ?? false;
+      if (!(bands[band as "hot" | "warm" | "cold"] ?? false)) return false;
+      if (completeOnly && !hasCompleteRequirements(lead)) return false;
+      return true;
     });
-  }, [preview, bands]);
+  }, [preview, bands, completeOnly]);
 
 
 
@@ -158,12 +188,19 @@ export function ExportCsvDialog({
     try {
       const { calls, leadByCall } = await source();
       const selected = calls.filter((call) => {
-        const band = leadByCall.get(call.id)?.score_band;
+        const lead = leadByCall.get(call.id);
+        const band = lead?.score_band;
         if (!band) return false;
-        return bands[band as "hot" | "warm" | "cold"] ?? false;
+        if (!(bands[band as "hot" | "warm" | "cold"] ?? false)) return false;
+        if (completeOnly && !hasCompleteRequirements(lead)) return false;
+        return true;
       });
       if (selected.length === 0) {
-        toast.error("No leads match the selected score bands");
+        toast.error(
+          completeOnly
+            ? "No leads match the selected score bands with all requirement fields filled"
+            : "No leads match the selected score bands",
+        );
         return;
       }
       if (kind === "leads") downloadLeadsCsv(selected, leadByCall, keys);
@@ -281,10 +318,23 @@ export function ExportCsvDialog({
               </div>
             ))}
           </div>
+          <div className="mt-3 flex items-start gap-2 border-t border-border/60 pt-3">
+            <Checkbox
+              id="complete-only"
+              checked={completeOnly}
+              onCheckedChange={(v) => setCompleteOnly(v === true)}
+            />
+            <Label htmlFor="complete-only" className="text-sm font-normal leading-snug">
+              Only leads with complete requirements
+              <span className="block text-xs text-muted-foreground">
+                Location, property type, configuration, budget, purpose and timeline all filled.
+              </span>
+            </Label>
+          </div>
           {preview && (
             <p className="mt-2 text-xs text-muted-foreground">
-              {filteredCalls.length} of {preview.calls.length} selected leads match the score-band
-              filter.
+              {filteredCalls.length} of {preview.calls.length} selected leads match the current
+              filters.
             </p>
           )}
         </div>
