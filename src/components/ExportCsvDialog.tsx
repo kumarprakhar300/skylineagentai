@@ -318,10 +318,23 @@ export function ExportCsvDialog({
               </div>
             ))}
           </div>
+          <div className="mt-3 flex items-start gap-2 border-t border-border/60 pt-3">
+            <Checkbox
+              id="complete-only"
+              checked={completeOnly}
+              onCheckedChange={(v) => setCompleteOnly(v === true)}
+            />
+            <Label htmlFor="complete-only" className="text-sm font-normal leading-snug">
+              Only leads with complete requirements
+              <span className="block text-xs text-muted-foreground">
+                Location, property type, configuration, budget, purpose and timeline all filled.
+              </span>
+            </Label>
+          </div>
           {preview && (
             <p className="mt-2 text-xs text-muted-foreground">
-              {filteredCalls.length} of {preview.calls.length} selected leads match the score-band
-              filter.
+              {filteredCalls.length} of {preview.calls.length} selected leads match the current
+              filters.
             </p>
           )}
         </div>
