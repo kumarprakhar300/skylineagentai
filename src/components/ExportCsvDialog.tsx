@@ -32,6 +32,7 @@ import {
 import type { CallRow, LeadRow } from "@/lib/leads-types";
 import { explainScoreReasons } from "@/lib/score-breakdown";
 
+import { downloadLeadsNdjson } from "@/lib/ndjson-export";
 import { downloadLeadsXlsx } from "@/lib/xlsx-export";
 
 const PREVIEW_LIMIT_OPTIONS = [5, 10, 25] as const;
@@ -83,7 +84,7 @@ export function ExportCsvDialog({
 }) {
   const [open, setOpen] = useState(false);
   const [keys, setKeys] = useState<string[]>(DEFAULT_EXPORT_COLUMN_KEYS);
-  const [busy, setBusy] = useState<"leads" | "transcripts" | "xlsx" | null>(null);
+  const [busy, setBusy] = useState<"leads" | "transcripts" | "xlsx" | "ndjson" | null>(null);
   const [includeTranscripts, setIncludeTranscripts] = useState(true);
   const [preview, setPreview] = useState<{
     calls: CallRow[];
@@ -179,7 +180,7 @@ export function ExportCsvDialog({
     setKeys((prev) => (on ? [...prev, key] : prev.filter((k) => k !== key)));
 
 
-  async function run(kind: "leads" | "transcripts" | "xlsx") {
+  async function run(kind: "leads" | "transcripts" | "xlsx" | "ndjson") {
     if (kind !== "transcripts" && keys.length === 0) {
       toast.error("Pick at least one column to export");
       return;
@@ -205,6 +206,7 @@ export function ExportCsvDialog({
       }
       if (kind === "leads") downloadLeadsCsv(selected, leadByCall, keys);
       else if (kind === "xlsx") downloadLeadsXlsx(selected, leadByCall, keys, undefined, includeTranscripts);
+      else if (kind === "ndjson") downloadLeadsNdjson(selected, leadByCall, includeTranscripts);
       else downloadTranscriptsCsv(selected, leadByCall);
       toast.success(`${selected.length} call${selected.length === 1 ? "" : "s"} exported`);
       setOpen(false);
@@ -226,7 +228,7 @@ export function ExportCsvDialog({
       <DialogContent className="max-w-3xl">
 
         <DialogHeader>
-          <DialogTitle>Export leads (CSV or XLSX)</DialogTitle>
+          <DialogTitle>Export leads (CSV, XLSX or NDJSON)</DialogTitle>
           <DialogDescription>
             {typeof count === "number"
               ? `${count} call${count === 1 ? "" : "s"} ${scopeLabel ?? "will be exported"}.`
@@ -568,6 +570,20 @@ export function ExportCsvDialog({
                 Include Transcripts sheet
               </Label>
             </div>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={busy !== null}
+              onClick={() => void run("ndjson")}
+              title="Newline-delimited JSON with requirements, score and call summary"
+            >
+              {busy === "ndjson" ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <FileJson className="size-4" />
+              )}{" "}
+              Download NDJSON
+            </Button>
             <Button
               variant="outline"
               size="sm"
