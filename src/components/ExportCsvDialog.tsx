@@ -188,12 +188,19 @@ export function ExportCsvDialog({
     try {
       const { calls, leadByCall } = await source();
       const selected = calls.filter((call) => {
-        const band = leadByCall.get(call.id)?.score_band;
+        const lead = leadByCall.get(call.id);
+        const band = lead?.score_band;
         if (!band) return false;
-        return bands[band as "hot" | "warm" | "cold"] ?? false;
+        if (!(bands[band as "hot" | "warm" | "cold"] ?? false)) return false;
+        if (completeOnly && !hasCompleteRequirements(lead)) return false;
+        return true;
       });
       if (selected.length === 0) {
-        toast.error("No leads match the selected score bands");
+        toast.error(
+          completeOnly
+            ? "No leads match the selected score bands with all requirement fields filled"
+            : "No leads match the selected score bands",
+        );
         return;
       }
       if (kind === "leads") downloadLeadsCsv(selected, leadByCall, keys);
