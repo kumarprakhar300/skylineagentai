@@ -99,14 +99,19 @@ export function ExportCsvDialog({
     cold: true,
   });
 
+  const [completeOnly, setCompleteOnly] = useState(false);
+
   const filteredCalls = useMemo(() => {
     if (!preview) return [];
     return preview.calls.filter((call) => {
-      const band = preview.leadByCall.get(call.id)?.score_band;
+      const lead = preview.leadByCall.get(call.id);
+      const band = lead?.score_band;
       if (!band) return false;
-      return bands[band as "hot" | "warm" | "cold"] ?? false;
+      if (!(bands[band as "hot" | "warm" | "cold"] ?? false)) return false;
+      if (completeOnly && !hasCompleteRequirements(lead)) return false;
+      return true;
     });
-  }, [preview, bands]);
+  }, [preview, bands, completeOnly]);
 
 
 
