@@ -38,7 +38,32 @@ const PREVIEW_LIMIT_OPTIONS = [5, 10, 25] as const;
 
 type Source = () => Promise<{ calls: CallRow[]; leadByCall: Map<string, LeadRow> }>;
 
-const GROUPS = ["Call", "Lead", "Score", "Score breakdown", "Pipeline", "Summary sections"] as const;
+const GROUPS = [
+  "Call",
+  "Lead",
+  "Requirements",
+  "Score",
+  "Score breakdown",
+  "Pipeline",
+  "Summary sections",
+] as const;
+
+const REQUIREMENT_FIELDS = [
+  "location",
+  "property_type",
+  "configuration",
+  "budget",
+  "purpose",
+  "timeline",
+] as const;
+
+function hasCompleteRequirements(lead: LeadRow | undefined) {
+  if (!lead) return false;
+  return REQUIREMENT_FIELDS.every((field) => {
+    const value = lead[field];
+    return value !== null && value !== undefined && String(value).trim() !== "";
+  });
+}
 
 export function ExportCsvDialog({
   source,
