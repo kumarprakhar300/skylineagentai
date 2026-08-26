@@ -101,6 +101,7 @@ export function ExportCsvDialog({
   });
 
   const [completeOnly, setCompleteOnly] = useState(false);
+  const [showNdjsonPreview, setShowNdjsonPreview] = useState(false);
 
   const filteredCalls = useMemo(() => {
     if (!preview) return [];
