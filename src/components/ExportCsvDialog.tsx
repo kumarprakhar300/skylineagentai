@@ -32,7 +32,7 @@ import {
 import type { CallRow, LeadRow } from "@/lib/leads-types";
 import { explainScoreReasons } from "@/lib/score-breakdown";
 
-import { downloadLeadsNdjson } from "@/lib/ndjson-export";
+import { buildLeadRecord, downloadLeadsNdjson } from "@/lib/ndjson-export";
 import { downloadLeadsXlsx } from "@/lib/xlsx-export";
 
 const PREVIEW_LIMIT_OPTIONS = [5, 10, 25] as const;
