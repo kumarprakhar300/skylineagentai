@@ -154,6 +154,13 @@ export function ExportCsvDialog({
     return { total: filteredCalls.length, fields };
   }, [preview, keys, filteredCalls]);
 
+  const ndjsonPreview = useMemo(() => {
+    if (!preview || filteredCalls.length === 0) return null;
+    const firstCall = filteredCalls[0];
+    const firstLead = preview.leadByCall.get(firstCall.id);
+    return JSON.stringify(buildLeadRecord(firstCall, firstLead, includeTranscripts));
+  }, [preview, filteredCalls, includeTranscripts]);
+
 
   async function loadPreview() {
     setPreviewLoading(true);
