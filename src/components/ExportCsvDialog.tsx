@@ -32,7 +32,7 @@ import {
 import type { CallRow, LeadRow } from "@/lib/leads-types";
 import { explainScoreReasons } from "@/lib/score-breakdown";
 
-import { downloadLeadsNdjson } from "@/lib/ndjson-export";
+import { buildLeadRecord, downloadLeadsNdjson } from "@/lib/ndjson-export";
 import { downloadLeadsXlsx } from "@/lib/xlsx-export";
 
 const PREVIEW_LIMIT_OPTIONS = [5, 10, 25] as const;
@@ -101,6 +101,7 @@ export function ExportCsvDialog({
   });
 
   const [completeOnly, setCompleteOnly] = useState(false);
+  const [showNdjsonPreview, setShowNdjsonPreview] = useState(false);
 
   const filteredCalls = useMemo(() => {
     if (!preview) return [];
@@ -152,6 +153,13 @@ export function ExportCsvDialog({
       .filter((field) => field.rows.length > 0);
     return { total: filteredCalls.length, fields };
   }, [preview, keys, filteredCalls]);
+
+  const ndjsonPreview = useMemo(() => {
+    if (!preview || filteredCalls.length === 0) return null;
+    const firstCall = filteredCalls[0]!;
+    const firstLead = preview.leadByCall.get(firstCall.id);
+    return JSON.stringify(buildLeadRecord(firstCall, firstLead, includeTranscripts));
+  }, [preview, filteredCalls, includeTranscripts]);
 
 
   async function loadPreview() {
@@ -457,6 +465,46 @@ export function ExportCsvDialog({
                   </tbody>
                 </table>
               </ScrollArea>
+            )}
+          </div>
+
+          <div className="rounded-lg border border-border/60 p-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="ndjson-preview"
+                  checked={showNdjsonPreview}
+                  onCheckedChange={(v) => setShowNdjsonPreview(v === true)}
+                />
+                <Label htmlFor="ndjson-preview" className="text-sm font-normal">
+                  Show NDJSON preview
+                </Label>
+              </div>
+              {ndjsonPreview && (
+                <Badge variant="secondary" className="text-xs">
+                  1 object preview
+                </Badge>
+              )}
+            </div>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Live preview of the exact one-line JSON object for the first matching lead.
+            </p>
+            {showNdjsonPreview && (
+              <div className="mt-3 overflow-hidden rounded-md bg-muted/60">
+                {ndjsonPreview ? (
+                  <ScrollArea className="max-h-60">
+                    <pre className="whitespace-pre-wrap break-all p-3 font-mono text-xs leading-relaxed text-foreground">
+                      {ndjsonPreview}
+                    </pre>
+                  </ScrollArea>
+                ) : (
+                  <p className="p-3 text-xs text-muted-foreground">
+                    {previewLoading
+                      ? "Building preview…"
+                      : "No leads match the current filters."}
+                  </p>
+                )}
+              </div>
             )}
           </div>
 
