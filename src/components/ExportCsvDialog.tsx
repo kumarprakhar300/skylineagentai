@@ -1,4 +1,4 @@
-import { Download, FileJson, FileSpreadsheet, Loader2 } from "lucide-react";
+import { Download, FileJson, FileSpreadsheet, Loader2, Webhook } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -14,6 +14,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -33,6 +34,7 @@ import type { CallRow, LeadRow } from "@/lib/leads-types";
 import { explainScoreReasons } from "@/lib/score-breakdown";
 
 import { buildLeadRecord, downloadLeadsNdjson } from "@/lib/ndjson-export";
+import { sendLeadsWebhook } from "@/lib/webhook-export.functions";
 import { downloadLeadsXlsx } from "@/lib/xlsx-export";
 
 const PREVIEW_LIMIT_OPTIONS = [5, 10, 25] as const;
@@ -84,7 +86,11 @@ export function ExportCsvDialog({
 }) {
   const [open, setOpen] = useState(false);
   const [keys, setKeys] = useState<string[]>(DEFAULT_EXPORT_COLUMN_KEYS);
-  const [busy, setBusy] = useState<"leads" | "transcripts" | "xlsx" | "ndjson" | null>(null);
+  const [busy, setBusy] = useState<"leads" | "transcripts" | "xlsx" | "ndjson" | "webhook" | null>(
+    null,
+  );
+  const [webhookUrl, setWebhookUrl] = useState("");
+  const [webhookSecret, setWebhookSecret] = useState("");
   const [includeTranscripts, setIncludeTranscripts] = useState(true);
   const [preview, setPreview] = useState<{
     calls: CallRow[];
@@ -188,7 +194,7 @@ export function ExportCsvDialog({
     setKeys((prev) => (on ? [...prev, key] : prev.filter((k) => k !== key)));
 
 
-  async function run(kind: "leads" | "transcripts" | "xlsx" | "ndjson") {
+  async function run(kind: "leads" | "transcripts" | "xlsx" | "ndjson" | "webhook") {
     if (kind !== "transcripts" && keys.length === 0) {
       toast.error("Pick at least one column to export");
       return;
@@ -215,6 +221,35 @@ export function ExportCsvDialog({
       if (kind === "leads") downloadLeadsCsv(selected, leadByCall, keys);
       else if (kind === "xlsx") downloadLeadsXlsx(selected, leadByCall, keys, undefined, includeTranscripts);
       else if (kind === "ndjson") downloadLeadsNdjson(selected, leadByCall, includeTranscripts);
+      else if (kind === "webhook") {
+        if (!/^https:\/\//i.test(webhookUrl.trim())) {
+          toast.error("Enter a public https:// webhook URL");
+          return;
+        }
+        const records = selected.map((call) =>
+          buildLeadRecord(call, leadByCall.get(call.id), includeTranscripts),
+        ) as unknown as Record<string, unknown>[];
+        const result = await sendLeadsWebhook({
+          data: {
+            url: webhookUrl.trim(),
+            ...(webhookSecret.trim() ? { secret: webhookSecret.trim() } : {}),
+            records,
+          },
+        });
+        if (!result.ok) {
+          toast.error(result.error);
+          return;
+        }
+        if (result.failures.length > 0) {
+          toast.warning(
+            `${result.sent}/${result.total} records delivered — first error: ${result.failures[0]!.message}`,
+          );
+        } else {
+          toast.success(`${result.sent} record${result.sent === 1 ? "" : "s"} POSTed to your webhook`);
+        }
+        setOpen(false);
+        return;
+      }
       else downloadTranscriptsCsv(selected, leadByCall);
       toast.success(`${selected.length} call${selected.length === 1 ? "" : "s"} exported`);
       setOpen(false);
@@ -506,6 +541,56 @@ export function ExportCsvDialog({
                 )}
               </div>
             )}
+          </div>
+
+          <div className="rounded-lg border border-border/60 p-3">
+            <div className="flex items-center gap-2 text-sm font-medium">
+              <Webhook className="size-4" /> Webhook export
+            </div>
+            <p className="mt-1 text-xs text-muted-foreground">
+              POST each NDJSON record (one JSON object per request) to your endpoint instead of
+              downloading a file. Public https:// URLs only.
+            </p>
+            <div className="mt-3 grid gap-2 sm:grid-cols-2">
+              <div className="space-y-1">
+                <Label htmlFor="webhook-url" className="text-xs">
+                  Webhook URL
+                </Label>
+                <Input
+                  id="webhook-url"
+                  inputMode="url"
+                  placeholder="https://example.com/hooks/leads"
+                  value={webhookUrl}
+                  onChange={(event) => setWebhookUrl(event.target.value)}
+                />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="webhook-secret" className="text-xs">
+                  Shared secret (optional)
+                </Label>
+                <Input
+                  id="webhook-secret"
+                  type="password"
+                  placeholder="Sent as x-webhook-secret"
+                  value={webhookSecret}
+                  onChange={(event) => setWebhookSecret(event.target.value)}
+                />
+              </div>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-3 w-full sm:w-auto"
+              disabled={busy !== null || webhookUrl.trim() === ""}
+              onClick={() => void run("webhook")}
+            >
+              {busy === "webhook" ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <Webhook className="size-4" />
+              )}{" "}
+              Send to webhook
+            </Button>
           </div>
 
           <div className="flex items-center gap-2">
