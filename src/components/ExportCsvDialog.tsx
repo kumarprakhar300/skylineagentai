@@ -468,6 +468,46 @@ export function ExportCsvDialog({
             )}
           </div>
 
+          <div className="rounded-lg border border-border/60 p-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="ndjson-preview"
+                  checked={showNdjsonPreview}
+                  onCheckedChange={(v) => setShowNdjsonPreview(v === true)}
+                />
+                <Label htmlFor="ndjson-preview" className="text-sm font-normal">
+                  Show NDJSON preview
+                </Label>
+              </div>
+              {ndjsonPreview && (
+                <Badge variant="secondary" className="text-xs">
+                  1 object preview
+                </Badge>
+              )}
+            </div>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Live preview of the exact one-line JSON object for the first matching lead.
+            </p>
+            {showNdjsonPreview && (
+              <div className="mt-3 overflow-hidden rounded-md bg-muted/60">
+                {ndjsonPreview ? (
+                  <ScrollArea className="max-h-60">
+                    <pre className="whitespace-pre-wrap break-all p-3 font-mono text-xs leading-relaxed text-foreground">
+                      {ndjsonPreview}
+                    </pre>
+                  </ScrollArea>
+                ) : (
+                  <p className="p-3 text-xs text-muted-foreground">
+                    {previewLoading
+                      ? "Building preview…"
+                      : "No leads match the current filters."}
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+
           <div className="flex items-center gap-2">
             <Checkbox
               id="explain-signals"
