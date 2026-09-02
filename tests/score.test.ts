@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { scoreLead, scoreLine } from "@/lib/agent/score";
-import { buildSignalBreakdown } from "@/lib/score-breakdown";
+import { breakdownScoreReasons } from "@/lib/score-breakdown";
 
 const fullLead = {
   intent: "buy",
@@ -55,7 +55,7 @@ describe("scoreLead", () => {
 
   it("breaks stored reasons down into per-signal points", () => {
     const result = scoreLead(fullLead, [{ role: "user", content: "site visit" }]);
-    const breakdown = buildSignalBreakdown(result.reasons);
+    const breakdown = breakdownScoreReasons(result.reasons);
     expect(breakdown.length).toBeGreaterThan(0);
     expect(breakdown.some((row) => row.signal === "Timeline" && row.points === 20)).toBe(true);
   });
