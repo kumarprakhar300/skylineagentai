@@ -46,6 +46,16 @@ export function AppHeader() {
                 </Link>
               </Button>
               <Button asChild variant="ghost" size="sm" className="shrink-0">
+                <Link to="/pipeline">
+                  <KanbanSquare className="size-4" /> Pipeline
+                </Link>
+              </Button>
+              <Button asChild variant="ghost" size="sm" className="shrink-0">
+                <Link to="/import">
+                  <Upload className="size-4" /> Import
+                </Link>
+              </Button>
+              <Button asChild variant="ghost" size="sm" className="shrink-0">
                 <Link to="/analytics">
                   <BarChart3 className="size-4" /> Analytics
                 </Link>
