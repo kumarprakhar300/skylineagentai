@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { BarChart3, LogIn, LogOut, Settings2, Table2 } from "lucide-react";
+import { BarChart3, KanbanSquare, LogIn, LogOut, Settings2, Table2, Upload } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { useAppSession } from "@/hooks/useAppSession";
@@ -26,7 +26,10 @@ export function AppHeader() {
         aria-label="Main"
         className="mx-auto grid max-w-6xl grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 px-4 py-2.5 sm:px-5 sm:py-3"
       >
-        <Link to="/" className="min-w-0 truncate font-serif text-sm font-semibold tracking-tight sm:text-base">
+        <Link
+          to="/"
+          className="min-w-0 truncate font-serif text-sm font-semibold tracking-tight sm:text-base"
+        >
           Skyline Estates <span className="text-muted-foreground">AI</span>
         </Link>
 
@@ -43,6 +46,16 @@ export function AppHeader() {
               <Button asChild variant="ghost" size="sm" className="shrink-0">
                 <Link to="/leads" search={leadsDefaultSearch}>
                   <Table2 className="size-4" /> Leads
+                </Link>
+              </Button>
+              <Button asChild variant="ghost" size="sm" className="shrink-0">
+                <Link to="/pipeline">
+                  <KanbanSquare className="size-4" /> Pipeline
+                </Link>
+              </Button>
+              <Button asChild variant="ghost" size="sm" className="shrink-0">
+                <Link to="/import">
+                  <Upload className="size-4" /> Import
                 </Link>
               </Button>
               <Button asChild variant="ghost" size="sm" className="shrink-0">

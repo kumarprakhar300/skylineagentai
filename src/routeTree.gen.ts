@@ -16,7 +16,9 @@ import { Route as DocsRouteImport } from './routes/docs'
 import { Route as PhoneRouteImport } from './routes/phone'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAnalyticsRouteImport } from './routes/_authenticated/analytics'
+import { Route as AuthenticatedImportRouteImport } from './routes/_authenticated/import'
 import { Route as AuthenticatedLeadsRouteImport } from './routes/_authenticated/leads'
+import { Route as AuthenticatedPipelineRouteImport } from './routes/_authenticated/pipeline'
 import { Route as ApiEndCallRouteImport } from './routes/api/end-call'
 import { Route as ApiSttRouteImport } from './routes/api/stt'
 import { Route as ApiTtsRouteImport } from './routes/api/tts'
@@ -57,9 +59,19 @@ const AuthenticatedAnalyticsRoute = AuthenticatedAnalyticsRouteImport.update({
   path: '/analytics',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedImportRoute = AuthenticatedImportRouteImport.update({
+  id: '/import',
+  path: '/import',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedLeadsRoute = AuthenticatedLeadsRouteImport.update({
   id: '/leads',
   path: '/leads',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedPipelineRoute = AuthenticatedPipelineRouteImport.update({
+  id: '/pipeline',
+  path: '/pipeline',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const ApiEndCallRoute = ApiEndCallRouteImport.update({
@@ -95,7 +107,9 @@ export interface FileRoutesByFullPath {
   '/phone': typeof PhoneRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/analytics': typeof AuthenticatedAnalyticsRoute
+  '/import': typeof AuthenticatedImportRoute
   '/leads': typeof AuthenticatedLeadsRoute
+  '/pipeline': typeof AuthenticatedPipelineRoute
   '/api/end-call': typeof ApiEndCallRoute
   '/api/stt': typeof ApiSttRoute
   '/api/tts': typeof ApiTtsRoute
@@ -109,7 +123,9 @@ export interface FileRoutesByTo {
   '/phone': typeof PhoneRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/analytics': typeof AuthenticatedAnalyticsRoute
+  '/import': typeof AuthenticatedImportRoute
   '/leads': typeof AuthenticatedLeadsRoute
+  '/pipeline': typeof AuthenticatedPipelineRoute
   '/api/end-call': typeof ApiEndCallRoute
   '/api/stt': typeof ApiSttRoute
   '/api/tts': typeof ApiTtsRoute
@@ -125,7 +141,9 @@ export interface FileRoutesById {
   '/phone': typeof PhoneRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/analytics': typeof AuthenticatedAnalyticsRoute
+  '/_authenticated/import': typeof AuthenticatedImportRoute
   '/_authenticated/leads': typeof AuthenticatedLeadsRoute
+  '/_authenticated/pipeline': typeof AuthenticatedPipelineRoute
   '/api/end-call': typeof ApiEndCallRoute
   '/api/stt': typeof ApiSttRoute
   '/api/tts': typeof ApiTtsRoute
@@ -141,7 +159,9 @@ export interface FileRouteTypes {
     | '/phone'
     | '/admin'
     | '/analytics'
+    | '/import'
     | '/leads'
+    | '/pipeline'
     | '/api/end-call'
     | '/api/stt'
     | '/api/tts'
@@ -155,7 +175,9 @@ export interface FileRouteTypes {
     | '/phone'
     | '/admin'
     | '/analytics'
+    | '/import'
     | '/leads'
+    | '/pipeline'
     | '/api/end-call'
     | '/api/stt'
     | '/api/tts'
@@ -170,7 +192,9 @@ export interface FileRouteTypes {
     | '/phone'
     | '/_authenticated/admin'
     | '/_authenticated/analytics'
+    | '/_authenticated/import'
     | '/_authenticated/leads'
+    | '/_authenticated/pipeline'
     | '/api/end-call'
     | '/api/stt'
     | '/api/tts'
@@ -242,11 +266,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAnalyticsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/import': {
+      id: '/_authenticated/import'
+      path: '/import'
+      fullPath: '/import'
+      preLoaderRoute: typeof AuthenticatedImportRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/leads': {
       id: '/_authenticated/leads'
       path: '/leads'
       fullPath: '/leads'
       preLoaderRoute: typeof AuthenticatedLeadsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/pipeline': {
+      id: '/_authenticated/pipeline'
+      path: '/pipeline'
+      fullPath: '/pipeline'
+      preLoaderRoute: typeof AuthenticatedPipelineRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/api/end-call': {
@@ -290,13 +328,17 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedAnalyticsRoute: typeof AuthenticatedAnalyticsRoute
+  AuthenticatedImportRoute: typeof AuthenticatedImportRoute
   AuthenticatedLeadsRoute: typeof AuthenticatedLeadsRoute
+  AuthenticatedPipelineRoute: typeof AuthenticatedPipelineRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedAnalyticsRoute: AuthenticatedAnalyticsRoute,
+  AuthenticatedImportRoute: AuthenticatedImportRoute,
   AuthenticatedLeadsRoute: AuthenticatedLeadsRoute,
+  AuthenticatedPipelineRoute: AuthenticatedPipelineRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
