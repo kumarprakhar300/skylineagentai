@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { BarChart3, LogIn, LogOut, Settings2, Table2 } from "lucide-react";
+import { BarChart3, KanbanSquare, LogIn, LogOut, Settings2, Table2, Upload } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { useAppSession } from "@/hooks/useAppSession";
