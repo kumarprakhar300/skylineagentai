@@ -33,21 +33,91 @@ export type ImportedLead = {
 };
 
 export const IMPORT_FIELDS: ImportField[] = [
-  { key: "name", label: "Name", group: "Lead", aliases: ["name", "customer", "customer name", "lead name"] },
-  { key: "phone", label: "Phone", group: "Lead", aliases: ["phone", "mobile", "contact", "contact number", "number"] },
-  { key: "intent", label: "Buy / invest", group: "Lead", aliases: ["intent", "buy / invest", "buy or invest"] },
-  { key: "location", label: "Location", group: "Requirements", aliases: ["location", "preferred location", "city", "area"] },
-  { key: "property_type", label: "Property type", group: "Requirements", aliases: ["property type", "property_type", "type"] },
-  { key: "configuration", label: "Configuration", group: "Requirements", aliases: ["configuration", "config", "bhk"] },
-  { key: "budget", label: "Budget", group: "Requirements", aliases: ["budget", "budget range", "price"] },
-  { key: "purpose", label: "Purpose", group: "Requirements", aliases: ["purpose", "self-use or investment", "use"] },
-  { key: "timeline", label: "Timeline", group: "Requirements", aliases: ["timeline", "purchase timeline", "when"] },
+  {
+    key: "name",
+    label: "Name",
+    group: "Lead",
+    aliases: ["name", "customer", "customer name", "lead name"],
+  },
+  {
+    key: "phone",
+    label: "Phone",
+    group: "Lead",
+    aliases: ["phone", "mobile", "contact", "contact number", "number"],
+  },
+  {
+    key: "intent",
+    label: "Buy / invest",
+    group: "Lead",
+    aliases: ["intent", "buy / invest", "buy or invest"],
+  },
+  {
+    key: "location",
+    label: "Location",
+    group: "Requirements",
+    aliases: ["location", "preferred location", "city", "area"],
+  },
+  {
+    key: "property_type",
+    label: "Property type",
+    group: "Requirements",
+    aliases: ["property type", "property_type", "type"],
+  },
+  {
+    key: "configuration",
+    label: "Configuration",
+    group: "Requirements",
+    aliases: ["configuration", "config", "bhk"],
+  },
+  {
+    key: "budget",
+    label: "Budget",
+    group: "Requirements",
+    aliases: ["budget", "budget range", "price"],
+  },
+  {
+    key: "purpose",
+    label: "Purpose",
+    group: "Requirements",
+    aliases: ["purpose", "self-use or investment", "use"],
+  },
+  {
+    key: "timeline",
+    label: "Timeline",
+    group: "Requirements",
+    aliases: ["timeline", "purchase timeline", "when"],
+  },
   { key: "score", label: "Lead score", group: "Score", aliases: ["lead score", "score"] },
-  { key: "score_band", label: "Score band", group: "Score", aliases: ["score band", "score_band", "band"] },
-  { key: "status", label: "Pipeline status", group: "Pipeline", aliases: ["pipeline status", "status", "stage"] },
-  { key: "owner_notes", label: "Follow-up notes", group: "Pipeline", aliases: ["follow-up notes", "owner notes", "owner_notes", "notes"] },
-  { key: "callback_at", label: "Callback at", group: "Pipeline", aliases: ["callback at", "callback_at", "callback"] },
-  { key: "notes", label: "Extra notes", group: "Pipeline", aliases: ["extra notes", "remarks", "comment", "comments"] },
+  {
+    key: "score_band",
+    label: "Score band",
+    group: "Score",
+    aliases: ["score band", "score_band", "band"],
+  },
+  {
+    key: "status",
+    label: "Pipeline status",
+    group: "Pipeline",
+    aliases: ["pipeline status", "status", "stage"],
+  },
+  {
+    key: "owner_notes",
+    label: "Follow-up notes",
+    group: "Pipeline",
+    aliases: ["follow-up notes", "owner notes", "owner_notes", "notes"],
+  },
+  {
+    key: "callback_at",
+    label: "Callback at",
+    group: "Pipeline",
+    aliases: ["callback at", "callback_at", "callback"],
+  },
+  {
+    key: "notes",
+    label: "Extra notes",
+    group: "Pipeline",
+    aliases: ["extra notes", "remarks", "comment", "comments"],
+  },
 ];
 
 export type SheetTable = { headers: string[]; rows: string[][] };
@@ -213,13 +283,18 @@ export function buildImportRows(
       band = score >= 70 ? "hot" : score >= 40 ? "warm" : "cold";
       reasons = ["Score imported from the uploaded file"];
     } else if (rawScore !== null) {
-      issues.push({ row: rowNumber, message: `Score "${rawScore}" is not a number — recalculated` });
+      issues.push({
+        row: rowNumber,
+        message: `Score "${rawScore}" is not a number — recalculated`,
+      });
     }
 
     const importedBand = get("score_band")?.toLowerCase();
     if (importedBand && ["hot", "warm", "cold"].includes(importedBand)) band = importedBand;
 
-    const rawStatus = get("status")?.toLowerCase().replace(/[\s/]+/g, "_");
+    const rawStatus = get("status")
+      ?.toLowerCase()
+      .replace(/[\s/]+/g, "_");
     let status = "new";
     if (rawStatus) {
       if (VALID_STATUSES.has(rawStatus as never)) status = rawStatus;
@@ -231,7 +306,10 @@ export function buildImportRows(
     if (rawCallback) {
       const parsed = new Date(rawCallback);
       if (Number.isNaN(parsed.getTime())) {
-        issues.push({ row: rowNumber, message: `Callback date "${rawCallback}" not understood — ignored` });
+        issues.push({
+          row: rowNumber,
+          message: `Callback date "${rawCallback}" not understood — ignored`,
+        });
       } else {
         callback_at = parsed.toISOString();
       }

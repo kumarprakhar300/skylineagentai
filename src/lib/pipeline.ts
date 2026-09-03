@@ -53,9 +53,17 @@ export const REQUIREMENT_BUCKETS: { value: RequirementBucket; label: string }[] 
 export type ScoreBand = "hot" | "warm" | "cold";
 
 export const SCORE_BANDS: { value: ScoreBand; label: string; tone: string }[] = [
-  { value: "hot", label: "Hot (70+)", tone: "border-destructive/40 bg-destructive/10 text-destructive" },
+  {
+    value: "hot",
+    label: "Hot (70+)",
+    tone: "border-destructive/40 bg-destructive/10 text-destructive",
+  },
   { value: "warm", label: "Warm (40-69)", tone: "border-primary/40 bg-primary/10 text-primary" },
-  { value: "cold", label: "Cold (<40)", tone: "border-border bg-secondary/60 text-muted-foreground" },
+  {
+    value: "cold",
+    label: "Cold (<40)",
+    tone: "border-border bg-secondary/60 text-muted-foreground",
+  },
 ];
 
 export function leadBand(lead: LeadRow | undefined): ScoreBand {

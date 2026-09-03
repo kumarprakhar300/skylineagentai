@@ -61,7 +61,8 @@ export const Route = createFileRoute("/_authenticated/pipeline")({
       { property: "og:title", content: "Lead pipeline board" },
       {
         property: "og:description",
-        content: "Drag-and-drop stage flow for AI-qualified leads, grouped by score band and requirements.",
+        content:
+          "Drag-and-drop stage flow for AI-qualified leads, grouped by score band and requirements.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -243,7 +244,9 @@ function Pipeline() {
                     )}
 
                     {groupsFor(groupBy).map((group) => {
-                      const groupLeads = stageLeads.filter((l) => groupKey(groupBy, l) === group.value);
+                      const groupLeads = stageLeads.filter(
+                        (l) => groupKey(groupBy, l) === group.value,
+                      );
                       if (groupLeads.length === 0) return null;
                       return (
                         <div key={group.value} className="space-y-2">
@@ -314,15 +317,14 @@ function LeadCard({
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
       aria-label={`${lead.name ?? "Unnamed lead"} — ${statusLabel(lead.status)}`}
-      className={cn(
-        "panel-3d cursor-grab p-3 active:cursor-grabbing",
-        dragging && "opacity-50",
-      )}
+      className={cn("panel-3d cursor-grab p-3 active:cursor-grabbing", dragging && "opacity-50")}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <p className="truncate text-sm font-medium">{lead.name ?? "Unnamed lead"}</p>
-          <p className="truncate text-xs text-muted-foreground">{lead.phone ?? "No number shared"}</p>
+          <p className="truncate text-xs text-muted-foreground">
+            {lead.phone ?? "No number shared"}
+          </p>
         </div>
         <GripVertical aria-hidden="true" className="size-4 shrink-0 text-muted-foreground" />
       </div>

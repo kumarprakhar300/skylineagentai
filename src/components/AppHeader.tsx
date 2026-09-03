@@ -26,7 +26,10 @@ export function AppHeader() {
         aria-label="Main"
         className="mx-auto grid max-w-6xl grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-2 px-4 py-2.5 sm:px-5 sm:py-3"
       >
-        <Link to="/" className="min-w-0 truncate font-serif text-sm font-semibold tracking-tight sm:text-base">
+        <Link
+          to="/"
+          className="min-w-0 truncate font-serif text-sm font-semibold tracking-tight sm:text-base"
+        >
           Skyline Estates <span className="text-muted-foreground">AI</span>
         </Link>
 

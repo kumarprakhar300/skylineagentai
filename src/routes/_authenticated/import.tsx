@@ -41,7 +41,8 @@ export const Route = createFileRoute("/_authenticated/import")({
       { property: "og:title", content: "Import leads from a spreadsheet" },
       {
         property: "og:description",
-        content: "Map CSV/XLSX columns to the export fields and import leads straight into the pipeline.",
+        content:
+          "Map CSV/XLSX columns to the export fields and import leads straight into the pipeline.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -165,7 +166,8 @@ function ImportLeads() {
             <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {table.headers.map((header, index) => {
                 const current = mapping[String(index)] ?? NONE;
-                const sample = table.rows.find((r) => (r[index] ?? "").trim() !== "")?.[index] ?? "";
+                const sample =
+                  table.rows.find((r) => (r[index] ?? "").trim() !== "")?.[index] ?? "";
                 return (
                   <div key={`${header}-${index}`}>
                     <Label className="truncate text-xs text-muted-foreground">
@@ -189,7 +191,9 @@ function ImportLeads() {
                       </SelectContent>
                     </Select>
                     {sample && (
-                      <p className="mt-1 truncate text-[0.7rem] text-muted-foreground">e.g. {sample}</p>
+                      <p className="mt-1 truncate text-[0.7rem] text-muted-foreground">
+                        e.g. {sample}
+                      </p>
                     )}
                   </div>
                 );
@@ -206,7 +210,10 @@ function ImportLeads() {
                   {built.issues.length > 0 && ` · ${built.issues.length} row note(s)`}
                 </p>
               </div>
-              <Button onClick={() => void runImport()} disabled={importing || built.rows.length === 0}>
+              <Button
+                onClick={() => void runImport()}
+                disabled={importing || built.rows.length === 0}
+              >
                 {importing ? "Importing…" : `Import ${built.rows.length} leads`}
               </Button>
             </div>
@@ -216,28 +223,45 @@ function ImportLeads() {
                 <table className="w-full min-w-[46rem] text-left text-xs">
                   <thead className="text-muted-foreground">
                     <tr>
-                      {["Row", "Name", "Phone", "Location", "Budget", "Timeline", "Score", "Stage"].map(
-                        (h) => (
-                          <th key={h} className="border-b border-border/70 px-2 py-2 font-medium">
-                            {h}
-                          </th>
-                        ),
-                      )}
+                      {[
+                        "Row",
+                        "Name",
+                        "Phone",
+                        "Location",
+                        "Budget",
+                        "Timeline",
+                        "Score",
+                        "Stage",
+                      ].map((h) => (
+                        <th key={h} className="border-b border-border/70 px-2 py-2 font-medium">
+                          {h}
+                        </th>
+                      ))}
                     </tr>
                   </thead>
                   <tbody>
                     {previewRows.map(({ row, lead }) => (
                       <tr key={row} className="align-top">
-                        <td className="border-b border-border/40 px-2 py-2 text-muted-foreground">{row}</td>
+                        <td className="border-b border-border/40 px-2 py-2 text-muted-foreground">
+                          {row}
+                        </td>
                         <td className="border-b border-border/40 px-2 py-2">{lead.name ?? "—"}</td>
                         <td className="border-b border-border/40 px-2 py-2">{lead.phone ?? "—"}</td>
-                        <td className="border-b border-border/40 px-2 py-2">{lead.location ?? "—"}</td>
-                        <td className="border-b border-border/40 px-2 py-2">{lead.budget ?? "—"}</td>
-                        <td className="border-b border-border/40 px-2 py-2">{lead.timeline ?? "—"}</td>
+                        <td className="border-b border-border/40 px-2 py-2">
+                          {lead.location ?? "—"}
+                        </td>
+                        <td className="border-b border-border/40 px-2 py-2">
+                          {lead.budget ?? "—"}
+                        </td>
+                        <td className="border-b border-border/40 px-2 py-2">
+                          {lead.timeline ?? "—"}
+                        </td>
                         <td className="border-b border-border/40 px-2 py-2">
                           {lead.score ?? 0} · {lead.score_band}
                         </td>
-                        <td className="border-b border-border/40 px-2 py-2">{statusLabel(lead.status)}</td>
+                        <td className="border-b border-border/40 px-2 py-2">
+                          {statusLabel(lead.status)}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
